@@ -4,5 +4,3 @@ node_modules/
 # Next.js build output
 .next/
 
-# pnpm lock file
-pnpm-lock.yaml
