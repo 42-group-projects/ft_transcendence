@@ -16,10 +16,14 @@ ft_transcendence/
 │   │   ├── page.tsx          # Landing page
 │   └── public/               # Static assets
 │
+├── database/                 # PostgreSQL container setup
+│   └── Dockerfile
+│
 └── socket_server/            # Node.js game server
     ├── Dockerfile
     ├── package.json
     └── index.js              # Express + Socket.io + physics loop
+    
 ```
 
 ---
