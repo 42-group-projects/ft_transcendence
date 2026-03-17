@@ -52,7 +52,13 @@ ft_transcendence/
 
 ### Environment variables
 
-Create a `.env` file in the project root with:
+Copy `.env.example` to `.env` in the project root, then adjust values as needed:
+
+```bash
+cp .env.example .env
+```
+
+Example values:
 
 ```env
 POSTGRES_DB=*****
