@@ -16,10 +16,14 @@ ft_transcendence/
 │   │   ├── page.tsx          # Landing page
 │   └── public/               # Static assets
 │
+├── database/                 # PostgreSQL container setup
+│   └── Dockerfile
+│
 └── socket_server/            # Node.js game server
     ├── Dockerfile
     ├── package.json
     └── index.js              # Express + Socket.io + physics loop
+    
 ```
 
 ---
@@ -45,6 +49,27 @@ ft_transcendence/
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose installed
 - No need to install Node.js or pnpm locally — everything runs inside containers
+
+### Environment variables
+
+Copy `.env.example` to `.env` in the project root, then adjust values as needed:
+
+```bash
+cp .env.example .env
+```
+
+Example values:
+
+```env
+POSTGRES_DB=*****
+POSTGRES_USER=*****
+POSTGRES_PASSWORD=******
+
+NODE_ENV=******
+SOCKET_PORT=*****
+
+NEXT_PUBLIC_SOCKET_URL=******
+```
 
 ### Running the project
 
@@ -79,3 +104,4 @@ Source files are mounted as volumes, so most changes hot-reload automatically. I
 ```bash
 docker compose up --build
 ```
+
