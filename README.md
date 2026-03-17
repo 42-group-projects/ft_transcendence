@@ -46,6 +46,21 @@ ft_transcendence/
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose installed
 - No need to install Node.js or pnpm locally — everything runs inside containers
 
+### Environment variables
+
+Create a `.env` file in the project root with:
+
+```env
+POSTGRES_DB=*****
+POSTGRES_USER=*****
+POSTGRES_PASSWORD=******
+
+NODE_ENV=******
+SOCKET_PORT=*****
+
+NEXT_PUBLIC_SOCKET_URL=******
+```
+
 ### Running the project
 
 ```bash
@@ -79,3 +94,4 @@ Source files are mounted as volumes, so most changes hot-reload automatically. I
 ```bash
 docker compose up --build
 ```
+

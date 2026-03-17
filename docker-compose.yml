@@ -21,7 +21,7 @@ services:
       context: ./socket_server
       dockerfile: Dockerfile
     ports:
-      - "3001:3001"
+      - "${SOCKET_PORT}:${SOCKET_PORT}"
     environment:
       - NODE_ENV=${NODE_ENV}
       - PORT=${SOCKET_PORT}
