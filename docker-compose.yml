@@ -1,0 +1,40 @@
+
+services:
+  # Socket.io
+  socket-server:
+    build:
+      context: ./socket_server
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+    volumes:
+      - ./socket_server:/app
+      - /app/node_modules
+    networks:
+      - game-network
+    restart: unless-stopped
+ 
+  #Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_SOCKET_URL=http://socket-server:3001
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - game-network
+    depends_on:
+      - socket-server
+    restart: unless-stopped
+ 
+networks:
+  game-network:
+    driver: bridge
