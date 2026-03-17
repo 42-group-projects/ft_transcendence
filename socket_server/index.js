@@ -1,285 +1,345 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
-
-// ─── Server Setup ────────────────────────────────────────────────────────────
+const express = require("express");
+const http = require("http");
+const cors = require("cors");
+const { Server } = require("socket.io");
 
 const app = express();
 app.use(cors());
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] },
+  cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
 const PORT = process.env.PORT || 3001;
 
-// ─── Physics Constants ────────────────────────────────────────────────────────
+const TICK_RATE = 60;
+const TICK_MS = 1000 / TICK_RATE;
+const WORLD_HALF = 14;
+const PLAYER_RADIUS = 0.6;
+const PLAYER_MASS = 1;
+const MAX_PLAYERS_PER_ROOM = 8;
+const ACCEL = 22;
+const FRICTION = 0.88;
+const MAX_SPEED = 9;
+const RESTITUTION = 0.8;
 
-const TICK_RATE   = 60;                      // Hz
-const TICK_MS     = 1000 / TICK_RATE;        // ~16.67 ms per tick
-const DT          = TICK_MS / 1000;          // delta-time in seconds
-
-const MAT_HALF    = 5;                        // mat spans -5 to +5 on X and Z
-const BALL_RADIUS = 0.5;
-const BALL_MASS   = 1;
-
-const GRAVITY     = 9.8;                      // m/s²  (applied when off mat)
-const FRICTION    = 0.92;                     // velocity multiplier per tick (on mat)
-const FORCE_MAG   = 18;                       // force applied per held key (m/s² equiv)
-const RESTITUTION = 0.85;                     // elasticity of ball-to-ball collision
-
-// ─── Game State ───────────────────────────────────────────────────────────────
-
-function makeBall(x, z) {
-  return {
-    pos:  { x, y: BALL_RADIUS, z },           // y = resting on mat
-    vel:  { x: 0, y: 0, z: 0 },
-    onMat: true,
-    fallen: false,
-  };
-}
-
-function makeGameState() {
-  return {
-    balls:   [makeBall(-2, 0), makeBall(2, 0)],
-    inputs:  [                                  // per-player input flags
-      { up: false, down: false, left: false, right: false },
-      { up: false, down: false, left: false, right: false },
-    ],
-    winner:  null,
-    running: false,
-  };
-}
-
-// Active rooms: roomId → { state, players: [socketId, socketId], interval }
 const rooms = new Map();
 
-// ─── Physics Engine ───────────────────────────────────────────────────────────
-
-function applyInput(vel, input, idx) {
-  // Player 0 faces +Z, Player 1 faces -Z (mirror controls feel natural)
-  const dir = idx === 0 ? 1 : -1;
-
-  if (input.up)    vel.z -= FORCE_MAG * dir * DT;
-  if (input.down)  vel.z += FORCE_MAG * dir * DT;
-  if (input.left)  vel.x -= FORCE_MAG * DT;
-  if (input.right) vel.x += FORCE_MAG * DT;
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
-function isOnMat(ball) {
-  return (
-    Math.abs(ball.pos.x) <= MAT_HALF &&
-    Math.abs(ball.pos.z) <= MAT_HALF &&
-    ball.pos.y <= BALL_RADIUS + 0.05
-  );
+function randomBetween(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
-function elasticCollision(a, b) {
-  const dx = b.pos.x - a.pos.x;
-  const dy = b.pos.y - a.pos.y;
-  const dz = b.pos.z - a.pos.z;
-  const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-  const minDist = BALL_RADIUS * 2;
-
-  if (dist >= minDist || dist < 0.001) return;
-
-  // Normalised collision axis
-  const nx = dx / dist;
-  const ny = dy / dist;
-  const nz = dz / dist;
-
-  // Relative velocity along collision normal
-  const rvx = b.vel.x - a.vel.x;
-  const rvy = b.vel.y - a.vel.y;
-  const rvz = b.vel.z - a.vel.z;
-  const vn = rvx * nx + rvy * ny + rvz * nz;
-
-  // Already separating
-  if (vn > 0) return;
-
-  const impulse = -(1 + RESTITUTION) * vn / (1 / BALL_MASS + 1 / BALL_MASS);
-
-  a.vel.x -= (impulse / BALL_MASS) * nx;
-  a.vel.y -= (impulse / BALL_MASS) * ny;
-  a.vel.z -= (impulse / BALL_MASS) * nz;
-  b.vel.x += (impulse / BALL_MASS) * nx;
-  b.vel.y += (impulse / BALL_MASS) * ny;
-  b.vel.z += (impulse / BALL_MASS) * nz;
-
-  // Positional correction – prevent sinking
-  const overlap = (minDist - dist) / 2;
-  a.pos.x -= overlap * nx;
-  a.pos.y -= overlap * ny;
-  a.pos.z -= overlap * nz;
-  b.pos.x += overlap * nx;
-  b.pos.y += overlap * ny;
-  b.pos.z += overlap * nz;
+function randomRoomId() {
+  return `room_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function tickPhysics(state) {
-  if (!state.running || state.winner) return;
-
-  const [b0, b1] = state.balls;
-
-  // 1. Apply player inputs
-  for (let i = 0; i < 2; i++) {
-    const ball = state.balls[i];
-    if (!ball.fallen && ball.onMat) {
-      applyInput(ball.vel, state.inputs[i], i);
-    }
-  }
-
-  // 2. Update each ball
-  for (let i = 0; i < 2; i++) {
-    const ball = state.balls[i];
-
-    if (ball.fallen) continue;
-
-    // Gravity when off mat (or airborne)
-    if (!ball.onMat) {
-      ball.vel.y -= GRAVITY * DT;
-    }
-
-    // Integrate position
-    ball.pos.x += ball.vel.x * DT;
-    ball.pos.y += ball.vel.y * DT;
-    ball.pos.z += ball.vel.z * DT;
-
-    // Check if back on mat surface
-    ball.onMat = isOnMat(ball);
-
-    if (ball.onMat) {
-      ball.pos.y = BALL_RADIUS;
-      ball.vel.y = 0;
-      // Friction only on mat
-      ball.vel.x *= FRICTION;
-      ball.vel.z *= FRICTION;
-    }
-
-    // Fallen off the world
-    if (ball.pos.y < -5) {
-      ball.fallen = true;
-      state.winner = i === 0 ? 1 : 0;   // opponent wins
-    }
-  }
-
-  // 3. Ball-to-ball elastic collision
-  elasticCollision(b0, b1);
+function makePlayer(id, name) {
+  return {
+    id,
+    name,
+    position: { x: 0, y: PLAYER_RADIUS, z: 0 },
+    velocity: { x: 0, z: 0 },
+    input: { x: 0, z: 0 },
+  };
 }
 
-// ─── Room Management ─────────────────────────────────────────────────────────
-
-function startGameLoop(roomId) {
-  const room = rooms.get(roomId);
-  if (!room) return;
-
-  room.state.running = true;
-  room.state.balls   = [makeBall(-2, 0), makeBall(2, 0)];
-  room.state.winner  = null;
-
-  room.interval = setInterval(() => {
-    tickPhysics(room.state);
-
-    io.to(roomId).emit('gameState', {
-      balls:  room.state.balls,
-      winner: room.state.winner,
-    });
-
-    if (room.state.winner !== null) {
-      clearInterval(room.interval);
-      room.state.running = false;
-    }
-  }, TICK_MS);
+function makeRoom(password) {
+  return {
+    id: randomRoomId(),
+    password,
+    players: new Map(),
+    running: true,
+    interval: null,
+  };
 }
 
-function stopGameLoop(roomId) {
-  const room = rooms.get(roomId);
-  if (room?.interval) {
-    clearInterval(room.interval);
-    room.interval = null;
-  }
-}
+function spawnPlayerInRoom(room, player) {
+  let position = { x: 0, y: PLAYER_RADIUS, z: 0 };
 
-// ─── Socket Events ────────────────────────────────────────────────────────────
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    const candidate = {
+      x: randomBetween(-WORLD_HALF + 2, WORLD_HALF - 2),
+      y: PLAYER_RADIUS,
+      z: randomBetween(-WORLD_HALF + 2, WORLD_HALF - 2),
+    };
 
-io.on('connection', (socket) => {
-  console.log(`[+] Client connected: ${socket.id}`);
-
-  socket.on('joinGame', () => {
-    // Find a room with exactly 1 waiting player, or create a new one
-    let roomId = null;
-    for (const [id, room] of rooms) {
-      if (room.players.length === 1 && !room.state.running) {
-        roomId = id;
+    let overlaps = false;
+    for (const other of room.players.values()) {
+      const dx = candidate.x - other.position.x;
+      const dz = candidate.z - other.position.z;
+      const d2 = dx * dx + dz * dz;
+      if (d2 < (PLAYER_RADIUS * 2.5) ** 2) {
+        overlaps = true;
         break;
       }
     }
 
+    if (!overlaps) {
+      position = candidate;
+      break;
+    }
+  }
+
+  player.position = position;
+}
+
+function removeRoom(roomId) {
+  const room = rooms.get(roomId);
+  if (!room) {
+    return;
+  }
+
+  if (room.interval) {
+    clearInterval(room.interval);
+  }
+
+  rooms.delete(roomId);
+}
+
+function broadcastRoomState(room) {
+  io.to(room.id).emit("roomState", {
+    roomId: room.id,
+    players: [...room.players.values()].map((player) => ({
+      id: player.id,
+      name: player.name,
+      position: player.position,
+      velocity: player.velocity,
+    })),
+  });
+}
+
+function resolveBallCollision(a, b) {
+  const dx = b.position.x - a.position.x;
+  const dz = b.position.z - a.position.z;
+  const dist = Math.sqrt(dx * dx + dz * dz);
+  const minDist = PLAYER_RADIUS * 2;
+
+  if (dist >= minDist || dist < 0.0001) {
+    return;
+  }
+
+  const nx = dx / dist;
+  const nz = dz / dist;
+
+  const rvx = b.velocity.x - a.velocity.x;
+  const rvz = b.velocity.z - a.velocity.z;
+  const velAlongNormal = rvx * nx + rvz * nz;
+
+  if (velAlongNormal > 0) {
+    return;
+  }
+
+  const impulse = -(1 + RESTITUTION) * velAlongNormal / (1 / PLAYER_MASS + 1 / PLAYER_MASS);
+
+  a.velocity.x -= (impulse / PLAYER_MASS) * nx;
+  a.velocity.z -= (impulse / PLAYER_MASS) * nz;
+  b.velocity.x += (impulse / PLAYER_MASS) * nx;
+  b.velocity.z += (impulse / PLAYER_MASS) * nz;
+
+  const overlap = (minDist - dist) / 2;
+  a.position.x -= overlap * nx;
+  a.position.z -= overlap * nz;
+  b.position.x += overlap * nx;
+  b.position.z += overlap * nz;
+}
+
+function tickRoom(room) {
+  const players = [...room.players.values()];
+
+  for (const player of players) {
+    player.velocity.x += player.input.x * ACCEL * (TICK_MS / 1000);
+    player.velocity.z += player.input.z * ACCEL * (TICK_MS / 1000);
+
+    const speed = Math.hypot(player.velocity.x, player.velocity.z);
+    if (speed > MAX_SPEED) {
+      const scale = MAX_SPEED / speed;
+      player.velocity.x *= scale;
+      player.velocity.z *= scale;
+    }
+
+    player.velocity.x *= FRICTION;
+    player.velocity.z *= FRICTION;
+
+    player.position.x += player.velocity.x * (TICK_MS / 1000);
+    player.position.z += player.velocity.z * (TICK_MS / 1000);
+
+    if (player.position.x < -WORLD_HALF + PLAYER_RADIUS || player.position.x > WORLD_HALF - PLAYER_RADIUS) {
+      player.position.x = clamp(player.position.x, -WORLD_HALF + PLAYER_RADIUS, WORLD_HALF - PLAYER_RADIUS);
+      player.velocity.x *= -0.5;
+    }
+
+    if (player.position.z < -WORLD_HALF + PLAYER_RADIUS || player.position.z > WORLD_HALF - PLAYER_RADIUS) {
+      player.position.z = clamp(player.position.z, -WORLD_HALF + PLAYER_RADIUS, WORLD_HALF - PLAYER_RADIUS);
+      player.velocity.z *= -0.5;
+    }
+  }
+
+  for (let i = 0; i < players.length; i += 1) {
+    for (let j = i + 1; j < players.length; j += 1) {
+      resolveBallCollision(players[i], players[j]);
+    }
+  }
+
+  broadcastRoomState(room);
+}
+
+function startRoomLoop(room) {
+  if (room.interval) {
+    clearInterval(room.interval);
+  }
+
+  room.interval = setInterval(() => {
+    tickRoom(room);
+  }, TICK_MS);
+}
+
+io.on("connection", (socket) => {
+  socket.on("createRoom", ({ password, name }) => {
+    const trimmedPassword = (password || "").trim();
+    if (!trimmedPassword) {
+      socket.emit("roomError", { message: "Password is required to create a room." });
+      return;
+    }
+
+    const room = makeRoom(trimmedPassword);
+    rooms.set(room.id, room);
+    startRoomLoop(room);
+
+    socket.emit("roomCreated", { roomId: room.id });
+    socket.emit("systemMessage", { message: `Room created: ${room.id}` });
+
+    const player = makePlayer(socket.id, (name || "Player").trim() || "Player");
+    spawnPlayerInRoom(room, player);
+    room.players.set(socket.id, player);
+
+    socket.join(room.id);
+    socket.data.roomId = room.id;
+
+    socket.emit("joinedRoom", { roomId: room.id, playerId: socket.id });
+    broadcastRoomState(room);
+  });
+
+  socket.on("joinRoom", ({ roomId, password, name }) => {
+    const room = rooms.get((roomId || "").trim());
+
+    if (!room) {
+      socket.emit("roomError", { message: "Room not found." });
+      return;
+    }
+
+    if (room.password !== (password || "").trim()) {
+      socket.emit("roomError", { message: "Incorrect room password." });
+      return;
+    }
+
+    if (room.players.size >= MAX_PLAYERS_PER_ROOM) {
+      socket.emit("roomError", { message: "Room is full." });
+      return;
+    }
+
+    const player = makePlayer(socket.id, (name || "Player").trim() || "Player");
+    spawnPlayerInRoom(room, player);
+    room.players.set(socket.id, player);
+
+    socket.join(room.id);
+    socket.data.roomId = room.id;
+
+    socket.emit("joinedRoom", { roomId: room.id, playerId: socket.id });
+    socket.emit("systemMessage", { message: `Joined room: ${room.id}` });
+    io.to(room.id).emit("systemMessage", { message: `${player.name} joined.` });
+
+    broadcastRoomState(room);
+  });
+
+  socket.on("moveInput", ({ x, z }) => {
+    const roomId = socket.data.roomId;
     if (!roomId) {
-      roomId = `room_${Date.now()}`;
-      rooms.set(roomId, {
-        state:    makeGameState(),
-        players:  [],
-        interval: null,
-      });
+      return;
     }
 
     const room = rooms.get(roomId);
-    const playerIdx = room.players.length;   // 0 or 1
-    room.players.push(socket.id);
-
-    socket.join(roomId);
-    socket.data.roomId    = roomId;
-    socket.data.playerIdx = playerIdx;
-
-    socket.emit('playerAssigned', { playerIdx, roomId });
-    console.log(`  Player ${playerIdx} joined room ${roomId}`);
-
-    if (room.players.length === 2) {
-      io.to(roomId).emit('gameStart', { message: 'Both players connected. Game starting!' });
-      startGameLoop(roomId);
-    } else {
-      socket.emit('waiting', { message: 'Waiting for second player...' });
+    if (!room) {
+      return;
     }
+
+    const player = room.players.get(socket.id);
+    if (!player) {
+      return;
+    }
+
+    player.input.x = clamp(Number(x) || 0, -1, 1);
+    player.input.z = clamp(Number(z) || 0, -1, 1);
   });
 
-  // Input: { up, down, left, right } boolean flags sent every frame from client
-  socket.on('input', (input) => {
-    const { roomId, playerIdx } = socket.data;
+  socket.on("leaveRoom", () => {
+    const roomId = socket.data.roomId;
+    if (!roomId) {
+      return;
+    }
+
     const room = rooms.get(roomId);
-    if (!room) return;
-    room.state.inputs[playerIdx] = input;
+    if (!room) {
+      socket.data.roomId = null;
+      return;
+    }
+
+    const leavingPlayer = room.players.get(socket.id);
+    room.players.delete(socket.id);
+    socket.leave(roomId);
+    socket.data.roomId = null;
+
+    if (leavingPlayer) {
+      io.to(roomId).emit("systemMessage", { message: `${leavingPlayer.name} left.` });
+    }
+
+    if (room.players.size === 0) {
+      removeRoom(roomId);
+      return;
+    }
+
+    broadcastRoomState(room);
   });
 
-  socket.on('restartGame', () => {
-    const { roomId } = socket.data;
-    const room = rooms.get(roomId);
-    if (!room || room.players.length < 2) return;
-    stopGameLoop(roomId);
-    startGameLoop(roomId);
-    io.to(roomId).emit('gameRestart');
-  });
+  socket.on("disconnect", () => {
+    const roomId = socket.data.roomId;
+    if (!roomId) {
+      return;
+    }
 
-  socket.on('disconnect', () => {
-    console.log(`[-] Client disconnected: ${socket.id}`);
-    const { roomId } = socket.data;
     const room = rooms.get(roomId);
-    if (!room) return;
+    if (!room) {
+      return;
+    }
 
-    stopGameLoop(roomId);
-    io.to(roomId).emit('opponentLeft', { message: 'Opponent disconnected.' });
-    rooms.delete(roomId);
+    const leavingPlayer = room.players.get(socket.id);
+    room.players.delete(socket.id);
+
+    if (leavingPlayer) {
+      io.to(roomId).emit("systemMessage", { message: `${leavingPlayer.name} disconnected.` });
+    }
+
+    if (room.players.size === 0) {
+      removeRoom(roomId);
+      return;
+    }
+
+    broadcastRoomState(room);
   });
 });
 
-// ─── Health Check ─────────────────────────────────────────────────────────────
-
-app.get('/health', (_, res) => res.json({ status: 'ok', tickRate: TICK_RATE }));
-
-// ─── Start ────────────────────────────────────────────────────────────────────
+app.get("/health", (_, res) => {
+  res.json({
+    status: "ok",
+    tickRate: TICK_RATE,
+    rooms: rooms.size,
+  });
+});
 
 server.listen(PORT, () => {
-  console.log(`Socket.io game server running on port ${PORT} @ ${TICK_RATE} Hz`);
+  console.log(`Socket server running on :${PORT}`);
 });
