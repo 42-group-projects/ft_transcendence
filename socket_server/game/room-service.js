@@ -13,13 +13,11 @@ const PLATE_RADIUS = WORLD_HALF;
 const GRAVITY = 24;
 const FALL_ELIMINATION_Y = -2;
 const SPAWN_DISTANCE = 6;
+const PLATE_SURFACE_Y = PLAYER_RADIUS;
+const PLATE_BOUNDARY_RADIUS = PLATE_RADIUS - PLAYER_RADIUS;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
-}
-
-function randomBetween(min, max) {
-  return Math.random() * (max - min) + min;
 }
 
 function randomRoomId() {
@@ -39,7 +37,6 @@ function makePlayer(id, name) {
     input: { x: 0, z: 0 },
     heading: 0,
     fallVelocityY: 0,
-    isFalling: false,
     eliminated: false,
     roundResult: null,
   };
@@ -95,51 +92,22 @@ function resolveBallCollision(a, b) {
   b.position.z += overlap * nz;
 }
 
-function spawnPlayerInRoom(room, player) {
-  let position = { x: 0, y: PLAYER_RADIUS, z: 0 };
+function placePlayerAtSpawnSlot(player, slotIndex) {
+  const isNorthSide = slotIndex % 2 === 0;
 
-  for (let attempt = 0; attempt < 50; attempt += 1) {
-    const angle = randomBetween(0, Math.PI * 2);
-    const distance = Math.sqrt(Math.random()) * (PLATE_RADIUS - 2);
-    const candidate = {
-      x: Math.cos(angle) * distance,
-      y: PLAYER_RADIUS,
-      z: Math.sin(angle) * distance,
-    };
-
-    let overlaps = false;
-    for (const other of room.players.values()) {
-      const dx = candidate.x - other.position.x;
-      const dz = candidate.z - other.position.z;
-      const d2 = dx * dx + dz * dz;
-
-      if (d2 < (PLAYER_RADIUS * 2.5) ** 2) {
-        overlaps = true;
-        break;
-      }
-    }
-
-    if (!overlaps) {
-      position = candidate;
-      break;
-    }
-  }
-
-  player.position = position;
+  player.position = {
+    x: 0,
+    y: PLATE_SURFACE_Y,
+    z: isNorthSide ? SPAWN_DISTANCE : -SPAWN_DISTANCE,
+  };
+  player.heading = isNorthSide ? 0 : Math.PI;
 }
 
 function placePlayersForRound(room) {
   const players = [...room.players.values()];
 
   players.forEach((player, index) => {
-    const isNorthSide = index % 2 === 0;
-
-    player.position = {
-      x: 0,
-      y: PLAYER_RADIUS,
-      z: isNorthSide ? SPAWN_DISTANCE : -SPAWN_DISTANCE,
-    };
-    player.heading = isNorthSide ? 0 : Math.PI;
+    placePlayerAtSpawnSlot(player, index);
   });
 }
 
@@ -157,21 +125,64 @@ function serializePlayers(playersMap) {
 function createRoomService(io) {
   const rooms = new Map();
 
-  function resetPlayerForRound(room, player) {
+  function resetPlayerForRound(player) {
     player.velocity.x = 0;
     player.velocity.z = 0;
     player.input.x = 0;
     player.input.z = 0;
     player.fallVelocityY = 0;
-    player.isFalling = false;
-    player.position.y = PLAYER_RADIUS;
+    player.position.y = PLATE_SURFACE_Y;
     player.eliminated = false;
     player.roundResult = null;
+  }
+
+  function stopPlayerHorizontalMovement(player) {
+    player.input.x = 0;
+    player.input.z = 0;
+    player.velocity.x = 0;
+    player.velocity.z = 0;
   }
 
   function applyFalling(player, dt) {
     player.fallVelocityY -= GRAVITY * dt;
     player.position.y += player.fallVelocityY * dt;
+  }
+
+  function isPlayerOnPlate(player) {
+    const distanceFromCenter = Math.hypot(player.position.x, player.position.z);
+    return distanceFromCenter <= PLATE_BOUNDARY_RADIUS;
+  }
+
+  function applyMovementInput(player, dt) {
+    player.heading += player.input.x * TURN_SPEED * dt;
+
+    const throttle = -player.input.z;
+    const forwardX = Math.sin(player.heading);
+    const forwardZ = -Math.cos(player.heading);
+
+    player.velocity.x += forwardX * throttle * ACCEL * dt;
+    player.velocity.z += forwardZ * throttle * ACCEL * dt;
+  }
+
+  function capHorizontalSpeed(player) {
+    const speed = Math.hypot(player.velocity.x, player.velocity.z);
+    if (speed <= MAX_SPEED) {
+      return;
+    }
+
+    const scale = MAX_SPEED / speed;
+    player.velocity.x *= scale;
+    player.velocity.z *= scale;
+  }
+
+  function applyHorizontalFriction(player) {
+    player.velocity.x *= FRICTION;
+    player.velocity.z *= FRICTION;
+  }
+
+  function advanceHorizontalPosition(player, dt) {
+    player.position.x += player.velocity.x * dt;
+    player.position.z += player.velocity.z * dt;
   }
 
   function notifyWaitingForOpponent(room) {
@@ -241,10 +252,7 @@ function createRoomService(io) {
     }
 
     player.eliminated = true;
-    player.input.x = 0;
-    player.input.z = 0;
-    player.velocity.x = 0;
-    player.velocity.z = 0;
+    stopPlayerHorizontalMovement(player);
 
     emitLoss(player);
     io.to(room.id).emit("systemMessage", {
@@ -286,35 +294,13 @@ function createRoomService(io) {
         continue;
       }
 
-      player.heading += player.input.x * TURN_SPEED * dt;
+      applyMovementInput(player, dt);
+      capHorizontalSpeed(player);
+      applyHorizontalFriction(player);
+      advanceHorizontalPosition(player, dt);
 
-      const throttle = -player.input.z;
-      const forwardX = Math.sin(player.heading);
-      const forwardZ = -Math.cos(player.heading);
-
-      player.velocity.x += forwardX * throttle * ACCEL * dt;
-      player.velocity.z += forwardZ * throttle * ACCEL * dt;
-
-      const speed = Math.hypot(player.velocity.x, player.velocity.z);
-      if (speed > MAX_SPEED) {
-        const scale = MAX_SPEED / speed;
-        player.velocity.x *= scale;
-        player.velocity.z *= scale;
-      }
-
-      player.velocity.x *= FRICTION;
-      player.velocity.z *= FRICTION;
-
-      player.position.x += player.velocity.x * dt;
-      player.position.z += player.velocity.z * dt;
-
-      const distanceFromCenter = Math.hypot(player.position.x, player.position.z);
-      const onPlate = distanceFromCenter <= PLATE_RADIUS - PLAYER_RADIUS;
-
-      if (!onPlate) {
-        player.isFalling = true;
-        player.input.x = 0;
-        player.input.z = 0;
+      if (!isPlayerOnPlate(player)) {
+        stopPlayerHorizontalMovement(player);
         applyFalling(player, dt);
 
         if (player.position.y <= FALL_ELIMINATION_Y) {
@@ -324,8 +310,7 @@ function createRoomService(io) {
         continue;
       }
 
-      player.isFalling = false;
-      player.position.y = PLAYER_RADIUS;
+      player.position.y = PLATE_SURFACE_Y;
       player.fallVelocityY = 0;
     }
 
@@ -364,7 +349,7 @@ function createRoomService(io) {
 
   function addPlayerToRoom(room, socketId, rawName) {
     const player = makePlayer(socketId, sanitizeName(rawName));
-    spawnPlayerInRoom(room, player);
+    placePlayerAtSpawnSlot(player, room.players.size);
     room.players.set(socketId, player);
     return player;
   }
@@ -396,7 +381,7 @@ function createRoomService(io) {
     }
 
     for (const player of room.players.values()) {
-      resetPlayerForRound(room, player);
+      resetPlayerForRound(player);
     }
 
     placePlayersForRound(room);
