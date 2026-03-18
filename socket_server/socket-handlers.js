@@ -19,6 +19,11 @@ function registerSocketHandlers(io, roomService) {
 
       socket.emit("joinedRoom", { roomId: room.id, playerId: socket.id });
       roomService.broadcastRoomState(room);
+      const started = roomService.tryStartRound(room);
+
+      if (!started) {
+        roomService.notifyWaitingForOpponent(room);
+      }
     });
 
     socket.on("joinRoom", ({ roomId, password, name }) => {
@@ -39,6 +44,11 @@ function registerSocketHandlers(io, roomService) {
         return;
       }
 
+      if (roomService.isRoundInProgress(room)) {
+        socket.emit("roomError", { message: "Round already in progress. Please wait for next room." });
+        return;
+      }
+
       const player = roomService.addPlayerToRoom(room, socket.id, name);
 
       socket.join(room.id);
@@ -49,6 +59,11 @@ function registerSocketHandlers(io, roomService) {
       io.to(room.id).emit("systemMessage", { message: `${player.name} joined.` });
 
       roomService.broadcastRoomState(room);
+      const started = roomService.tryStartRound(room);
+
+      if (!started) {
+        roomService.notifyWaitingForOpponent(room);
+      }
     });
 
     socket.on("moveInput", ({ x, z }) => {
@@ -80,6 +95,10 @@ function registerSocketHandlers(io, roomService) {
       if (result.player) {
         io.to(roomId).emit("systemMessage", { message: `${result.player.name} left.` });
       }
+
+      if (result.room) {
+        roomService.notifyWaitingForOpponent(result.room);
+      }
     });
 
     socket.on("disconnect", () => {
@@ -94,6 +113,10 @@ function registerSocketHandlers(io, roomService) {
       }
 
       io.to(roomId).emit("systemMessage", { message: `${result.player.name} disconnected.` });
+
+      if (result.room) {
+        roomService.notifyWaitingForOpponent(result.room);
+      }
     });
   });
 }

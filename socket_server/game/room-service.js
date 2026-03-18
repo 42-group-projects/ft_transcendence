@@ -9,6 +9,9 @@ const FRICTION = 0.88;
 const MAX_SPEED = 9;
 const RESTITUTION = 0.8;
 const TURN_SPEED = 3.4;
+const PLATE_RADIUS = WORLD_HALF;
+const GRAVITY = 24;
+const FALL_ELIMINATION_Y = -2;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -34,6 +37,10 @@ function makePlayer(id, name) {
     velocity: { x: 0, z: 0 },
     input: { x: 0, z: 0 },
     heading: 0,
+    fallVelocityY: 0,
+    isFalling: false,
+    eliminated: false,
+    roundResult: null,
   };
 }
 
@@ -43,10 +50,15 @@ function makeRoom(password) {
     password,
     players: new Map(),
     interval: null,
+    roundInProgress: false,
   };
 }
 
 function resolveBallCollision(a, b) {
+  if (Math.abs(a.position.y - b.position.y) > PLAYER_RADIUS * 1.5) {
+    return;
+  }
+
   const dx = b.position.x - a.position.x;
   const dz = b.position.z - a.position.z;
   const dist = Math.sqrt(dx * dx + dz * dz);
@@ -86,10 +98,12 @@ function spawnPlayerInRoom(room, player) {
   let position = { x: 0, y: PLAYER_RADIUS, z: 0 };
 
   for (let attempt = 0; attempt < 50; attempt += 1) {
+    const angle = randomBetween(0, Math.PI * 2);
+    const distance = Math.sqrt(Math.random()) * (PLATE_RADIUS - 2);
     const candidate = {
-      x: randomBetween(-WORLD_HALF + 2, WORLD_HALF - 2),
+      x: Math.cos(angle) * distance,
       y: PLAYER_RADIUS,
-      z: randomBetween(-WORLD_HALF + 2, WORLD_HALF - 2),
+      z: Math.sin(angle) * distance,
     };
 
     let overlaps = false;
@@ -120,11 +134,109 @@ function serializePlayers(playersMap) {
     position: player.position,
     velocity: player.velocity,
     heading: player.heading,
+    eliminated: player.eliminated,
   }));
 }
 
 function createRoomService(io) {
   const rooms = new Map();
+
+  function resetPlayerForRound(room, player) {
+    spawnPlayerInRoom(room, player);
+    player.velocity.x = 0;
+    player.velocity.z = 0;
+    player.input.x = 0;
+    player.input.z = 0;
+    player.fallVelocityY = 0;
+    player.isFalling = false;
+    player.position.y = PLAYER_RADIUS;
+    player.heading = randomBetween(0, Math.PI * 2);
+    player.eliminated = false;
+    player.roundResult = null;
+  }
+
+  function applyFalling(player, dt) {
+    player.fallVelocityY -= GRAVITY * dt;
+    player.position.y += player.fallVelocityY * dt;
+  }
+
+  function notifyWaitingForOpponent(room) {
+    if (room.roundInProgress || room.players.size !== 1) {
+      return;
+    }
+
+    io.to(room.id).emit("systemMessage", {
+      message: "Waiting for opponent...",
+    });
+  }
+
+  function emitLoss(player) {
+    if (player.roundResult) {
+      return;
+    }
+
+    player.roundResult = "lost";
+    io.to(player.id).emit("roundResult", {
+      result: "lost",
+      message: "You lose!",
+    });
+  }
+
+  function emitWin(player) {
+    if (player.roundResult) {
+      return;
+    }
+
+    player.roundResult = "won";
+    io.to(player.id).emit("roundResult", {
+      result: "won",
+      message: "You won!",
+    });
+  }
+
+  function endRoundIfNeeded(room) {
+    if (!room.roundInProgress) {
+      return;
+    }
+
+    const alivePlayers = [...room.players.values()].filter((player) => !player.eliminated);
+
+    if (alivePlayers.length > 1) {
+      return;
+    }
+
+    room.roundInProgress = false;
+
+    if (alivePlayers.length === 1) {
+      const winner = alivePlayers[0];
+      emitWin(winner);
+      io.to(room.id).emit("systemMessage", {
+        message: `${winner.name} is the winner!`,
+      });
+      return;
+    }
+
+    io.to(room.id).emit("systemMessage", {
+      message: "Round ended with no winner.",
+    });
+  }
+
+  function eliminatePlayer(room, player) {
+    if (player.eliminated) {
+      return;
+    }
+
+    player.eliminated = true;
+    player.input.x = 0;
+    player.input.z = 0;
+    player.velocity.x = 0;
+    player.velocity.z = 0;
+
+    emitLoss(player);
+    io.to(room.id).emit("systemMessage", {
+      message: `${player.name} fell off the plate!`,
+    });
+  }
 
   function removeRoom(roomId) {
     const room = rooms.get(roomId);
@@ -147,10 +259,19 @@ function createRoomService(io) {
   }
 
   function tickRoom(room) {
+    if (!room.roundInProgress) {
+      return;
+    }
+
     const players = [...room.players.values()];
     const dt = TICK_MS / 1000;
 
     for (const player of players) {
+      if (player.eliminated) {
+        applyFalling(player, dt);
+        continue;
+      }
+
       player.heading += player.input.x * TURN_SPEED * dt;
 
       const throttle = -player.input.z;
@@ -173,36 +294,35 @@ function createRoomService(io) {
       player.position.x += player.velocity.x * dt;
       player.position.z += player.velocity.z * dt;
 
-      if (
-        player.position.x < -WORLD_HALF + PLAYER_RADIUS ||
-        player.position.x > WORLD_HALF - PLAYER_RADIUS
-      ) {
-        player.position.x = clamp(
-          player.position.x,
-          -WORLD_HALF + PLAYER_RADIUS,
-          WORLD_HALF - PLAYER_RADIUS
-        );
-        player.velocity.x *= -0.5;
+      const distanceFromCenter = Math.hypot(player.position.x, player.position.z);
+      const onPlate = distanceFromCenter <= PLATE_RADIUS - PLAYER_RADIUS;
+
+      if (!onPlate) {
+        player.isFalling = true;
+        player.input.x = 0;
+        player.input.z = 0;
+        applyFalling(player, dt);
+
+        if (player.position.y <= FALL_ELIMINATION_Y) {
+          eliminatePlayer(room, player);
+        }
+
+        continue;
       }
 
-      if (
-        player.position.z < -WORLD_HALF + PLAYER_RADIUS ||
-        player.position.z > WORLD_HALF - PLAYER_RADIUS
-      ) {
-        player.position.z = clamp(
-          player.position.z,
-          -WORLD_HALF + PLAYER_RADIUS,
-          WORLD_HALF - PLAYER_RADIUS
-        );
-        player.velocity.z *= -0.5;
+      player.isFalling = false;
+      player.position.y = PLAYER_RADIUS;
+      player.fallVelocityY = 0;
+    }
+
+    const activePlayers = players.filter((player) => !player.eliminated);
+    for (let i = 0; i < activePlayers.length; i += 1) {
+      for (let j = i + 1; j < activePlayers.length; j += 1) {
+        resolveBallCollision(activePlayers[i], activePlayers[j]);
       }
     }
 
-    for (let i = 0; i < players.length; i += 1) {
-      for (let j = i + 1; j < players.length; j += 1) {
-        resolveBallCollision(players[i], players[j]);
-      }
-    }
+    endRoundIfNeeded(room);
 
     broadcastRoomState(room);
   }
@@ -246,8 +366,32 @@ function createRoomService(io) {
       return;
     }
 
+    if (!room.roundInProgress || player.eliminated) {
+      player.input.x = 0;
+      player.input.z = 0;
+      return;
+    }
+
     player.input.x = clamp(Number(x) || 0, -1, 1);
     player.input.z = clamp(Number(z) || 0, -1, 1);
+  }
+
+  function tryStartRound(room) {
+    if (room.roundInProgress || room.players.size < 2) {
+      return false;
+    }
+
+    for (const player of room.players.values()) {
+      resetPlayerForRound(room, player);
+    }
+
+    room.roundInProgress = true;
+    io.to(room.id).emit("roundStarted", { roomId: room.id });
+    io.to(room.id).emit("systemMessage", {
+      message: "Round started! Last player on the plate wins.",
+    });
+    broadcastRoomState(room);
+    return true;
   }
 
   function removePlayer(roomId, socketId) {
@@ -264,6 +408,9 @@ function createRoomService(io) {
       return { room: null, player, removedRoom: true };
     }
 
+    endRoundIfNeeded(room);
+    notifyWaitingForOpponent(room);
+
     broadcastRoomState(room);
     return { room, player, removedRoom: false };
   }
@@ -276,15 +423,22 @@ function createRoomService(io) {
     return room.players.size >= MAX_PLAYERS_PER_ROOM;
   }
 
+  function isRoundInProgress(room) {
+    return room.roundInProgress;
+  }
+
   return {
     TICK_RATE,
     createRoom,
     getRoom,
     addPlayerToRoom,
     setPlayerInput,
+    tryStartRound,
     removePlayer,
     isRoomPasswordValid,
     isRoomFull,
+    isRoundInProgress,
+    notifyWaitingForOpponent,
     broadcastRoomState,
     getRoomCount: () => rooms.size,
   };

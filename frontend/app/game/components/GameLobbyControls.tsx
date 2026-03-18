@@ -7,6 +7,7 @@ type GameLobbyControlsProps = {
   playersCount: number;
   errorMessage: string | null;
   systemMessage: string | null;
+  roundResultMessage: string | null;
   onNameChange: (value: string) => void;
   onRoomIdChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
@@ -24,6 +25,7 @@ export function GameLobbyControls({
   playersCount,
   errorMessage,
   systemMessage,
+  roundResultMessage,
   onNameChange,
   onRoomIdChange,
   onPasswordChange,
@@ -88,6 +90,7 @@ export function GameLobbyControls({
 
       {errorMessage ? <p className="text-sm text-red-400">{errorMessage}</p> : null}
       {systemMessage ? <p className="text-sm text-emerald-400">{systemMessage}</p> : null}
+      {roundResultMessage ? <p className="text-base font-semibold text-yellow-300">{roundResultMessage}</p> : null}
     </>
   );
 }

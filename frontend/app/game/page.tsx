@@ -20,6 +20,7 @@ export default function GamePage() {
     players,
     errorMessage,
     systemMessage,
+    roundResultMessage,
     createRoom,
     joinRoom,
     leaveRoom,
@@ -49,6 +50,7 @@ export default function GamePage() {
           playersCount={players.length}
           errorMessage={errorMessage}
           systemMessage={systemMessage}
+          roundResultMessage={roundResultMessage}
           onNameChange={setName}
           onRoomIdChange={setRoomId}
           onPasswordChange={setPassword}

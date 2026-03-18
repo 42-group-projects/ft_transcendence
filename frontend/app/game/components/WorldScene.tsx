@@ -6,6 +6,9 @@ import * as THREE from "three";
 import { PLAYER_RADIUS, WORLD_SIZE } from "../constants";
 import type { PlayerState } from "../types";
 
+const PLATE_RADIUS = WORLD_SIZE / 2;
+const PLATE_THICKNESS = 0.5;
+
 type FollowCameraProps = {
   target: THREE.Vector3 | null;
   heading: number;
@@ -68,26 +71,9 @@ export function WorldScene({ players, localPlayerId }: WorldSceneProps) {
       <ambientLight intensity={0.6} />
       <directionalLight intensity={1.2} position={[8, 12, 8]} castShadow />
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[WORLD_SIZE, WORLD_SIZE]} />
+      <mesh position={[0, -PLATE_THICKNESS / 2, 0]} receiveShadow>
+        <cylinderGeometry args={[PLATE_RADIUS, PLATE_RADIUS, PLATE_THICKNESS, 80]} />
         <meshStandardMaterial color="#2f2f2f" />
-      </mesh>
-
-      <mesh position={[0, 2, -WORLD_SIZE / 2]}>
-        <boxGeometry args={[WORLD_SIZE, 4, 0.4]} />
-        <meshStandardMaterial color="#5a5a5a" />
-      </mesh>
-      <mesh position={[0, 2, WORLD_SIZE / 2]}>
-        <boxGeometry args={[WORLD_SIZE, 4, 0.4]} />
-        <meshStandardMaterial color="#5a5a5a" />
-      </mesh>
-      <mesh position={[-WORLD_SIZE / 2, 2, 0]}>
-        <boxGeometry args={[0.4, 4, WORLD_SIZE]} />
-        <meshStandardMaterial color="#5a5a5a" />
-      </mesh>
-      <mesh position={[WORLD_SIZE / 2, 2, 0]}>
-        <boxGeometry args={[0.4, 4, WORLD_SIZE]} />
-        <meshStandardMaterial color="#5a5a5a" />
       </mesh>
 
       {players.map((player) => {

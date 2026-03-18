@@ -29,6 +29,7 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
   const [players, setPlayers] = useState<PlayerState[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [systemMessage, setSystemMessage] = useState<string | null>(null);
+  const [roundResultMessage, setRoundResultMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const socket = io(socketUrl, {
@@ -47,6 +48,8 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
       setJoinedRoomId(null);
       setLocalPlayerId(null);
       setPlayers([]);
+      setSystemMessage(null);
+      setRoundResultMessage(null);
     });
 
     socket.on("connect_error", () => {
@@ -64,6 +67,8 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
       setJoinedRoomId(activeRoomId);
       setLocalPlayerId(playerId);
       setErrorMessage(null);
+      setSystemMessage(null);
+      setRoundResultMessage(null);
     });
 
     socket.on("roomState", ({ players: nextPlayers }: RoomStatePayload) => {
@@ -76,6 +81,15 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
 
     socket.on("systemMessage", ({ message }: { message: string }) => {
       setSystemMessage(message);
+    });
+
+    socket.on("roundStarted", () => {
+      setSystemMessage(null);
+      setRoundResultMessage(null);
+    });
+
+    socket.on("roundResult", ({ message }: { message: string }) => {
+      setRoundResultMessage(message);
     });
 
     return () => {
@@ -129,6 +143,8 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
     setJoinedRoomId(null);
     setLocalPlayerId(null);
     setPlayers([]);
+    setSystemMessage(null);
+    setRoundResultMessage(null);
   }, []);
 
   return {
@@ -139,6 +155,7 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
     players,
     errorMessage,
     systemMessage,
+    roundResultMessage,
     setErrorMessage,
     setSystemMessage,
     createRoom,
