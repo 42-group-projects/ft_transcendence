@@ -3,11 +3,18 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
-import { PLAYER_RADIUS, WORLD_SIZE } from "../constants";
+import {
+  PLAYER_RADIUS,
+  SPAWN_DISTANCE,
+  SPAWN_LINE_OFFSET,
+  WORLD_SIZE,
+} from "../constants";
 import type { PlayerState } from "../types";
 
 const PLATE_RADIUS = WORLD_SIZE / 2;
 const PLATE_THICKNESS = 0.5;
+const SPAWN_LINE_LENGTH = 3.6;
+const SPAWN_LINE_THICKNESS = 0.12;
 
 type FollowCameraProps = {
   target: THREE.Vector3 | null;
@@ -74,6 +81,15 @@ export function WorldScene({ players, localPlayerId }: WorldSceneProps) {
       <mesh position={[0, -PLATE_THICKNESS / 2, 0]} receiveShadow>
         <cylinderGeometry args={[PLATE_RADIUS, PLATE_RADIUS, PLATE_THICKNESS, 80]} />
         <meshStandardMaterial color="#2f2f2f" />
+      </mesh>
+
+      <mesh position={[0, 0.02, SPAWN_DISTANCE - SPAWN_LINE_OFFSET]} receiveShadow>
+        <boxGeometry args={[SPAWN_LINE_LENGTH, SPAWN_LINE_THICKNESS, 0.18]} />
+        <meshStandardMaterial color="#f5f5f5" emissive="#737373" emissiveIntensity={0.3} />
+      </mesh>
+      <mesh position={[0, 0.02, -SPAWN_DISTANCE + SPAWN_LINE_OFFSET]} receiveShadow>
+        <boxGeometry args={[SPAWN_LINE_LENGTH, SPAWN_LINE_THICKNESS, 0.18]} />
+        <meshStandardMaterial color="#f5f5f5" emissive="#737373" emissiveIntensity={0.3} />
       </mesh>
 
       {players.map((player) => {

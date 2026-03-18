@@ -97,6 +97,7 @@ function registerSocketHandlers(io, roomService) {
       }
 
       if (result.room) {
+        roomService.broadcastRoomState(result.room);
         roomService.notifyWaitingForOpponent(result.room);
       }
     });
@@ -115,6 +116,7 @@ function registerSocketHandlers(io, roomService) {
       io.to(roomId).emit("systemMessage", { message: `${result.player.name} disconnected.` });
 
       if (result.room) {
+        roomService.broadcastRoomState(result.room);
         roomService.notifyWaitingForOpponent(result.room);
       }
     });

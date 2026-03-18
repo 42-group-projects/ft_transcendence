@@ -1,6 +1,6 @@
 const TICK_RATE = 60;
 const TICK_MS = 1000 / TICK_RATE;
-const WORLD_HALF = 14;
+const WORLD_HALF = 11;
 const PLAYER_RADIUS = 0.6;
 const PLAYER_MASS = 1;
 const MAX_PLAYERS_PER_ROOM = 8;
@@ -12,6 +12,7 @@ const TURN_SPEED = 3.4;
 const PLATE_RADIUS = WORLD_HALF;
 const GRAVITY = 24;
 const FALL_ELIMINATION_Y = -2;
+const SPAWN_DISTANCE = 6;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -127,6 +128,21 @@ function spawnPlayerInRoom(room, player) {
   player.position = position;
 }
 
+function placePlayersForRound(room) {
+  const players = [...room.players.values()];
+
+  players.forEach((player, index) => {
+    const isNorthSide = index % 2 === 0;
+
+    player.position = {
+      x: 0,
+      y: PLAYER_RADIUS,
+      z: isNorthSide ? SPAWN_DISTANCE : -SPAWN_DISTANCE,
+    };
+    player.heading = isNorthSide ? 0 : Math.PI;
+  });
+}
+
 function serializePlayers(playersMap) {
   return [...playersMap.values()].map((player) => ({
     id: player.id,
@@ -142,7 +158,6 @@ function createRoomService(io) {
   const rooms = new Map();
 
   function resetPlayerForRound(room, player) {
-    spawnPlayerInRoom(room, player);
     player.velocity.x = 0;
     player.velocity.z = 0;
     player.input.x = 0;
@@ -150,7 +165,6 @@ function createRoomService(io) {
     player.fallVelocityY = 0;
     player.isFalling = false;
     player.position.y = PLAYER_RADIUS;
-    player.heading = randomBetween(0, Math.PI * 2);
     player.eliminated = false;
     player.roundResult = null;
   }
@@ -385,6 +399,8 @@ function createRoomService(io) {
       resetPlayerForRound(room, player);
     }
 
+    placePlayersForRound(room);
+
     room.roundInProgress = true;
     io.to(room.id).emit("roundStarted", { roomId: room.id });
     io.to(room.id).emit("systemMessage", {
@@ -409,9 +425,6 @@ function createRoomService(io) {
     }
 
     endRoundIfNeeded(room);
-    notifyWaitingForOpponent(room);
-
-    broadcastRoomState(room);
     return { room, player, removedRoom: false };
   }
 
