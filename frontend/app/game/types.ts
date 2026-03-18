@@ -3,6 +3,7 @@ export type PlayerState = {
   name: string;
   position: { x: number; y: number; z: number };
   velocity: { x: number; z: number };
+  heading: number;
 };
 
 export type RoomStatePayload = {

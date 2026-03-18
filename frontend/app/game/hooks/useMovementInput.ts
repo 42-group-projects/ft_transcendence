@@ -28,6 +28,8 @@ export function useMovementInput({
       return;
     }
 
+    const socket = socketRef.current;
+
     const handleKey = (event: KeyboardEvent, pressed: boolean) => {
       if (event.repeat) {
         return;
@@ -57,14 +59,14 @@ export function useMovementInput({
       const x = Number(inputRef.current.right) - Number(inputRef.current.left);
       const z = Number(inputRef.current.down) - Number(inputRef.current.up);
 
-      socketRef.current?.emit("moveInput", { x, z });
+      socket?.emit("moveInput", { x, z });
     }, 1000 / 30);
 
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       clearInterval(sendInput);
-      socketRef.current?.emit("moveInput", { x: 0, z: 0 });
+      socket?.emit("moveInput", { x: 0, z: 0 });
     };
   }, [joinedRoomId, socketRef]);
 }

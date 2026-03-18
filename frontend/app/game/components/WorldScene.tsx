@@ -8,9 +8,10 @@ import type { PlayerState } from "../types";
 
 type FollowCameraProps = {
   target: THREE.Vector3 | null;
+  heading: number;
 };
 
-function FollowCamera({ target }: FollowCameraProps) {
+function FollowCamera({ target, heading }: FollowCameraProps) {
   const { camera } = useThree();
 
   useFrame(() => {
@@ -18,9 +19,24 @@ function FollowCamera({ target }: FollowCameraProps) {
       return;
     }
 
-    const desired = new THREE.Vector3(target.x, target.y + 6, target.z + 7);
+    const cameraDistance = 7;
+    const lookAheadDistance = 2;
+    const forwardX = Math.sin(heading);
+    const forwardZ = -Math.cos(heading);
+    const desired = new THREE.Vector3(
+      target.x - forwardX * cameraDistance,
+      target.y + 6,
+      target.z - forwardZ * cameraDistance
+    );
+
+    const lookAt = new THREE.Vector3(
+      target.x + forwardX * lookAheadDistance,
+      target.y,
+      target.z + forwardZ * lookAheadDistance
+    );
+
     camera.position.lerp(desired, 0.12);
-    camera.lookAt(target.x, target.y, target.z);
+    camera.lookAt(lookAt.x, lookAt.y, lookAt.z);
   });
 
   return null;
@@ -44,6 +60,8 @@ export function WorldScene({ players, localPlayerId }: WorldSceneProps) {
         localPlayer.position.z
       )
     : null;
+
+  const heading = localPlayer?.heading ?? 0;
 
   return (
     <>
@@ -92,7 +110,7 @@ export function WorldScene({ players, localPlayerId }: WorldSceneProps) {
         );
       })}
 
-      <FollowCamera target={target} />
+      <FollowCamera target={target} heading={heading} />
       <OrbitControls enablePan={false} enableZoom={false} enableRotate={false} />
     </>
   );

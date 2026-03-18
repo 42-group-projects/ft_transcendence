@@ -8,6 +8,7 @@ const ACCEL = 22;
 const FRICTION = 0.88;
 const MAX_SPEED = 9;
 const RESTITUTION = 0.8;
+const TURN_SPEED = 3.4;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -32,6 +33,7 @@ function makePlayer(id, name) {
     position: { x: 0, y: PLAYER_RADIUS, z: 0 },
     velocity: { x: 0, z: 0 },
     input: { x: 0, z: 0 },
+    heading: 0,
   };
 }
 
@@ -117,6 +119,7 @@ function serializePlayers(playersMap) {
     name: player.name,
     position: player.position,
     velocity: player.velocity,
+    heading: player.heading,
   }));
 }
 
@@ -145,10 +148,17 @@ function createRoomService(io) {
 
   function tickRoom(room) {
     const players = [...room.players.values()];
+    const dt = TICK_MS / 1000;
 
     for (const player of players) {
-      player.velocity.x += player.input.x * ACCEL * (TICK_MS / 1000);
-      player.velocity.z += player.input.z * ACCEL * (TICK_MS / 1000);
+      player.heading += player.input.x * TURN_SPEED * dt;
+
+      const throttle = -player.input.z;
+      const forwardX = Math.sin(player.heading);
+      const forwardZ = -Math.cos(player.heading);
+
+      player.velocity.x += forwardX * throttle * ACCEL * dt;
+      player.velocity.z += forwardZ * throttle * ACCEL * dt;
 
       const speed = Math.hypot(player.velocity.x, player.velocity.z);
       if (speed > MAX_SPEED) {
@@ -160,8 +170,8 @@ function createRoomService(io) {
       player.velocity.x *= FRICTION;
       player.velocity.z *= FRICTION;
 
-      player.position.x += player.velocity.x * (TICK_MS / 1000);
-      player.position.z += player.velocity.z * (TICK_MS / 1000);
+      player.position.x += player.velocity.x * dt;
+      player.position.z += player.velocity.z * dt;
 
       if (
         player.position.x < -WORLD_HALF + PLAYER_RADIUS ||
