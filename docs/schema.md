@@ -16,6 +16,81 @@ user_stats ──FK──→ users (user_id)
 
 ```mermaid
 erDiagram
+    users {
+        UUID id PK
+        VARCHAR email UK
+        VARCHAR password_hash
+        VARCHAR nickname UK
+        TEXT avatar_url
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+    oauth_accounts {
+        UUID id PK
+        UUID user_id FK
+        oauth_provider_type provider
+        VARCHAR provider_user_id
+        TIMESTAMPTZ created_at
+    }
+    friend_requests {
+        UUID id PK
+        UUID sender_id FK
+        UUID receiver_id FK
+        friend_request_status status
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+    friendships {
+        UUID id PK
+        UUID user_id FK
+        UUID friend_id FK
+        friendship_status status
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+    game_rooms {
+        UUID id PK
+        match_type match_type
+        VARCHAR keyword
+        UUID host_id FK
+        UUID guest_id FK
+        cpu_level cpu_level
+        game_room_status status
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+    game_sessions {
+        UUID id PK
+        UUID room_id FK "UQ"
+        UUID player1_id FK
+        UUID player2_id FK
+        BOOLEAN is_cpu_game
+        cpu_level cpu_level
+        UUID winner_id FK
+        game_session_status status
+        TIMESTAMPTZ started_at
+        TIMESTAMPTZ finished_at
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+    match_records {
+        UUID id PK
+        UUID session_id FK "UQ"
+        UUID player1_id FK
+        UUID player2_id FK
+        UUID winner_id FK
+        BOOLEAN is_cpu_game
+        TIMESTAMPTZ played_at
+        TIMESTAMPTZ created_at
+    }
+    user_stats {
+        UUID user_id PK "FK"
+        INTEGER wins
+        INTEGER losses
+        INTEGER rating
+        TIMESTAMPTZ updated_at
+    }
+
     users ||--o{ oauth_accounts : "has"
     users ||--o{ friend_requests : "sends/receives"
     users ||--o{ friendships : "has"
