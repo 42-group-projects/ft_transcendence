@@ -11,12 +11,12 @@ const RESTITUTION = 1.5;   // perfectly elastic — snappy bounces
 const CHARGE_BONUS = 1.8;  // up to +80% impulse for a direct front-on hit
 const TURN_SPEED = 3.4;
 const PLATE_RADIUS = WORLD_HALF;
-const GRAVITY = 12;
+const GRAVITY = 30;
 const FALL_ELIMINATION_Y = -2;
 const SPAWN_DISTANCE = 6;
 const PLATE_SURFACE_Y = PLAYER_RADIUS;
 const PLATE_BOUNDARY_RADIUS = PLATE_RADIUS - PLAYER_RADIUS;
-const PLATE_EDGE_TOLERANCE = 1.1;
+const PLATE_EDGE_TOLERANCE = 1.0;
 
 const SOLO_CPU_ID = "__solo_cpu__";
 const SOLO_DUMMY_ID = "__dummy_ball__";

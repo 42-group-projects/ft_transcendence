@@ -34,6 +34,11 @@ function registerSocketHandlers(io, roomService) {
         return;
       }
 
+      if (room.solo) {
+        socket.emit("roomError", { message: "Room not found." });
+        return;
+      }
+
       if (!roomService.isRoomPasswordValid(room, password)) {
         socket.emit("roomError", { message: "Incorrect room password." });
         return;
@@ -71,7 +76,8 @@ function registerSocketHandlers(io, roomService) {
         return;
       }
 
-      const room = roomService.createRoom("__solo__");
+      const soloPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      const room = roomService.createRoom(soloPassword);
       roomService.addPlayerToRoom(room, socket.id, name);
 
       socket.join(room.id);
