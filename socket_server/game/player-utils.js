@@ -40,6 +40,7 @@ function makeDummyBall() {
     input: { x: 0, z: 0 },
     heading: 0,
     fallVelocityY: 0,
+    isCpu: true,
     eliminated: false,
     roundResult: null,
   };
