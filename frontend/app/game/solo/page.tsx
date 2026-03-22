@@ -9,7 +9,7 @@ import { useMovementInput } from "../hooks/useMovementInput";
 
 type SoloDifficulty = "easy" | "medium" | "hard";
 
-export default function SoloDevPage() {
+export default function SoloPage() {
 	const [name, setName] = useState("Dev");
 	const [difficulty, setDifficulty] = useState<SoloDifficulty>("easy");
 	const {
