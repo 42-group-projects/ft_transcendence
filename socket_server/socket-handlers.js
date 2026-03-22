@@ -71,7 +71,7 @@ function registerSocketHandlers(io, roomService) {
       }
     });
 
-    socket.on("soloStart", ({ name, difficulty, opponentType }) => {
+    socket.on("soloStart", ({ name, difficulty }) => {
       if (socket.data.roomId) {
         return;
       }
@@ -86,7 +86,7 @@ function registerSocketHandlers(io, roomService) {
       socket.emit("joinedRoom", { roomId: room.id, playerId: socket.id });
       socket.emit("systemMessage", { message: `Solo room created: ${room.id}` });
 
-      roomService.startSoloRound(room, difficulty, opponentType);
+      roomService.startSoloRound(room, difficulty);
     });
 
     socket.on("moveInput", ({ x, z }) => {

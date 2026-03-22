@@ -7,7 +7,7 @@ import { WorldScene } from "../components/WorldScene";
 import { useGameSession } from "../hooks/useGameSession";
 import { useMovementInput } from "../hooks/useMovementInput";
 
-type SoloDifficulty = "easy" | "medium" | "hard";
+type SoloDifficulty = "dummy" | "easy" | "medium" | "hard";
 
 export default function SoloPage() {
 	const [name, setName] = useState("Dev");
@@ -53,8 +53,9 @@ export default function SoloPage() {
 							value={difficulty}
 							onChange={(event) => setDifficulty(event.target.value as SoloDifficulty)}
 							className="rounded border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-100 outline-none focus:border-neutral-500"
-						>
-							<option value="easy">Easy CPU</option>
+						>	
+                            <option value="dummy">Dummy (no AI)</option>
+                            <option value="easy">Easy CPU</option>
 							<option value="medium">Medium CPU</option>
 							<option value="hard">Hard CPU</option>
 						</select>

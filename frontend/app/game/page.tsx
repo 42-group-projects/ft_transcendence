@@ -17,12 +17,6 @@ export default function Home() {
         >
           Solo
         </Link>
-        <Link
-          href="/game/solo-dev"
-          className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
-        >
-          Solo Dev Mode
-        </Link>
       </section>
     </main>
   );

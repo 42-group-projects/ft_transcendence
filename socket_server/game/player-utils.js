@@ -31,21 +31,6 @@ function makePlayer(id, name) {
   };
 }
 
-function makeDummyBall() {
-  return {
-    id: "__dummy_ball__",
-    name: "Ball",
-    position: { x: 0, y: PLATE_SURFACE_Y, z: 0 },
-    velocity: { x: 0, z: 0 },
-    input: { x: 0, z: 0 },
-    heading: 0,
-    fallVelocityY: 0,
-    isCpu: true,
-    eliminated: false,
-    roundResult: null,
-  };
-}
-
 function makeCPUball(id, name) {
   return {
     id, 
@@ -124,7 +109,6 @@ module.exports = {
   clamp,
   sanitizeName,
   makePlayer,
-  makeDummyBall,
   makeCPUball,
   makeRoom,
   placePlayerAtSpawnSlot,

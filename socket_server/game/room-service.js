@@ -6,13 +6,11 @@ const {
   PLATE_SURFACE_Y,
   SOLO_CPU_DIFFICULTY,
   SOLO_CPU_ID,
-  SOLO_DUMMY_ID
 } = require("./constants");
 const {
   clamp,
   sanitizeName,
   makePlayer,
-  makeDummyBall,
   makeCPUball,
   makeRoom,
   placePlayerAtSpawnSlot,
@@ -58,34 +56,11 @@ function createRoomService(io) {
     return "medium";
   }
 
-  function normalizeSoloOpponentType(opponentType) {
-    if (opponentType === "dummy") {
-      return "dummy";
-    }
-
-    return "cpu";
-  }
-
   function makeSoloOpponent(room) {
-    if (room.soloOpponentType === "dummy") {
-      const dummy = makeDummyBall();
-      dummy.id = SOLO_DUMMY_ID;
-      dummy.isCpu = true;
-      placePlayerAtSpawnSlot(dummy, 1);
-      return dummy;
-    }
-
-    const cpu = makeCPUball(SOLO_CPU_ID, `CPU (${room.soloDifficulty})`);
+    const label = room.soloDifficulty === "dummy" ? "Dummy" : `CPU (${room.soloDifficulty})`;
+    const cpu = makeCPUball(SOLO_CPU_ID, label);
     placePlayerAtSpawnSlot(cpu, 1);
     return cpu;
-  }
-
-  function getSoloStartMessage(room) {
-    if (room.soloOpponentType === "dummy") {
-      return "Solo dev mode — dummy ball spawned.";
-    }
-
-    return `Solo dev mode — CPU set to ${room.soloDifficulty}.`;
   }
 
   function getSoloDifficultyConfig(difficulty) {
@@ -360,7 +335,7 @@ function createRoomService(io) {
     return true;
   }
 
-  function startSoloRound(room, difficulty = "medium", opponentType = "cpu") {
+  function startSoloRound(room, difficulty = "medium") {
     if (room.roundInProgress) {
       return false;
     }
@@ -368,7 +343,6 @@ function createRoomService(io) {
     room.solo = true;
     room.soloDifficulty = normalizeSoloDifficulty(difficulty);
     room.tickCount = 0;
-    room.soloOpponentType = normalizeSoloOpponentType(opponentType);
 
     for (const player of room.players.values()) {
       resetPlayerForRound(player);
@@ -381,7 +355,7 @@ function createRoomService(io) {
     room.roundInProgress = true;
     io.to(room.id).emit("roundStarted", { roomId: room.id });
     io.to(room.id).emit("systemMessage", {
-      message: getSoloStartMessage(room),
+      message: `Solo — opponent: ${room.soloDifficulty}.`,
     });
     broadcastRoomState(room);
     return true;

@@ -7,8 +7,8 @@ const MAX_PLAYERS_PER_ROOM = 8;
 const ACCEL = 70;
 const FRICTION = 0.9;
 const MAX_SPEED = 20;
-const RESTITUTION = 1.5;   // perfectly elastic — snappy bounces
-const CHARGE_BONUS = 1.8;  // up to +80% impulse for a direct front-on hit
+const RESTITUTION = 1.5;   // snappy bounces
+const CHARGE_BONUS = 1.8;  // up to +180% impulse for a direct front-on hit
 const TURN_SPEED = 3.4;
 const PLATE_RADIUS = WORLD_HALF;
 const GRAVITY = 30;
@@ -19,8 +19,18 @@ const PLATE_BOUNDARY_RADIUS = PLATE_RADIUS - PLAYER_RADIUS;
 const PLATE_EDGE_TOLERANCE = 1.0;
 
 const SOLO_CPU_ID = "__solo_cpu__";
-const SOLO_DUMMY_ID = "__dummy_ball__";
 const SOLO_CPU_DIFFICULTY = {
+  dummy:{
+    turnGain: 0,
+    maxThrottle: 0,
+    chargeBoost: 0,
+    predictionTime: 0,
+    wobbleAmp: 0,
+    wobbleFreq: 0,
+    brakeDistance: 0,
+    brakeThrottle: 0,
+    pivotThrottle: 0,
+  },
   easy: {
     turnGain: 0.65,
     maxThrottle: 0.2,
@@ -74,7 +84,6 @@ module.exports = {
   PLATE_SURFACE_Y,
   PLATE_BOUNDARY_RADIUS,
   PLATE_EDGE_TOLERANCE,
-  SOLO_DUMMY_ID,
   SOLO_CPU_ID,
   SOLO_CPU_DIFFICULTY,
 };
