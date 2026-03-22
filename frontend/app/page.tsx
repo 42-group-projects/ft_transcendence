@@ -10,7 +10,7 @@ export default function Home() {
           full experience.
         </p>
         <Link
-          href="/game"
+          href="game/"
           className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
         >
           Enter Game

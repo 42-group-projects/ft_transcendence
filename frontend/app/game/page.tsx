@@ -1,69 +1,26 @@
-"use client";
+import Link from "next/link";
 
-import { useState } from "react";
-import { Canvas } from "@react-three/fiber";
-
-import { GameLobbyControls } from "./components/GameLobbyControls";
-import { WorldScene } from "./components/WorldScene";
-import { useGameSession } from "./hooks/useGameSession";
-import { useMovementInput } from "./hooks/useMovementInput";
-
-export default function GamePage() {
-  const [name, setName] = useState("Player");
-  const [roomId, setRoomId] = useState("");
-  const [password, setPassword] = useState("");
-  const {
-    socketRef,
-    connected,
-    joinedRoomId,
-    localPlayerId,
-    players,
-    errorMessage,
-    systemMessage,
-    roundResultMessage,
-    createRoom,
-    joinRoom,
-    leaveRoom,
-  } = useGameSession({ onRoomCreated: setRoomId });
-
-  useMovementInput({ joinedRoomId, socketRef });
-
-  const handleCreateRoom = () => {
-    createRoom({ name, password });
-  };
-
-  const handleJoinRoom = () => {
-    joinRoom({ roomId, password, name });
-  };
-
+export default function Home() {
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100">
-      <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4">
-        <h1 className="text-2xl font-semibold">Multiplayer Prototype</h1>
-
-        <GameLobbyControls
-          name={name}
-          roomId={roomId}
-          password={password}
-          connected={connected}
-          joinedRoomId={joinedRoomId}
-          playersCount={players.length}
-          errorMessage={errorMessage}
-          systemMessage={systemMessage}
-          roundResultMessage={roundResultMessage}
-          onNameChange={setName}
-          onRoomIdChange={setRoomId}
-          onPasswordChange={setPassword}
-          onCreateRoom={handleCreateRoom}
-          onJoinRoom={handleJoinRoom}
-          onLeaveRoom={leaveRoom}
-        />
-
-        <div className="h-[72vh] overflow-hidden rounded-lg border border-neutral-700">
-          <Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
-            <WorldScene players={players} localPlayerId={localPlayerId} />
-          </Canvas>
-        </div>
+      <section className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-6 px-6 text-center">
+        <h1 className="text-5xl font-bold tracking-tight">SumoVerse</h1>
+        <p className="max-w-xl text-neutral-300">
+          Welcome to SumoVerse. This is a temporary landing page while we build the
+          full experience.
+        </p>
+        <Link
+          href="game/multiplayer"
+          className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
+        >
+          Multiplayer
+        </Link>
+        <Link
+          href="game/solo"
+          className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
+        >
+          Solo Mode
+        </Link>
       </section>
     </main>
   );
