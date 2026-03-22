@@ -51,7 +51,7 @@ function createRoomService(io) {
   const rooms = new Map();
 
   function normalizeSoloDifficulty(difficulty) {
-    if (SOLO_CPU_DIFFICULTY[difficulty]) {
+    if (Object.hasOwn(SOLO_CPU_DIFFICULTY, difficulty)) {
       return difficulty;
     }
 
