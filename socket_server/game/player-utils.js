@@ -25,6 +25,7 @@ function makePlayer(id, name) {
     input: { x: 0, z: 0 },
     heading: 0,
     fallVelocityY: 0,
+    isCpu: false,
     eliminated: false,
     roundResult: null,
   };
@@ -42,6 +43,22 @@ function makeDummyBall() {
     eliminated: false,
     roundResult: null,
   };
+}
+
+function makeCPUball(id, name) {
+  return {
+    id, 
+    name, 
+    position: { x: 0, y: PLATE_SURFACE_Y, z: 0 },
+    velocity: { x: 0, z: 0 },
+    input: { x: 0, z: 0 },
+    heading: 0,
+    fallVelocityY: 0,
+    isCpu: true,
+    eliminated: false,
+    roundResult: null,
+  };
+
 }
 
 function makeRoom(password) {
@@ -107,6 +124,7 @@ module.exports = {
   sanitizeName,
   makePlayer,
   makeDummyBall,
+  makeCPUball,
   makeRoom,
   placePlayerAtSpawnSlot,
   placePlayersForRound,

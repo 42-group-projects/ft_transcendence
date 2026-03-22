@@ -24,7 +24,7 @@ export default function SoloDevPage() {
   useMovementInput({ joinedRoomId, socketRef });
 
   const handleStart = () => {
-    socketRef.current?.emit("soloStart", { name });
+    socketRef.current?.emit("soloStart", { name, opponentType: "dummy" });
   };
 
   return (
