@@ -34,6 +34,11 @@ function registerSocketHandlers(io, roomService) {
         return;
       }
 
+      if (room.solo) {
+        socket.emit("roomError", { message: "Room not found." });
+        return;
+      }
+
       if (!roomService.isRoomPasswordValid(room, password)) {
         socket.emit("roomError", { message: "Incorrect room password." });
         return;
@@ -64,6 +69,24 @@ function registerSocketHandlers(io, roomService) {
       if (!started) {
         roomService.notifyWaitingForOpponent(room);
       }
+    });
+
+    socket.on("soloStart", ({ name, difficulty }) => {
+      if (socket.data.roomId) {
+        return;
+      }
+
+      const soloPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      const room = roomService.createRoom(soloPassword);
+      roomService.addPlayerToRoom(room, socket.id, name);
+
+      socket.join(room.id);
+      socket.data.roomId = room.id;
+
+      socket.emit("joinedRoom", { roomId: room.id, playerId: socket.id });
+      socket.emit("systemMessage", { message: `Solo room created: ${room.id}` });
+
+      roomService.startSoloRound(room, difficulty);
     });
 
     socket.on("moveInput", ({ x, z }) => {

@@ -1,188 +1,141 @@
-const TICK_RATE = 60;
-const TICK_MS = 1000 / TICK_RATE;
-const WORLD_HALF = 11;
-const PLAYER_RADIUS = 0.6;
-const PLAYER_MASS = 1;
-const MAX_PLAYERS_PER_ROOM = 8;
-const ACCEL = 22;
-const FRICTION = 0.88;
-const MAX_SPEED = 9;
-const RESTITUTION = 0.8;
-const TURN_SPEED = 3.4;
-const PLATE_RADIUS = WORLD_HALF;
-const GRAVITY = 24;
-const FALL_ELIMINATION_Y = -2;
-const SPAWN_DISTANCE = 6;
-const PLATE_SURFACE_Y = PLAYER_RADIUS;
-const PLATE_BOUNDARY_RADIUS = PLATE_RADIUS - PLAYER_RADIUS;
+const {
+  TICK_RATE,
+  TICK_MS,
+  MAX_PLAYERS_PER_ROOM,
+  FALL_ELIMINATION_Y,
+  PLATE_SURFACE_Y,
+  SOLO_CPU_DIFFICULTY,
+  SOLO_CPU_ID,
+} = require("./constants");
+const {
+  clamp,
+  sanitizeName,
+  makePlayer,
+  makeCPUball,
+  makeRoom,
+  placePlayerAtSpawnSlot,
+  placePlayersForRound,
+  resetPlayerForRound,
+  stopPlayerHorizontalMovement,
+  serializePlayers,
+} = require("./player-utils");
+const {
+  resolveBallCollision,
+  applyFalling,
+  isPlayerOnPlate,
+  applyMovementInput,
+  capHorizontalSpeed,
+  applyHorizontalFriction,
+  advanceHorizontalPosition,
+} = require("./physics-utils");
 
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
 
-function randomRoomId() {
-  return `room_${Math.random().toString(36).slice(2, 8)}`;
-}
 
-function sanitizeName(name) {
-  return (name || "Player").trim() || "Player";
-}
+function normalizeAngle(angle) {
+  let normalized = angle;
 
-function makePlayer(id, name) {
-  return {
-    id,
-    name,
-    position: { x: 0, y: PLAYER_RADIUS, z: 0 },
-    velocity: { x: 0, z: 0 },
-    input: { x: 0, z: 0 },
-    heading: 0,
-    fallVelocityY: 0,
-    eliminated: false,
-    roundResult: null,
-  };
-}
-
-function makeRoom(password) {
-  return {
-    id: randomRoomId(),
-    password,
-    players: new Map(),
-    interval: null,
-    roundInProgress: false,
-  };
-}
-
-function resolveBallCollision(a, b) {
-  if (Math.abs(a.position.y - b.position.y) > PLAYER_RADIUS * 1.5) {
-    return;
+  while (normalized > Math.PI) {
+    normalized -= Math.PI * 2;
   }
 
-  const dx = b.position.x - a.position.x;
-  const dz = b.position.z - a.position.z;
-  const dist = Math.sqrt(dx * dx + dz * dz);
-  const minDist = PLAYER_RADIUS * 2;
-
-  if (dist >= minDist || dist < 0.0001) {
-    return;
+  while (normalized < -Math.PI) {
+    normalized += Math.PI * 2;
   }
 
-  const nx = dx / dist;
-  const nz = dz / dist;
-
-  const rvx = b.velocity.x - a.velocity.x;
-  const rvz = b.velocity.z - a.velocity.z;
-  const velAlongNormal = rvx * nx + rvz * nz;
-
-  if (velAlongNormal > 0) {
-    return;
-  }
-
-  const impulse =
-    (-(1 + RESTITUTION) * velAlongNormal) / (1 / PLAYER_MASS + 1 / PLAYER_MASS);
-
-  a.velocity.x -= (impulse / PLAYER_MASS) * nx;
-  a.velocity.z -= (impulse / PLAYER_MASS) * nz;
-  b.velocity.x += (impulse / PLAYER_MASS) * nx;
-  b.velocity.z += (impulse / PLAYER_MASS) * nz;
-
-  const overlap = (minDist - dist) / 2;
-  a.position.x -= overlap * nx;
-  a.position.z -= overlap * nz;
-  b.position.x += overlap * nx;
-  b.position.z += overlap * nz;
-}
-
-function placePlayerAtSpawnSlot(player, slotIndex) {
-  const isNorthSide = slotIndex % 2 === 0;
-
-  player.position = {
-    x: 0,
-    y: PLATE_SURFACE_Y,
-    z: isNorthSide ? SPAWN_DISTANCE : -SPAWN_DISTANCE,
-  };
-  player.heading = isNorthSide ? 0 : Math.PI;
-}
-
-function placePlayersForRound(room) {
-  const players = [...room.players.values()];
-
-  players.forEach((player, index) => {
-    placePlayerAtSpawnSlot(player, index);
-  });
-}
-
-function serializePlayers(playersMap) {
-  return [...playersMap.values()].map((player) => ({
-    id: player.id,
-    name: player.name,
-    position: player.position,
-    velocity: player.velocity,
-    heading: player.heading,
-    eliminated: player.eliminated,
-  }));
+  return normalized;
 }
 
 function createRoomService(io) {
   const rooms = new Map();
 
-  function resetPlayerForRound(player) {
-    player.velocity.x = 0;
-    player.velocity.z = 0;
-    player.input.x = 0;
-    player.input.z = 0;
-    player.fallVelocityY = 0;
-    player.position.y = PLATE_SURFACE_Y;
-    player.eliminated = false;
-    player.roundResult = null;
+  function normalizeSoloDifficulty(difficulty) {
+    if (Object.hasOwn(SOLO_CPU_DIFFICULTY, difficulty)) {
+      return difficulty;
+    }
+
+    return "medium";
   }
 
-  function stopPlayerHorizontalMovement(player) {
-    player.input.x = 0;
-    player.input.z = 0;
-    player.velocity.x = 0;
-    player.velocity.z = 0;
+  function makeSoloOpponent(room) {
+    const label = room.soloDifficulty === "dummy" ? "Dummy" : `CPU (${room.soloDifficulty})`;
+    const cpu = makeCPUball(SOLO_CPU_ID, label);
+    placePlayerAtSpawnSlot(cpu, 1);
+    return cpu;
   }
 
-  function applyFalling(player, dt) {
-    player.fallVelocityY -= GRAVITY * dt;
-    player.position.y += player.fallVelocityY * dt;
+  function getSoloDifficultyConfig(difficulty) {
+    return SOLO_CPU_DIFFICULTY[difficulty] || SOLO_CPU_DIFFICULTY.medium;
   }
 
-  function isPlayerOnPlate(player) {
-    const distanceFromCenter = Math.hypot(player.position.x, player.position.z);
-    return distanceFromCenter <= PLATE_BOUNDARY_RADIUS;
-  }
-
-  function applyMovementInput(player, dt) {
-    player.heading += player.input.x * TURN_SPEED * dt;
-
-    const throttle = -player.input.z;
-    const forwardX = Math.sin(player.heading);
-    const forwardZ = -Math.cos(player.heading);
-
-    player.velocity.x += forwardX * throttle * ACCEL * dt;
-    player.velocity.z += forwardZ * throttle * ACCEL * dt;
-  }
-
-  function capHorizontalSpeed(player) {
-    const speed = Math.hypot(player.velocity.x, player.velocity.z);
-    if (speed <= MAX_SPEED) {
+  function updateSoloCpuInput(room) {
+    if (!room.solo || !room.roundInProgress) {
       return;
     }
 
-    const scale = MAX_SPEED / speed;
-    player.velocity.x *= scale;
-    player.velocity.z *= scale;
+    const cpu = room.players.get(SOLO_CPU_ID);
+    if (!cpu || cpu.eliminated) {
+      return;
+    }
+
+    const target = [...room.players.values()].find((player) => !player.isCpu && !player.eliminated);
+    if (!target) {
+      cpu.input.x = 0;
+      cpu.input.z = 0;
+      return;
+    }
+
+    const config = getSoloDifficultyConfig(room.soloDifficulty);
+    const targetX = target.position.x + target.velocity.x * config.predictionTime;
+    const targetZ = target.position.z + target.velocity.z * config.predictionTime;
+    const dx = targetX - cpu.position.x;
+    const dz = targetZ - cpu.position.z;
+    const distance = Math.hypot(dx, dz);
+
+    const desiredHeading = Math.atan2(dx, -dz);
+    const headingDelta = normalizeAngle(desiredHeading - cpu.heading);
+    const headingAbs = Math.abs(headingDelta);
+    const baseTurn = clamp((headingDelta / (Math.PI / 3)) * config.turnGain, -1, 1);
+    const wobble = Math.sin((room.tickCount || 0) * config.wobbleFreq) * config.wobbleAmp;
+    cpu.input.x = clamp(baseTurn + wobble, -1, 1);
+
+    const alignment = Math.max(0, Math.cos(headingAbs));
+    let throttle = config.maxThrottle * (0.5 + Math.min(distance / 6, 0.5));
+
+    if (headingAbs > 0.95) {
+      throttle = config.pivotThrottle;
+    }
+
+    if (distance < config.brakeDistance) {
+      throttle = config.brakeThrottle;
+    }
+
+    if (alignment > 0.92 && distance > 1.6) {
+      throttle = config.maxThrottle;
+    }
+
+    throttle += alignment * config.chargeBoost;
+    throttle = clamp(throttle, 0.16, config.maxThrottle);
+    cpu.input.z = -throttle;
   }
 
-  function applyHorizontalFriction(player) {
-    player.velocity.x *= FRICTION;
-    player.velocity.z *= FRICTION;
+  function removeRoom(roomId) {
+    const room = rooms.get(roomId);
+    if (!room) {
+      return;
+    }
+
+    if (room.interval) {
+      clearInterval(room.interval);
+    }
+
+    rooms.delete(roomId);
   }
 
-  function advanceHorizontalPosition(player, dt) {
-    player.position.x += player.velocity.x * dt;
-    player.position.z += player.velocity.z * dt;
+  function broadcastRoomState(room) {
+    io.to(room.id).emit("roomState", {
+      roomId: room.id,
+      players: serializePlayers(room.players),
+    });
   }
 
   function notifyWaitingForOpponent(room) {
@@ -195,28 +148,24 @@ function createRoomService(io) {
     });
   }
 
-  function emitLoss(player) {
+  function emitRoundResult(player, result, message) {
     if (player.roundResult) {
       return;
     }
 
-    player.roundResult = "lost";
+    player.roundResult = result;
     io.to(player.id).emit("roundResult", {
-      result: "lost",
-      message: "You lose!",
+      result,
+      message,
     });
   }
 
-  function emitWin(player) {
-    if (player.roundResult) {
-      return;
-    }
+  function emitLoss(player) {
+    emitRoundResult(player, "lost", "You lose!");
+  }
 
-    player.roundResult = "won";
-    io.to(player.id).emit("roundResult", {
-      result: "won",
-      message: "You won!",
-    });
+  function emitWin(player) {
+    emitRoundResult(player, "won", "You won!");
   }
 
   function endRoundIfNeeded(room) {
@@ -254,30 +203,47 @@ function createRoomService(io) {
     player.eliminated = true;
     stopPlayerHorizontalMovement(player);
 
-    emitLoss(player);
+    if (!player.isCpu) {
+      emitLoss(player);
+    }
     io.to(room.id).emit("systemMessage", {
       message: `${player.name} fell off the plate!`,
     });
   }
 
-  function removeRoom(roomId) {
-    const room = rooms.get(roomId);
-    if (!room) {
+  function tickPlayer(room, player, dt) {
+    if (player.eliminated) {
+      applyFalling(player, dt);
       return;
     }
 
-    if (room.interval) {
-      clearInterval(room.interval);
+    applyMovementInput(player, dt);
+    capHorizontalSpeed(player);
+    applyHorizontalFriction(player);
+    advanceHorizontalPosition(player, dt);
+
+    if (!isPlayerOnPlate(player)) {
+      stopPlayerHorizontalMovement(player);
+      applyFalling(player, dt);
+
+      if (player.position.y <= FALL_ELIMINATION_Y) {
+        eliminatePlayer(room, player);
+      }
+      return;
     }
 
-    rooms.delete(roomId);
+    player.position.y = PLATE_SURFACE_Y;
+    player.fallVelocityY = 0;
   }
 
-  function broadcastRoomState(room) {
-    io.to(room.id).emit("roomState", {
-      roomId: room.id,
-      players: serializePlayers(room.players),
-    });
+  function resolveActiveCollisions(players) {
+    const activePlayers = players.filter((player) => !player.eliminated);
+
+    for (let i = 0; i < activePlayers.length; i += 1) {
+      for (let j = i + 1; j < activePlayers.length; j += 1) {
+        resolveBallCollision(activePlayers[i], activePlayers[j]);
+      }
+    }
   }
 
   function tickRoom(room) {
@@ -287,42 +253,16 @@ function createRoomService(io) {
 
     const players = [...room.players.values()];
     const dt = TICK_MS / 1000;
+    room.tickCount = (room.tickCount || 0) + 1;
+
+    updateSoloCpuInput(room);
 
     for (const player of players) {
-      if (player.eliminated) {
-        applyFalling(player, dt);
-        continue;
-      }
-
-      applyMovementInput(player, dt);
-      capHorizontalSpeed(player);
-      applyHorizontalFriction(player);
-      advanceHorizontalPosition(player, dt);
-
-      if (!isPlayerOnPlate(player)) {
-        stopPlayerHorizontalMovement(player);
-        applyFalling(player, dt);
-
-        if (player.position.y <= FALL_ELIMINATION_Y) {
-          eliminatePlayer(room, player);
-        }
-
-        continue;
-      }
-
-      player.position.y = PLATE_SURFACE_Y;
-      player.fallVelocityY = 0;
+      tickPlayer(room, player, dt);
     }
 
-    const activePlayers = players.filter((player) => !player.eliminated);
-    for (let i = 0; i < activePlayers.length; i += 1) {
-      for (let j = i + 1; j < activePlayers.length; j += 1) {
-        resolveBallCollision(activePlayers[i], activePlayers[j]);
-      }
-    }
-
+    resolveActiveCollisions(players);
     endRoundIfNeeded(room);
-
     broadcastRoomState(room);
   }
 
@@ -395,6 +335,32 @@ function createRoomService(io) {
     return true;
   }
 
+  function startSoloRound(room, difficulty = "medium") {
+    if (room.roundInProgress) {
+      return false;
+    }
+
+    room.solo = true;
+    room.soloDifficulty = normalizeSoloDifficulty(difficulty);
+    room.tickCount = 0;
+
+    for (const player of room.players.values()) {
+      resetPlayerForRound(player);
+      placePlayerAtSpawnSlot(player, 0);
+    }
+
+    const soloOpponent = makeSoloOpponent(room);
+    room.players.set(soloOpponent.id, soloOpponent);
+
+    room.roundInProgress = true;
+    io.to(room.id).emit("roundStarted", { roomId: room.id });
+    io.to(room.id).emit("systemMessage", {
+      message: `Solo — opponent: ${room.soloDifficulty}.`,
+    });
+    broadcastRoomState(room);
+    return true;
+  }
+
   function removePlayer(roomId, socketId) {
     const room = rooms.get(roomId);
     if (!room) {
@@ -403,6 +369,15 @@ function createRoomService(io) {
 
     const player = room.players.get(socketId) || null;
     room.players.delete(socketId);
+
+    if (room.solo) {
+      const hasHumanPlayer = [...room.players.values()].some((currentPlayer) => !currentPlayer.isCpu);
+
+      if (!hasHumanPlayer) {
+        removeRoom(roomId);
+        return { room: null, player, removedRoom: true };
+      }
+    }
 
     if (room.players.size === 0) {
       removeRoom(roomId);
@@ -432,6 +407,7 @@ function createRoomService(io) {
     addPlayerToRoom,
     setPlayerInput,
     tryStartRound,
+    startSoloRound,
     removePlayer,
     isRoomPasswordValid,
     isRoomFull,
