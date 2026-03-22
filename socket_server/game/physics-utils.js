@@ -2,6 +2,7 @@ const {
   PLAYER_RADIUS,
   PLAYER_MASS,
   RESTITUTION,
+  CHARGE_BONUS,
   TURN_SPEED,
   ACCEL,
   MAX_SPEED,
@@ -35,8 +36,18 @@ function resolveBallCollision(a, b) {
     return;
   }
 
+  // Front-hit bonus: if a player's nose is pointing toward the target they
+  // deliver a harder hit (max +CHARGE_BONUS at perfectly head-on angle).
+  const aFwdX = Math.sin(a.heading);
+  const aFwdZ = -Math.cos(a.heading);
+  const bFwdX = Math.sin(b.heading);
+  const bFwdZ = -Math.cos(b.heading);
+  const aFrontHit = Math.max(0, aFwdX * nx + aFwdZ * nz);   // A charging into B
+  const bFrontHit = Math.max(0, -(bFwdX * nx + bFwdZ * nz)); // B charging into A
+  const chargeFactor = 1 + CHARGE_BONUS * Math.max(aFrontHit, bFrontHit);
+
   const impulse =
-    (-(1 + RESTITUTION) * velAlongNormal) / (1 / PLAYER_MASS + 1 / PLAYER_MASS);
+    (-(1 + RESTITUTION) * velAlongNormal * chargeFactor) / (1 / PLAYER_MASS + 1 / PLAYER_MASS);
 
   a.velocity.x -= (impulse / PLAYER_MASS) * nx;
   a.velocity.z -= (impulse / PLAYER_MASS) * nz;

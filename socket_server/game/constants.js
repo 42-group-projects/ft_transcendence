@@ -4,13 +4,14 @@ const WORLD_HALF = 11;
 const PLAYER_RADIUS = 0.6;
 const PLAYER_MASS = 1;
 const MAX_PLAYERS_PER_ROOM = 8;
-const ACCEL = 22;
-const FRICTION = 0.88;
-const MAX_SPEED = 9;
-const RESTITUTION = 0.8;
+const ACCEL = 70;
+const FRICTION = .9;
+const MAX_SPEED = 20;
+const RESTITUTION = 1.5;   // perfectly elastic — snappy bounces
+const CHARGE_BONUS = 1.8;  // up to +80% impulse for a direct front-on hit
 const TURN_SPEED = 3.4;
 const PLATE_RADIUS = WORLD_HALF;
-const GRAVITY = 24;
+const GRAVITY = 12;
 const FALL_ELIMINATION_Y = -2;
 const SPAWN_DISTANCE = 6;
 const PLATE_SURFACE_Y = PLAYER_RADIUS;
@@ -26,6 +27,7 @@ module.exports = {
   FRICTION,
   MAX_SPEED,
   RESTITUTION,
+  CHARGE_BONUS,
   TURN_SPEED,
   GRAVITY,
   FALL_ELIMINATION_Y,

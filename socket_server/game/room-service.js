@@ -9,6 +9,7 @@ const {
   clamp,
   sanitizeName,
   makePlayer,
+  makeDummyBall,
   makeRoom,
   placePlayerAtSpawnSlot,
   placePlayersForRound,
@@ -80,7 +81,7 @@ function createRoomService(io) {
   }
 
   function endRoundIfNeeded(room) {
-    if (!room.roundInProgress) {
+    if (!room.roundInProgress || room.solo) {
       return;
     }
 
@@ -136,7 +137,18 @@ function createRoomService(io) {
       applyFalling(player, dt);
 
       if (player.position.y <= FALL_ELIMINATION_Y) {
-        eliminatePlayer(room, player);
+        if (room.solo) {
+          resetPlayerForRound(player);
+          if (player.id === "__dummy_ball__") {
+            player.position.x = 0;
+            player.position.z = 0;
+            player.position.y = PLATE_SURFACE_Y;
+          } else {
+            placePlayerAtSpawnSlot(player, 0);
+          }
+        } else {
+          eliminatePlayer(room, player);
+        }
       }
       return;
     }
@@ -241,6 +253,31 @@ function createRoomService(io) {
     return true;
   }
 
+  function startSoloRound(room) {
+    if (room.roundInProgress) {
+      return false;
+    }
+
+    room.solo = true;
+
+    // Respawn the real player
+    for (const player of room.players.values()) {
+      resetPlayerForRound(player);
+      placePlayerAtSpawnSlot(player, 0);
+    }
+
+    // Add a stationary dummy ball at the centre for collision testing
+    const ball = makeDummyBall();
+    room.players.set(ball.id, ball);
+    room.roundInProgress = true;
+    io.to(room.id).emit("roundStarted", { roomId: room.id });
+    io.to(room.id).emit("systemMessage", {
+      message: "Solo dev mode — move around freely!",
+    });
+    broadcastRoomState(room);
+    return true;
+  }
+
   function removePlayer(roomId, socketId) {
     const room = rooms.get(roomId);
     if (!room) {
@@ -278,6 +315,7 @@ function createRoomService(io) {
     addPlayerToRoom,
     setPlayerInput,
     tryStartRound,
+    startSoloRound,
     removePlayer,
     isRoomPasswordValid,
     isRoomFull,

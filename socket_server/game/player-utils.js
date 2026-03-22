@@ -30,6 +30,20 @@ function makePlayer(id, name) {
   };
 }
 
+function makeDummyBall() {
+  return {
+    id: "__dummy_ball__",
+    name: "Ball",
+    position: { x: 0, y: PLATE_SURFACE_Y, z: 0 },
+    velocity: { x: 0, z: 0 },
+    input: { x: 0, z: 0 },
+    heading: 0,
+    fallVelocityY: 0,
+    eliminated: false,
+    roundResult: null,
+  };
+}
+
 function makeRoom(password) {
   return {
     id: randomRoomId(),
@@ -37,6 +51,7 @@ function makeRoom(password) {
     players: new Map(),
     interval: null,
     roundInProgress: false,
+    solo: false,
   };
 }
 
@@ -91,6 +106,7 @@ module.exports = {
   clamp,
   sanitizeName,
   makePlayer,
+  makeDummyBall,
   makeRoom,
   placePlayerAtSpawnSlot,
   placePlayersForRound,

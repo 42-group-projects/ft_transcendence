@@ -5,10 +5,6 @@ export default function Home() {
     <main className="min-h-screen bg-neutral-950 text-neutral-100">
       <section className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-6 px-6 text-center">
         <h1 className="text-5xl font-bold tracking-tight">SumoVerse</h1>
-        <p className="max-w-xl text-neutral-300">
-          Welcome to SumoVerse. This is a temporary landing page while we build the
-          full experience.
-        </p>
         <Link
           href="game/multiplayer"
           className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
@@ -19,7 +15,13 @@ export default function Home() {
           href="game/solo"
           className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
         >
-          Solo Mode
+          Solo
+        </Link>
+        <Link
+          href="game/solo-dev"
+          className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
+        >
+          Solo Dev Mode
         </Link>
       </section>
     </main>

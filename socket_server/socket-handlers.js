@@ -66,6 +66,23 @@ function registerSocketHandlers(io, roomService) {
       }
     });
 
+    socket.on("soloStart", ({ name }) => {
+      if (socket.data.roomId) {
+        return;
+      }
+
+      const room = roomService.createRoom("__solo__");
+      const player = roomService.addPlayerToRoom(room, socket.id, name);
+
+      socket.join(room.id);
+      socket.data.roomId = room.id;
+
+      socket.emit("joinedRoom", { roomId: room.id, playerId: socket.id });
+      socket.emit("systemMessage", { message: `Solo room created: ${room.id}` });
+
+      roomService.startSoloRound(room);
+    });
+
     socket.on("moveInput", ({ x, z }) => {
       const roomId = socket.data.roomId;
       if (!roomId) {
