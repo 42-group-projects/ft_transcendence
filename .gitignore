@@ -7,3 +7,9 @@ node_modules/
 # Environment files
 .env
 
+# Lock files (managed by pnpm workspace)
+frontend/package-lock.json
+
+# TypeScript build info
+*.tsbuildinfo
+
