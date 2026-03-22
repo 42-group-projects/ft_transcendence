@@ -8,6 +8,7 @@ const {
   MAX_SPEED,
   FRICTION,
   PLATE_BOUNDARY_RADIUS,
+  PLATE_EDGE_TOLERANCE,
   GRAVITY,
 } = require("./constants");
 
@@ -68,7 +69,7 @@ function applyFalling(player, dt) {
 
 function isPlayerOnPlate(player) {
   const distanceFromCenter = Math.hypot(player.position.x, player.position.z);
-  return distanceFromCenter <= PLATE_BOUNDARY_RADIUS;
+  return distanceFromCenter <= PLATE_BOUNDARY_RADIUS + PLATE_EDGE_TOLERANCE;
 }
 
 function applyMovementInput(player, dt) {

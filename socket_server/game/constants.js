@@ -16,6 +16,45 @@ const FALL_ELIMINATION_Y = -2;
 const SPAWN_DISTANCE = 6;
 const PLATE_SURFACE_Y = PLAYER_RADIUS;
 const PLATE_BOUNDARY_RADIUS = PLATE_RADIUS - PLAYER_RADIUS;
+const PLATE_EDGE_TOLERANCE = 1.1;
+
+const SOLO_CPU_ID = "__solo_cpu__";
+const SOLO_DUMMY_ID = "__dummy_ball__";
+const SOLO_CPU_DIFFICULTY = {
+  easy: {
+    turnGain: 0.65,
+    maxThrottle: 0.2,
+    chargeBoost: 0.08,
+    predictionTime: 0,
+    wobbleAmp: 0.08,
+    wobbleFreq: 0.1,
+    brakeDistance: 3.6,
+    brakeThrottle: 0.28,
+    pivotThrottle: 0.16,
+  },
+  medium: {
+    turnGain: 0.95,
+    maxThrottle: 0.72,
+    chargeBoost: 0.22,
+    predictionTime: 0.15,
+    wobbleAmp: 0.03,
+    wobbleFreq: 0.12,
+    brakeDistance: 2.5,
+    brakeThrottle: 0.45,
+    pivotThrottle: 0.2,
+  },
+  hard: {
+    turnGain: 1.15,
+    maxThrottle: 0.95,
+    chargeBoost: 0.4,
+    predictionTime: 0.3,
+    wobbleAmp: 0,
+    wobbleFreq: 0.14,
+    brakeDistance: 1.8,
+    brakeThrottle: 0.6,
+    pivotThrottle: 0.24,
+  },
+};
 
 module.exports = {
   TICK_RATE,
@@ -34,4 +73,8 @@ module.exports = {
   SPAWN_DISTANCE,
   PLATE_SURFACE_Y,
   PLATE_BOUNDARY_RADIUS,
+  PLATE_EDGE_TOLERANCE,
+  SOLO_DUMMY_ID,
+  SOLO_CPU_ID,
+  SOLO_CPU_DIFFICULTY,
 };

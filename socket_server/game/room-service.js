@@ -4,6 +4,9 @@ const {
   MAX_PLAYERS_PER_ROOM,
   FALL_ELIMINATION_Y,
   PLATE_SURFACE_Y,
+  SOLO_CPU_DIFFICULTY,
+  SOLO_CPU_ID,
+  SOLO_DUMMY_ID
 } = require("./constants");
 const {
   clamp,
@@ -28,43 +31,7 @@ const {
   advanceHorizontalPosition,
 } = require("./physics-utils");
 
-const SOLO_CPU_ID = "__solo_cpu__";
-const SOLO_DUMMY_ID = "__dummy_ball__";
-const SOLO_CPU_DIFFICULTY = {
-  easy: {
-    turnGain: 0.65,
-    maxThrottle: 0.2,
-    chargeBoost: 0.08,
-    predictionTime: 0,
-    wobbleAmp: 0.08,
-    wobbleFreq: 0.1,
-    brakeDistance: 3.6,
-    brakeThrottle: 0.28,
-    pivotThrottle: 0.16,
-  },
-  medium: {
-    turnGain: 0.95,
-    maxThrottle: 0.72,
-    chargeBoost: 0.22,
-    predictionTime: 0.15,
-    wobbleAmp: 0.03,
-    wobbleFreq: 0.12,
-    brakeDistance: 2.5,
-    brakeThrottle: 0.45,
-    pivotThrottle: 0.2,
-  },
-  hard: {
-    turnGain: 1.15,
-    maxThrottle: 0.95,
-    chargeBoost: 0.4,
-    predictionTime: 0.3,
-    wobbleAmp: 0,
-    wobbleFreq: 0.14,
-    brakeDistance: 1.8,
-    brakeThrottle: 0.6,
-    pivotThrottle: 0.24,
-  },
-};
+
 
 function normalizeAngle(angle) {
   let normalized = angle;
@@ -82,6 +49,44 @@ function normalizeAngle(angle) {
 
 function createRoomService(io) {
   const rooms = new Map();
+
+  function normalizeSoloDifficulty(difficulty) {
+    if (SOLO_CPU_DIFFICULTY[difficulty]) {
+      return difficulty;
+    }
+
+    return "medium";
+  }
+
+  function normalizeSoloOpponentType(opponentType) {
+    if (opponentType === "dummy") {
+      return "dummy";
+    }
+
+    return "cpu";
+  }
+
+  function makeSoloOpponent(room) {
+    if (room.soloOpponentType === "dummy") {
+      const dummy = makeDummyBall();
+      dummy.id = SOLO_DUMMY_ID;
+      dummy.isCpu = true;
+      placePlayerAtSpawnSlot(dummy, 1);
+      return dummy;
+    }
+
+    const cpu = makeCPUball(SOLO_CPU_ID, `CPU (${room.soloDifficulty})`);
+    placePlayerAtSpawnSlot(cpu, 1);
+    return cpu;
+  }
+
+  function getSoloStartMessage(room) {
+    if (room.soloOpponentType === "dummy") {
+      return "Solo dev mode — dummy ball spawned.";
+    }
+
+    return `Solo dev mode — CPU set to ${room.soloDifficulty}.`;
+  }
 
   function getSoloDifficultyConfig(difficulty) {
     return SOLO_CPU_DIFFICULTY[difficulty] || SOLO_CPU_DIFFICULTY.medium;
@@ -361,34 +366,22 @@ function createRoomService(io) {
     }
 
     room.solo = true;
-    room.soloDifficulty = ["easy", "medium", "hard"].includes(difficulty) ? difficulty : "medium";
+    room.soloDifficulty = normalizeSoloDifficulty(difficulty);
     room.tickCount = 0;
-    room.soloOpponentType = opponentType === "dummy" ? "dummy" : "cpu";
+    room.soloOpponentType = normalizeSoloOpponentType(opponentType);
 
     for (const player of room.players.values()) {
       resetPlayerForRound(player);
       placePlayerAtSpawnSlot(player, 0);
     }
 
-    if (room.soloOpponentType === "dummy") {
-      const dummy = makeDummyBall();
-      dummy.id = SOLO_DUMMY_ID;
-      dummy.isCpu = true;
-      placePlayerAtSpawnSlot(dummy, 1);
-      room.players.set(dummy.id, dummy);
-    } else {
-      const cpu = makeCPUball(SOLO_CPU_ID, `CPU (${room.soloDifficulty})`);
-      placePlayerAtSpawnSlot(cpu, 1);
-      room.players.set(cpu.id, cpu);
-    }
+    const soloOpponent = makeSoloOpponent(room);
+    room.players.set(soloOpponent.id, soloOpponent);
 
     room.roundInProgress = true;
     io.to(room.id).emit("roundStarted", { roomId: room.id });
     io.to(room.id).emit("systemMessage", {
-      message:
-        room.soloOpponentType === "dummy"
-          ? "Solo dev mode — dummy ball spawned."
-          : `Solo dev mode — CPU set to ${room.soloDifficulty}.`,
+      message: getSoloStartMessage(room),
     });
     broadcastRoomState(room);
     return true;
