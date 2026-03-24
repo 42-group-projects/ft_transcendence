@@ -1,5 +1,14 @@
+const { PLAYER_RADIUS, SPAWN_DISTANCE, WORLD_HALF } = require("./game/constants");
+
 function registerSocketHandlers(io, roomService) {
   io.on("connection", (socket) => {
+    // Send game constants to the client
+    socket.emit("gameConstants", {
+      PLAYER_RADIUS,
+      SPAWN_DISTANCE,
+      WORLD_HALF,
+    });
+
     socket.on("createRoom", ({ password, name }) => {
       const trimmedPassword = (password || "").trim();
       if (!trimmedPassword) {

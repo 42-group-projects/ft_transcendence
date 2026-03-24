@@ -4,14 +4,12 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
 import {
-  PLAYER_RADIUS,
-  SPAWN_DISTANCE,
+  PLAYER_RADIUS as IMPORTED_PLAYER_RADIUS,
+  SPAWN_DISTANCE as IMPORTED_SPAWN_DISTANCE,
   SPAWN_LINE_OFFSET,
-  WORLD_SIZE,
 } from "../constants";
 import type { PlayerState } from "../types";
 
-const PLATE_RADIUS = WORLD_SIZE / 2;
 const PLATE_THICKNESS = 0.5;
 const SPAWN_LINE_LENGTH = 3.6;
 const SPAWN_LINE_THICKNESS = 0.12;
@@ -55,9 +53,20 @@ function FollowCamera({ target, heading }: FollowCameraProps) {
 type WorldSceneProps = {
   players: PlayerState[];
   localPlayerId: string | null;
+  gameConstants?: {
+    PLAYER_RADIUS: number;
+    SPAWN_DISTANCE: number;
+    WORLD_HALF: number;
+  } | null;
 };
 
-export function WorldScene({ players, localPlayerId }: WorldSceneProps) {
+export function WorldScene({ players, localPlayerId, gameConstants }: WorldSceneProps) {
+  // Use passed constants or fallback to imports (for backwards compatibility)
+  const PLAYER_RADIUS = gameConstants?.PLAYER_RADIUS ?? IMPORTED_PLAYER_RADIUS;
+  const SPAWN_DISTANCE = gameConstants?.SPAWN_DISTANCE ?? IMPORTED_SPAWN_DISTANCE;
+  const WORLD_SIZE = gameConstants?.WORLD_HALF ? gameConstants.WORLD_HALF * 2 : 22;
+  const PLATE_RADIUS = WORLD_SIZE / 2;
+
   const localPlayer = useMemo(
     () => players.find((player) => player.id === localPlayerId) || null,
     [players, localPlayerId]

@@ -30,6 +30,7 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [systemMessage, setSystemMessage] = useState<string | null>(null);
   const [roundResultMessage, setRoundResultMessage] = useState<string | null>(null);
+  const [gameConstants, setGameConstants] = useState<{ PLAYER_RADIUS: number; SPAWN_DISTANCE: number; WORLD_HALF: number } | null>(null);
 
   useEffect(() => {
     const socket = io(socketUrl, {
@@ -41,6 +42,10 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
     socket.on("connect", () => {
       setConnected(true);
       setErrorMessage(null);
+    });
+
+    socket.on("gameConstants", ({ PLAYER_RADIUS, SPAWN_DISTANCE, WORLD_HALF }: { PLAYER_RADIUS: number; SPAWN_DISTANCE: number; WORLD_HALF: number }) => {
+      setGameConstants({ PLAYER_RADIUS, SPAWN_DISTANCE, WORLD_HALF });
     });
 
     socket.on("disconnect", () => {
@@ -156,6 +161,7 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
     errorMessage,
     systemMessage,
     roundResultMessage,
+    gameConstants,
     setErrorMessage,
     setSystemMessage,
     createRoom,

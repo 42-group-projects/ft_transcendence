@@ -21,6 +21,7 @@ export default function SoloPage() {
 		errorMessage,
 		systemMessage,
 		roundResultMessage,
+		gameConstants,
 		leaveRoom,
 	} = useGameSession();
 
@@ -87,7 +88,7 @@ export default function SoloPage() {
 
 				<div className="h-[70vh] overflow-hidden rounded-lg border border-neutral-700">
 					<Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
-						<WorldScene players={players} localPlayerId={localPlayerId} />
+						<WorldScene players={players} localPlayerId={localPlayerId} gameConstants={gameConstants} />
 					</Canvas>
 				</div>
 

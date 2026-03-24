@@ -44,7 +44,7 @@ const SOLO_CPU_DIFFICULTY = {
   },
   medium: {
     turnGain: 0.95,
-    maxThrottle: 0.72,
+    maxThrottle: 0.6,
     chargeBoost: 0.22,
     predictionTime: 0.15,
     wobbleAmp: 0.03,
@@ -69,6 +69,7 @@ const SOLO_CPU_DIFFICULTY = {
 module.exports = {
   TICK_RATE,
   TICK_MS,
+  WORLD_HALF,
   PLAYER_RADIUS,
   PLAYER_MASS,
   MAX_PLAYERS_PER_ROOM,
