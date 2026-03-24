@@ -1,9 +1,20 @@
 # Dependencies
-node_modules/
+**/node_modules/
 
-# Next.js build output
-.next/
+# Lockfiles (using pnpm in this repo)
+package-lock.json
+
+# Build output / caches
+**/.next/
+**/dist/
+**/build/
+**/coverage/
+**/*.tsbuildinfo
 
 # Environment files
 .env
+
+# OS / editor
+.DS_Store
+Thumbs.db
 
