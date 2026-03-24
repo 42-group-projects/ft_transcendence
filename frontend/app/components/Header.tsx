@@ -16,7 +16,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function TopNavigation() {
+export function Header() {
   const pathname = usePathname();
 
   return (
