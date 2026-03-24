@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { FriendsSidebar } from "@/app/components/FriendsSidebar";
+
 const mockProfile = {
   displayName: "Player One",
   rankLabel: "Rookie Wrestler",
@@ -63,6 +65,8 @@ export default function LobbyPage() {
           <div className="absolute bottom-[20%] right-[18%] h-32 w-32 rounded-full border border-orange-400/20 bg-orange-400/10 blur-sm" />
           <div className="absolute left-[24%] top-[48%] h-px w-[18%] -rotate-12 bg-gradient-to-r from-blue-400/50 to-transparent" />
           <div className="absolute right-[25%] top-[40%] h-px w-[16%] rotate-[18deg] bg-gradient-to-r from-orange-400/50 to-transparent" />
+
+          <FriendsSidebar />
 
           <div className="relative z-10 flex h-full flex-col p-4 sm:p-6">
             <div className="flex flex-wrap gap-2 lg:gap-3">
