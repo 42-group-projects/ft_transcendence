@@ -55,8 +55,8 @@ export default function SoloPage() {
 							onChange={(event) => setDifficulty(event.target.value as SoloDifficulty)}
 							className="rounded border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-100 outline-none focus:border-neutral-500"
 						>	
-                            <option value="dummy">Dummy (no AI)</option>
-                            <option value="easy">Easy CPU</option>
+							<option value="dummy">Dummy (no AI)</option>
+							<option value="easy">Easy CPU</option>
 							<option value="medium">Medium CPU</option>
 							<option value="hard">Hard CPU</option>
 						</select>
