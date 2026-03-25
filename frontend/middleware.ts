@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const TOKEN_COOKIE_KEY = "access_token";
 
-const PUBLIC_PATHS = new Set(["/", "/login", "/signup"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/signup", "/terms", "/privacy"]);
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
