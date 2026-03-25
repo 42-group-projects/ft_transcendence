@@ -24,7 +24,7 @@ app.use(
 app.get("/health", (c) => c.json({ status: "ok", server: "mock-server" }));
 app.route("/auth", authRoutes);
 
-// ── JWT auth middleware (all routes below this line are protected) ──────────
+// ── JWT auth middleware (all /users routes are protected) ───────────────────
 app.use("/users/*", async (c, next) => {
   const authHeader = c.req.header("Authorization");
 
