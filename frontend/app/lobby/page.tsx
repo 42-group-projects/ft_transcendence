@@ -91,6 +91,7 @@ export default function LobbyPage() {
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight">{mockProfile.displayName}</h2>
                 <p className="mt-2 text-sm text-neutral-400">{mockProfile.rankLabel}</p>
 
+                {/* TODO: Connect this button to the future profile editor or avatar customization flow. */}
                 <Link
                   href="/profile"
                   className="mt-6 inline-flex rounded-lg border border-neutral-600 px-5 py-3 text-sm font-medium text-neutral-100 transition hover:bg-neutral-800"
@@ -98,7 +99,6 @@ export default function LobbyPage() {
                   Edit profile / avatar
                 </Link>
 
-                {/* TODO: Connect this button to the future profile editor or avatar customization flow. */}
               </div>
             </div>
           </div>

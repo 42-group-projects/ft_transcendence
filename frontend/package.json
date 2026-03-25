@@ -16,14 +16,14 @@
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "three": "^0.183.2"
+    "three": "0.181.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^20.19.37",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@types/three": "^0.183.1",
+    "@types/three": "0.181.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.1.6",
     "next-transpile-modules": "^10.0.1",

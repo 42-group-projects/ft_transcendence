@@ -84,6 +84,7 @@ export function FriendsSidebar() {
             <p className="mt-1 text-xs text-neutral-400">{onlineCount} online • {mockFriends.length} total</p>
           </div>
 
+          {/* TODO: Replace mockFriends with backend friend list and live status updates (WebSocket/presence API). */}
           <ul className="flex-1 space-y-2 overflow-y-auto px-3 pb-3">
             {mockFriends.map((friend) => (
               <li
@@ -103,8 +104,6 @@ export function FriendsSidebar() {
               </li>
             ))}
           </ul>
-
-          {/* TODO: Replace mockFriends with backend friend list and live status updates (WebSocket/presence API). */}
         </div>
       </div>
     </>

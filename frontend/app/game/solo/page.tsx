@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
+import * as THREE from "three";
 
 import { WorldScene } from "../components/WorldScene";
 import { useGameSession } from "../hooks/useGameSession";
@@ -87,7 +88,7 @@ export default function SoloPage() {
 				{roundResultMessage && <p className="text-sm font-medium text-yellow-400">{roundResultMessage}</p>}
 
 				<div className="h-[70vh] overflow-hidden rounded-lg border border-neutral-700">
-					<Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
+					<Canvas shadows={THREE.PCFShadowMap} camera={{ position: [0, 8, 10], fov: 55 }}>
 						<WorldScene players={players} localPlayerId={localPlayerId} gameConstants={gameConstants} />
 					</Canvas>
 				</div>

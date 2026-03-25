@@ -11,8 +11,9 @@ export default function SignupPage() {
   const [statusMessage, setStatusMessage] = useState("");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
 
+    // TODO: Replace this placeholder with the real signup API request.
+    event.preventDefault();
     if (password !== confirmPassword) {
       setStatusMessage("Passwords do not match.");
       return;
@@ -20,7 +21,6 @@ export default function SignupPage() {
 
     setStatusMessage("Signup is not connected yet.");
 
-    // TODO: Replace this placeholder with the real signup API request.
   };
 
   return (
