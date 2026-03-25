@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 
@@ -40,7 +41,15 @@ export default function GamePage() {
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100">
       <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4">
-        <h1 className="text-2xl font-semibold">Multiplayer Prototype</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold">Multiplayer Prototype</h1>
+          <Link
+            href="/lobby"
+            className="rounded-md border border-neutral-700 px-3 py-1.5 text-xs font-medium text-neutral-200 transition hover:bg-neutral-900"
+          >
+            Back to Lobby
+          </Link>
+        </div>
 
         <GameLobbyControls
           name={name}

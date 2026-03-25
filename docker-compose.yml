@@ -42,7 +42,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
       - PORT=4000
-      - JWT_SECRET=${JWT_SECRET:-mock-super-secret-dev-key}
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - ./mock_server:/app
       - /app/node_modules
