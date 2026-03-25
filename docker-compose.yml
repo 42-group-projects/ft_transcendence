@@ -15,7 +15,7 @@ services:
       - private-network
     restart: unless-stopped
 
-  # Socket.io game server
+  # Socket.io
   socket-server:
     build:
       context: ./socket_server
