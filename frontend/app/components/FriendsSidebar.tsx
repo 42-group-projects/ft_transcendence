@@ -46,12 +46,6 @@ export function FriendsSidebar() {
       const newX = dragStateRef.current.startOffsetX - deltaX;
       const newY = dragStateRef.current.startOffsetY + deltaY;
 
-      // Clamp so panel never leaves the map container.
-      // The panel starts at right:8px top:16px, transform is translate(-x, y).
-      // left edge = containerW - panelW - 8 - x  ≥ 8  →  x ≤ containerW - panelW - 16
-      // right edge stays in  →  x ≥ 0
-      // top edge = 16 + y  ≥ 8  →  y ≥ -8
-      // bottom edge = 16 + y + panelH  ≤ containerH - 8  →  y ≤ containerH - panelH - 24
       const panel = panelRef.current;
       const container = panel?.parentElement?.parentElement;
       if (panel && container) {
