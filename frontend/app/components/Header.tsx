@@ -8,6 +8,8 @@ const navLinks = [
   { href: "/signup", label: "Sign up" },
 ];
 
+// TODO: Add user state and conditionally show profile/logout links when logged in, and login/signup when logged out.
+
 function isActive(pathname: string, href: string) {
   if (href === "/") {
     return pathname === "/";
