@@ -36,6 +36,10 @@ app.use("/users/*", async (c, next) => {
 
   try {
     const payload = jwt.verify(token, JWT_SECRET);
+
+    if (!payload || typeof payload !== "object" || typeof payload.sub !== "string") {
+      return c.json({ error: "Invalid or expired token" }, 401);
+    }
     c.set("userId", payload.sub);
     await next();
   } catch {
