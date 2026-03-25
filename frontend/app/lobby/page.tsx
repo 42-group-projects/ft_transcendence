@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { FriendsSidebar } from "@/app/components/FriendsSidebar";
+import { FriendsSidebar } from "@/app/lobby/components/FriendsSidebar";
 
 const mockProfile = {
   displayName: "Player One",
@@ -68,7 +68,7 @@ export default function LobbyPage() {
 
           <FriendsSidebar />
 
-          <div className="relative z-10 flex h-full flex-col p-4 sm:p-6">
+          <div className="relative z-10 flex h-full flex-col p-4 sm:p-6 md:pr-80">
             <div className="flex flex-wrap gap-2 lg:gap-3">
               {roomLinks.map((room) => (
                 <Link
