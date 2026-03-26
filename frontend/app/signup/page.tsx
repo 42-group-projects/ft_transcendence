@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthCard } from "@/app/components/AuthCard";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -38,15 +39,22 @@ export default function SignupPage() {
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100">
       <section className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-12">
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/90 p-8 shadow-2xl shadow-black/30">
-          <div className="mb-8 text-center">
-            <p className="text-sm uppercase tracking-[0.3em] text-orange-400">SumoVerse</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight">Create account</h1>
-            <p className="mt-3 text-sm text-neutral-400">
-              Temporary UI only. This form is ready for future API wiring.
-            </p>
-          </div>
-
+        <AuthCard
+          accentLabel="SumoVerse"
+          accentColorClassName="text-orange-400"
+          title="Create account"
+          description="Temporary UI only. This form is ready for future API wiring."
+          footer={
+            <>
+              <Link href="/" className="transition hover:text-neutral-200">
+                Back home
+              </Link>
+              <Link href="/login" className="text-orange-400 transition hover:text-orange-300">
+                Already have an account?
+              </Link>
+            </>
+          }
+        >
           <form className="space-y-4" onSubmit={handleSubmit}>
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-neutral-200">Display name</span>
@@ -106,16 +114,7 @@ export default function SignupPage() {
           </form>
 
           {statusMessage ? <p className="mt-4 text-sm text-amber-400">{statusMessage}</p> : null}
-
-          <div className="mt-6 flex items-center justify-between text-sm text-neutral-400">
-            <Link href="/" className="transition hover:text-neutral-200">
-              Back home
-            </Link>
-            <Link href="/login" className="text-orange-400 transition hover:text-orange-300">
-              Already have an account?
-            </Link>
-          </div>
-        </div>
+        </AuthCard>
       </section>
     </main>
   );

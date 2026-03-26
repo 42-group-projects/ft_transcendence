@@ -6,7 +6,7 @@ export default function TermsPage() {
       <section className="mx-auto w-full max-w-3xl">
         <div className="mb-8">
           <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">Legal</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">Terms of Service(Placeholder)</h1>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight">Terms of Service (Placeholder)</h1>
           <p className="mt-2 text-sm text-neutral-400">Last updated: March 2026</p>
         </div>
 
