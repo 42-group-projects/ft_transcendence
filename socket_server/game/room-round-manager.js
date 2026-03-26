@@ -256,14 +256,25 @@ function createRoomRoundManager({
 
     placePlayersForRound(room);
     room.tickCount = 0;
-    room.roundInProgress = true;
     room.paused = false;
-    io.to(room.id).emit("roundStarted", { roomId: room.id });
-    io.to(room.id).emit("countdown", { secondsRemaining: 0, reason: "round_start" });
-    io.to(room.id).emit("systemMessage", {
-      message: "Round started! Last player on the plate wins.",
-    });
-    emitGameState(room);
+
+    // Countdown sequence before round starts
+    let secondsRemaining = 3;
+    const countdownTick = () => {
+      io.to(room.id).emit("countdown", { secondsRemaining, reason: "round_start" });
+      if (secondsRemaining === 0) {
+        room.roundInProgress = true;
+        io.to(room.id).emit("roundStarted", { roomId: room.id });
+        io.to(room.id).emit("systemMessage", {
+          message: "Round started! Last player on the plate wins.",
+        });
+        emitGameState(room);
+        return;
+      }
+      secondsRemaining -= 1;
+      setTimeout(countdownTick, 1000);
+    };
+    countdownTick();
     return true;
   }
 
@@ -284,14 +295,25 @@ function createRoomRoundManager({
     const soloOpponent = makeSoloOpponent(room);
     room.players.set(soloOpponent.id, soloOpponent);
 
-    room.roundInProgress = true;
     room.paused = false;
-    io.to(room.id).emit("roundStarted", { roomId: room.id });
-    io.to(room.id).emit("countdown", { secondsRemaining: 0, reason: "round_start" });
-    io.to(room.id).emit("systemMessage", {
-      message: `Solo — opponent: ${room.soloDifficulty}.`,
-    });
-    emitGameState(room);
+
+    // Countdown sequence before solo round starts
+    let secondsRemaining = 3;
+    const countdownTick = () => {
+      io.to(room.id).emit("countdown", { secondsRemaining, reason: "round_start" });
+      if (secondsRemaining === 0) {
+        room.roundInProgress = true;
+        io.to(room.id).emit("roundStarted", { roomId: room.id });
+        io.to(room.id).emit("systemMessage", {
+          message: `Solo — opponent: ${room.soloDifficulty}.`,
+        });
+        emitGameState(room);
+        return;
+      }
+      secondsRemaining -= 1;
+      setTimeout(countdownTick, 1000);
+    };
+    countdownTick();
     return true;
   }
 

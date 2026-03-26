@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 
 import { GameResultOverlay } from "@/app/game/components/GameResultOverlay";
+import { CountdownOverlay } from "@/app/game/components/CountdownOverlay";
 import { GameLobbyControls } from "../components/GameLobbyControls";
 import { WorldScene } from "../components/WorldScene";
 import { useGameSession } from "../hooks/useGameSession";
@@ -24,6 +25,8 @@ export default function GamePage() {
     systemMessage,
     roundResultMessage,
     sessionEndedReason,
+    isPaused,
+    countdown,
     gameConstants,
     createRoom,
     joinRoom,
@@ -78,6 +81,7 @@ export default function GamePage() {
           <Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
             <WorldScene players={players} localPlayerId={localPlayerId} gameConstants={gameConstants} />
           </Canvas>
+          {countdown && countdown > 0 ? <CountdownOverlay seconds={countdown} /> : null}
           {showGameResult ? <GameResultOverlay title={resultTitle} description={systemMessage} /> : null}
         </div>
       </section>
