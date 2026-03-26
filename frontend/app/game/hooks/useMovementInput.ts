@@ -9,6 +9,15 @@ type InputState = {
   right: boolean;
 };
 
+function createEmptyInputState(): InputState {
+  return {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+  };
+}
+
 export function useMovementInput({
   joinedRoomId,
   socketRef,
@@ -16,15 +25,11 @@ export function useMovementInput({
   joinedRoomId: string | null;
   socketRef: MutableRefObject<Socket | null>;
 }) {
-  const inputRef = useRef<InputState>({
-    up: false,
-    down: false,
-    left: false,
-    right: false,
-  });
+  const inputRef = useRef<InputState>(createEmptyInputState());
 
   useEffect(() => {
     if (!joinedRoomId) {
+      inputRef.current = createEmptyInputState();
       return;
     }
 
@@ -59,14 +64,15 @@ export function useMovementInput({
       const x = Number(inputRef.current.right) - Number(inputRef.current.left);
       const z = Number(inputRef.current.down) - Number(inputRef.current.up);
 
-      socket?.emit("moveInput", { x, z });
+      socket?.emit("move", { x, z });
     }, 1000 / 30);
 
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       clearInterval(sendInput);
-      socket?.emit("moveInput", { x: 0, z: 0 });
+      inputRef.current = createEmptyInputState();
+      socket?.emit("move", { x: 0, z: 0 });
     };
   }, [joinedRoomId, socketRef]);
 }

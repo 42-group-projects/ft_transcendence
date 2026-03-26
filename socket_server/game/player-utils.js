@@ -1,8 +1,4 @@
-const {
-  PLAYER_RADIUS,
-  SPAWN_DISTANCE,
-  PLATE_SURFACE_Y,
-} = require("./constants");
+const { PLAYER_RADIUS, SPAWN_DISTANCE, PLATE_SURFACE_Y } = require("./constants");
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -16,9 +12,11 @@ function sanitizeName(name) {
   return (name || "Player").trim() || "Player";
 }
 
-function makePlayer(id, name) {
+function makePlayer({ userId, socketId, name }) {
   return {
-    id,
+    id: userId,
+    userId,
+    socketId,
     name,
     position: { x: 0, y: PLAYER_RADIUS, z: 0 },
     velocity: { x: 0, z: 0 },
@@ -27,14 +25,17 @@ function makePlayer(id, name) {
     fallVelocityY: 0,
     isCpu: false,
     eliminated: false,
+    disconnected: false,
     roundResult: null,
   };
 }
 
 function makeCPUball(id, name) {
   return {
-    id, 
-    name, 
+    id,
+    userId: id,
+    socketId: null,
+    name,
     position: { x: 0, y: PLATE_SURFACE_Y, z: 0 },
     velocity: { x: 0, z: 0 },
     input: { x: 0, z: 0 },
@@ -42,9 +43,9 @@ function makeCPUball(id, name) {
     fallVelocityY: 0,
     isCpu: true,
     eliminated: false,
+    disconnected: false,
     roundResult: null,
   };
-
 }
 
 function makeRoom(password) {
@@ -52,8 +53,12 @@ function makeRoom(password) {
     id: randomRoomId(),
     password,
     players: new Map(),
+    playerBySocketId: new Map(),
+    reconnectTimeouts: new Map(),
     interval: null,
     roundInProgress: false,
+    paused: false,
+    tickCount: 0,
     solo: false,
   };
 }
@@ -70,7 +75,7 @@ function placePlayerAtSpawnSlot(player, slotIndex) {
 }
 
 function placePlayersForRound(room) {
-  const players = [...room.players.values()];
+  const players = [...room.players.values()].filter((player) => !player.isCpu);
   players.forEach((player, index) => {
     placePlayerAtSpawnSlot(player, index);
   });
@@ -84,6 +89,7 @@ function resetPlayerForRound(player) {
   player.fallVelocityY = 0;
   player.position.y = PLATE_SURFACE_Y;
   player.eliminated = false;
+  player.disconnected = false;
   player.roundResult = null;
 }
 
@@ -97,11 +103,13 @@ function stopPlayerHorizontalMovement(player) {
 function serializePlayers(playersMap) {
   return [...playersMap.values()].map((player) => ({
     id: player.id,
+    userId: player.userId,
     name: player.name,
     position: player.position,
     velocity: player.velocity,
     heading: player.heading,
     eliminated: player.eliminated,
+    disconnected: player.disconnected,
   }));
 }
 

@@ -8,7 +8,7 @@ import {
   SPAWN_DISTANCE as IMPORTED_SPAWN_DISTANCE,
   SPAWN_LINE_OFFSET,
 } from "../constants";
-import type { PlayerState } from "../types";
+import type { GameConstants, PlayerState } from "../types";
 
 const PLATE_THICKNESS = 0.5;
 const SPAWN_LINE_LENGTH = 3.6;
@@ -53,11 +53,7 @@ function FollowCamera({ target, heading }: FollowCameraProps) {
 type WorldSceneProps = {
   players: PlayerState[];
   localPlayerId: string | null;
-  gameConstants?: {
-    PLAYER_RADIUS: number;
-    SPAWN_DISTANCE: number;
-    WORLD_HALF: number;
-  } | null;
+  gameConstants?: GameConstants | null;
 };
 
 export function WorldScene({ players, localPlayerId, gameConstants }: WorldSceneProps) {

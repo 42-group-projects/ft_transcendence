@@ -24,7 +24,9 @@ services:
       - "${NEXT_PUBLIC_SOCKET_PORT}:${NEXT_PUBLIC_SOCKET_PORT}"
     environment:
       - NODE_ENV=${NODE_ENV}
-      - PORT=${NEXSOCKET_PORT}
+      - PORT=${NEXT_PUBLIC_SOCKET_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - RECONNECT_GRACE_MS=${RECONNECT_GRACE_MS:-30000}
     volumes:
       - ./socket_server:/app
       - /app/node_modules
