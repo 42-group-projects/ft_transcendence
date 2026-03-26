@@ -55,8 +55,8 @@ export default function SoloPage() {
 							onChange={(event) => setDifficulty(event.target.value as SoloDifficulty)}
 							className="rounded border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-100 outline-none focus:border-neutral-500"
 						>	
-                            <option value="dummy">Dummy (no AI)</option>
-                            <option value="easy">Easy CPU</option>
+							<option value="dummy">Dummy (no AI)</option>
+							<option value="easy">Easy CPU</option>
 							<option value="medium">Medium CPU</option>
 							<option value="hard">Hard CPU</option>
 						</select>
@@ -87,7 +87,7 @@ export default function SoloPage() {
 				{roundResultMessage && <p className="text-sm font-medium text-yellow-400">{roundResultMessage}</p>}
 
 				<div className="h-[70vh] overflow-hidden rounded-lg border border-neutral-700">
-					<Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
+					<Canvas shadows="basic" camera={{ position: [0, 8, 10], fov: 55 }}>
 						<WorldScene players={players} localPlayerId={localPlayerId} gameConstants={gameConstants} />
 					</Canvas>
 				</div>

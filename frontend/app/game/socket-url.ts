@@ -1,6 +1,6 @@
 export function resolveSocketUrl() {
   const configured = process.env.NEXT_PUBLIC_SOCKET_URL;
-  const socketPort = process.env.SOCKET_PORT;
+  const socketPort = process.env.NEXT_PUBLIC_SOCKET_PORT;
 
   if (typeof window === "undefined") {
     return configured || "http://localhost:3001";

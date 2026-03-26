@@ -35,7 +35,14 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
   useEffect(() => {
     const socket = io(socketUrl, {
       transports: ["websocket"],
+      autoConnect: false,
     });
+    let disposed = false;
+    const connectTimeout = window.setTimeout(() => {
+      if (!disposed) {
+        socket.connect();
+      }
+    }, 0);
 
     socketRef.current = socket;
 
@@ -98,7 +105,13 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
     });
 
     return () => {
-      socket.disconnect();
+      disposed = true;
+      window.clearTimeout(connectTimeout);
+      socket.removeAllListeners();
+      if (socket.connected || socket.active) {
+        socket.disconnect();
+      }
+      socketRef.current = null;
     };
   }, [onRoomCreated, socketUrl]);
 
