@@ -76,7 +76,8 @@ async function apiFetch<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const url = new URL(path, API_BASE);
+  const res = await fetch(url.toString(), { ...options, headers });
   const data = await res.json();
 
   if (!res.ok) {
