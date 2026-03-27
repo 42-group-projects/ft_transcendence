@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 
+import { GameResultOverlay } from "@/app/game/components/GameResultOverlay";
+import { CountdownOverlay } from "@/app/game/components/CountdownOverlay";
 import { WorldScene } from "../components/WorldScene";
 import { useGameSession } from "../hooks/useGameSession";
 import { useMovementInput } from "../hooks/useMovementInput";
@@ -22,6 +24,9 @@ export default function SoloPage() {
 		errorMessage,
 		systemMessage,
 		roundResultMessage,
+		sessionEndedReason,
+		isPaused,
+		countdown,
 		gameConstants,
 		leaveRoom,
 	} = useGameSession();
@@ -31,6 +36,9 @@ export default function SoloPage() {
 	const handleStart = () => {
 		socketRef.current?.emit("soloStart", { name, difficulty });
 	};
+
+	const showGameResult = sessionEndedReason === "game_finished";
+	const resultTitle = roundResultMessage ?? "Match finished";
 
 	return (
 		<main className="min-h-screen bg-neutral-950 text-neutral-100">
@@ -95,10 +103,12 @@ export default function SoloPage() {
 				{systemMessage && !errorMessage && <p className="text-sm text-neutral-400">{systemMessage}</p>}
 				{roundResultMessage && <p className="text-sm font-medium text-yellow-400">{roundResultMessage}</p>}
 
-				<div className="h-[70vh] overflow-hidden rounded-lg border border-neutral-700">
+				<div className="relative h-[70vh] overflow-hidden rounded-lg border border-neutral-700">
 					<Canvas shadows="basic" camera={{ position: [0, 8, 10], fov: 55 }}>
 						<WorldScene players={players} localPlayerId={localPlayerId} gameConstants={gameConstants} />
 					</Canvas>
+					{countdown && countdown > 0 ? <CountdownOverlay seconds={countdown} /> : null}
+					{showGameResult ? <GameResultOverlay title={resultTitle} description={systemMessage} /> : null}
 				</div>
 
 				<p className="text-center text-xs text-neutral-600">WASD / arrow keys to move</p>

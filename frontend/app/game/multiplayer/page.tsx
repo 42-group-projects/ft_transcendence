@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 
+import { GameResultOverlay } from "@/app/game/components/GameResultOverlay";
+import { CountdownOverlay } from "@/app/game/components/CountdownOverlay";
 import { GameLobbyControls } from "../components/GameLobbyControls";
 import { WorldScene } from "../components/WorldScene";
 import { useGameSession } from "../hooks/useGameSession";
@@ -22,6 +24,9 @@ export default function GamePage() {
     errorMessage,
     systemMessage,
     roundResultMessage,
+    sessionEndedReason,
+    isPaused,
+    countdown,
     gameConstants,
     createRoom,
     joinRoom,
@@ -37,6 +42,9 @@ export default function GamePage() {
   const handleJoinRoom = () => {
     joinRoom({ roomId, password, name });
   };
+
+  const showGameResult = sessionEndedReason === "game_finished";
+  const resultTitle = roundResultMessage ?? "Match finished";
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100">
@@ -69,10 +77,12 @@ export default function GamePage() {
           onLeaveRoom={leaveRoom}
         />
 
-        <div className="h-[72vh] overflow-hidden rounded-lg border border-neutral-700">
+        <div className="relative h-[72vh] overflow-hidden rounded-lg border border-neutral-700">
           <Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
             <WorldScene players={players} localPlayerId={localPlayerId} gameConstants={gameConstants} />
           </Canvas>
+          {countdown && countdown > 0 ? <CountdownOverlay seconds={countdown} /> : null}
+          {showGameResult ? <GameResultOverlay title={resultTitle} description={systemMessage} /> : null}
         </div>
       </section>
     </main>

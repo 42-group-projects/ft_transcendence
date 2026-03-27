@@ -2,12 +2,24 @@ const { PLAYER_RADIUS, SPAWN_DISTANCE, WORLD_HALF } = require("./game/constants"
 
 function registerSocketHandlers(io, roomService) {
   io.on("connection", (socket) => {
-    // Send game constants to the client
+    const userId = socket.data.userId;
+
     socket.emit("gameConstants", {
       PLAYER_RADIUS,
       SPAWN_DISTANCE,
       WORLD_HALF,
     });
+
+    const reconnectResult = roomService.reconnectPlayer(userId, socket.id);
+    if (reconnectResult.ok && reconnectResult.room) {
+      socket.join(reconnectResult.room.id);
+      socket.data.roomId = reconnectResult.room.id;
+      socket.emit("joinedRoom", {
+        roomId: reconnectResult.room.id,
+        playerId: reconnectResult.player.userId,
+      });
+      socket.emit("systemMessage", { message: "Reconnected to active session." });
+    }
 
     socket.on("createRoom", ({ password, name }) => {
       const trimmedPassword = (password || "").trim();
@@ -21,21 +33,25 @@ function registerSocketHandlers(io, roomService) {
       socket.emit("roomCreated", { roomId: room.id });
       socket.emit("systemMessage", { message: `Room created: ${room.id}` });
 
-      roomService.addPlayerToRoom(room, socket.id, name);
+      const player = roomService.addPlayerToRoom(room, {
+        userId,
+        socketId: socket.id,
+        rawName: name,
+      });
 
       socket.join(room.id);
       socket.data.roomId = room.id;
 
-      socket.emit("joinedRoom", { roomId: room.id, playerId: socket.id });
+      socket.emit("joinedRoom", { roomId: room.id, playerId: player.userId });
       roomService.broadcastRoomState(room);
-      const started = roomService.tryStartRound(room);
 
+      const started = roomService.tryStartRound(room);
       if (!started) {
         roomService.notifyWaitingForOpponent(room);
       }
     });
 
-    socket.on("joinRoom", ({ roomId, password, name }) => {
+    const handleJoinRoom = ({ roomId, password, name }) => {
       const room = roomService.getRoom((roomId || "").trim());
 
       if (!room) {
@@ -58,17 +74,16 @@ function registerSocketHandlers(io, roomService) {
         return;
       }
 
-      if (roomService.isRoundInProgress(room)) {
-        socket.emit("roomError", { message: "Round already in progress. Please wait for next room." });
-        return;
-      }
-
-      const player = roomService.addPlayerToRoom(room, socket.id, name);
+      const player = roomService.addPlayerToRoom(room, {
+        userId,
+        socketId: socket.id,
+        rawName: name,
+      });
 
       socket.join(room.id);
       socket.data.roomId = room.id;
 
-      socket.emit("joinedRoom", { roomId: room.id, playerId: socket.id });
+      socket.emit("joinedRoom", { roomId: room.id, playerId: player.userId });
       socket.emit("systemMessage", { message: `Joined room: ${room.id}` });
       io.to(room.id).emit("systemMessage", { message: `${player.name} joined.` });
 
@@ -78,7 +93,10 @@ function registerSocketHandlers(io, roomService) {
       if (!started) {
         roomService.notifyWaitingForOpponent(room);
       }
-    });
+    };
+
+    socket.on("join", handleJoinRoom);
+    socket.on("joinRoom", handleJoinRoom);
 
     socket.on("soloStart", ({ name, difficulty }) => {
       if (socket.data.roomId) {
@@ -87,15 +105,29 @@ function registerSocketHandlers(io, roomService) {
 
       const soloPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
       const room = roomService.createRoom(soloPassword);
-      roomService.addPlayerToRoom(room, socket.id, name);
+
+      const player = roomService.addPlayerToRoom(room, {
+        userId,
+        socketId: socket.id,
+        rawName: name,
+      });
 
       socket.join(room.id);
       socket.data.roomId = room.id;
 
-      socket.emit("joinedRoom", { roomId: room.id, playerId: socket.id });
+      socket.emit("joinedRoom", { roomId: room.id, playerId: player.userId });
       socket.emit("systemMessage", { message: `Solo room created: ${room.id}` });
 
       roomService.startSoloRound(room, difficulty);
+    });
+
+    socket.on("move", ({ x, z }) => {
+      const roomId = socket.data.roomId;
+      if (!roomId) {
+        return;
+      }
+
+      roomService.setPlayerInput(roomId, userId, x, z);
     });
 
     socket.on("moveInput", ({ x, z }) => {
@@ -104,7 +136,21 @@ function registerSocketHandlers(io, roomService) {
         return;
       }
 
-      roomService.setPlayerInput(roomId, socket.id, x, z);
+      roomService.setPlayerInput(roomId, userId, x, z);
+    });
+
+    socket.on("reconnect", () => {
+      const result = roomService.reconnectPlayer(userId, socket.id);
+      if (!result.ok || !result.room) {
+        return;
+      }
+
+      socket.join(result.room.id);
+      socket.data.roomId = result.room.id;
+      socket.emit("joinedRoom", {
+        roomId: result.room.id,
+        playerId: result.player.userId,
+      });
     });
 
     socket.on("leaveRoom", () => {
@@ -113,13 +159,7 @@ function registerSocketHandlers(io, roomService) {
         return;
       }
 
-      const room = roomService.getRoom(roomId);
-      if (!room) {
-        socket.data.roomId = null;
-        return;
-      }
-
-      const result = roomService.removePlayer(roomId, socket.id);
+      const result = roomService.handleLeave(roomId, userId);
 
       socket.leave(roomId);
       socket.data.roomId = null;
@@ -140,17 +180,13 @@ function registerSocketHandlers(io, roomService) {
         return;
       }
 
-      const result = roomService.removePlayer(roomId, socket.id);
-      if (!result.player) {
+      const result = roomService.handleDisconnect(roomId, userId);
+
+      if (!result.player || !result.room) {
         return;
       }
 
-      io.to(roomId).emit("systemMessage", { message: `${result.player.name} disconnected.` });
-
-      if (result.room) {
-        roomService.broadcastRoomState(result.room);
-        roomService.notifyWaitingForOpponent(result.room);
-      }
+      roomService.broadcastRoomState(result.room);
     });
   });
 }

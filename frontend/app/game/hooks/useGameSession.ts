@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
+import { getToken } from "@/lib/api";
 import { resolveSocketUrl } from "../socket-url";
-import type { PlayerState, RoomStatePayload } from "../types";
+import type { GameConstants, PlayerState } from "../types";
+import { registerGameSessionSocketHandlers } from "./registerGameSessionSocketHandlers";
 
 type CreateRoomArgs = {
   name: string;
@@ -27,16 +29,33 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
   const [joinedRoomId, setJoinedRoomId] = useState<string | null>(null);
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   const [players, setPlayers] = useState<PlayerState[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    return getToken() ? null : "Please login first.";
+  });
   const [systemMessage, setSystemMessage] = useState<string | null>(null);
   const [roundResultMessage, setRoundResultMessage] = useState<string | null>(null);
-  const [gameConstants, setGameConstants] = useState<{ PLAYER_RADIUS: number; SPAWN_DISTANCE: number; WORLD_HALF: number } | null>(null);
+  const [sessionEndedReason, setSessionEndedReason] = useState<string | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [gameConstants, setGameConstants] = useState<GameConstants | null>(null);
 
   useEffect(() => {
+    const token = getToken();
+
+    if (!token) {
+      return;
+    }
+
     const socket = io(socketUrl, {
       transports: ["websocket"],
       autoConnect: false,
+      auth: { token },
     });
+
     let disposed = false;
     const connectTimeout = window.setTimeout(() => {
       if (!disposed) {
@@ -46,62 +65,21 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
 
     socketRef.current = socket;
 
-    socket.on("connect", () => {
-      setConnected(true);
-      setErrorMessage(null);
-    });
-
-    socket.on("gameConstants", ({ PLAYER_RADIUS, SPAWN_DISTANCE, WORLD_HALF }: { PLAYER_RADIUS: number; SPAWN_DISTANCE: number; WORLD_HALF: number }) => {
-      setGameConstants({ PLAYER_RADIUS, SPAWN_DISTANCE, WORLD_HALF });
-    });
-
-    socket.on("disconnect", () => {
-      setConnected(false);
-      setJoinedRoomId(null);
-      setLocalPlayerId(null);
-      setPlayers([]);
-      setSystemMessage(null);
-      setRoundResultMessage(null);
-    });
-
-    socket.on("connect_error", () => {
-      setConnected(false);
-      setErrorMessage(`Unable to reach socket server at ${socketUrl}`);
-    });
-
-    socket.on("roomCreated", ({ roomId }: { roomId: string }) => {
-      onRoomCreated?.(roomId);
-      setSystemMessage(`Room created: ${roomId}`);
-      setErrorMessage(null);
-    });
-
-    socket.on("joinedRoom", ({ roomId: activeRoomId, playerId }: { roomId: string; playerId: string }) => {
-      setJoinedRoomId(activeRoomId);
-      setLocalPlayerId(playerId);
-      setErrorMessage(null);
-      setSystemMessage(null);
-      setRoundResultMessage(null);
-    });
-
-    socket.on("roomState", ({ players: nextPlayers }: RoomStatePayload) => {
-      setPlayers(nextPlayers);
-    });
-
-    socket.on("roomError", ({ message }: { message: string }) => {
-      setErrorMessage(message);
-    });
-
-    socket.on("systemMessage", ({ message }: { message: string }) => {
-      setSystemMessage(message);
-    });
-
-    socket.on("roundStarted", () => {
-      setSystemMessage(null);
-      setRoundResultMessage(null);
-    });
-
-    socket.on("roundResult", ({ message }: { message: string }) => {
-      setRoundResultMessage(message);
+    registerGameSessionSocketHandlers({
+      socket,
+      socketUrl,
+      onRoomCreated,
+      setConnected,
+      setJoinedRoomId,
+      setLocalPlayerId,
+      setPlayers,
+      setErrorMessage,
+      setSystemMessage,
+      setRoundResultMessage,
+      setSessionEndedReason,
+      setIsPaused,
+      setCountdown,
+      setGameConstants,
     });
 
     return () => {
@@ -147,7 +125,7 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
         return;
       }
 
-      socketRef.current?.emit("joinRoom", {
+      socketRef.current?.emit("join", {
         roomId,
         password,
         name,
@@ -163,6 +141,8 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
     setPlayers([]);
     setSystemMessage(null);
     setRoundResultMessage(null);
+    setCountdown(null);
+    setSessionEndedReason(null);
   }, []);
 
   return {
@@ -174,6 +154,9 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
     errorMessage,
     systemMessage,
     roundResultMessage,
+    sessionEndedReason,
+    isPaused,
+    countdown,
     gameConstants,
     setErrorMessage,
     setSystemMessage,
