@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 
@@ -35,11 +36,19 @@ export default function SoloPage() {
 		<main className="min-h-screen bg-neutral-950 text-neutral-100">
 			<section className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4">
 				<div className="flex items-center justify-between">
-					<h1 className="text-xl font-semibold tracking-tight">solo dev mode</h1>
-					<span className="flex items-center gap-2 text-sm text-neutral-400">
-						<span className={`inline-block h-2 w-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`} />
-						{connected ? "connected" : "disconnected"}
-					</span>
+					<div className="flex items-center gap-3">
+						<h1 className="text-xl font-semibold tracking-tight">solo dev mode</h1>
+						<span className="flex items-center gap-2 text-sm text-neutral-400">
+							<span className={`inline-block h-2 w-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`} />
+							{connected ? "connected" : "disconnected"}
+						</span>
+					</div>
+					<Link
+						href="/lobby"
+						className="rounded-md border border-neutral-700 px-3 py-1.5 text-xs font-medium text-neutral-200 transition hover:bg-neutral-900"
+					>
+						Back to Lobby
+					</Link>
 				</div>
 
 				{!joinedRoomId ? (

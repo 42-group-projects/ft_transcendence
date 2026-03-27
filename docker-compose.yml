@@ -21,18 +21,36 @@ services:
       context: ./socket_server
       dockerfile: Dockerfile
     ports:
-      - "${SOCKET_PORT}:${SOCKET_PORT}"
+      - "${NEXT_PUBLIC_SOCKET_PORT}:${NEXT_PUBLIC_SOCKET_PORT}"
     environment:
       - NODE_ENV=${NODE_ENV}
-      - PORT=${SOCKET_PORT}
+      - PORT=${NEXT_PUBLIC_SOCKET_PORT}
     volumes:
       - ./socket_server:/app
       - /app/node_modules
     networks:
       - game-network
     restart: unless-stopped
- 
-  #Frontend
+
+  # Mock REST API (Hono) — replace internals with real DB later
+  mock-server:
+    build:
+      context: ./mock_server
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT:-4000}:4000"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=4000
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./mock_server:/app
+      - /app/node_modules
+    networks:
+      - game-network
+    restart: unless-stopped
+
+  # Frontend (Next.js)
   frontend:
     build:
       context: ./frontend
@@ -41,6 +59,7 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4000}
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -48,8 +67,9 @@ services:
       - game-network
     depends_on:
       - socket-server
+      - mock-server
     restart: unless-stopped
- 
+
 networks:
   game-network:
     driver: bridge

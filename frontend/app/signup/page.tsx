@@ -2,7 +2,9 @@
 
 import { AuthCard } from "@/app/components/AuthCard";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { apiSignup, saveToken } from "@/lib/api";
 
 export default function SignupPage() {
   const [displayName, setDisplayName] = useState("");
@@ -10,18 +12,28 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-
-    // TODO: Replace this placeholder with the real signup API request.
     event.preventDefault();
+    setStatusMessage("");
+
     if (password !== confirmPassword) {
       setStatusMessage("Passwords do not match.");
       return;
     }
 
-    setStatusMessage("Signup is not connected yet.");
-
+    setLoading(true);
+    try {
+      const { access_token } = await apiSignup(email, displayName, password);
+      saveToken(access_token);
+      router.push("/lobby");
+    } catch (err) {
+      setStatusMessage(err instanceof Error ? err.message : "Signup failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,7 +62,7 @@ export default function SignupPage() {
                 type="text"
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
-                placeholder="PlayerOne"
+                placeholder="Display Name"
                 className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-orange-500"
                 required
               />
@@ -94,9 +106,10 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
+              disabled={loading}
+              className="w-full rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50"
             >
-              Sign up
+              {loading ? "Creating account…" : "Sign up"}
             </button>
           </form>
 

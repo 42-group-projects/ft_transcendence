@@ -1,12 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { FriendsSidebar } from "@/app/lobby/components/FriendsSidebar";
-
-const mockProfile = {
-  displayName: "Player One",
-  rankLabel: "Rookie Wrestler",
-  avatarInitials: "PO",
-};
+import { apiGetMe, apiGetMyStats, type User, type UserStats } from "@/lib/api";
 
 const roomLinks = [
   {
@@ -41,7 +39,46 @@ const roomLinks = [
   },
 ];
 
+function getRankLabel(rating: number | undefined) {
+  if (rating === undefined) return "Rookie Wrestler";
+  if (rating >= 1800) return "Yokozuna";
+  if (rating >= 1500) return "Ozeki";
+  if (rating >= 1200) return "Sekiwake";
+  return "Rookie Wrestler";
+}
+
 export default function LobbyPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [stats, setStats] = useState<UserStats | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadLobbyProfile = async () => {
+      try {
+        const [meResponse, statsResponse] = await Promise.all([apiGetMe(), apiGetMyStats()]);
+        if (cancelled) return;
+        setUser(meResponse.user);
+        setStats(statsResponse.stats);
+      } catch {
+        if (cancelled) return;
+        setUser(null);
+        setStats(null);
+      }
+    };
+
+    loadLobbyProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const avatarInitials = user?.nickname ? user.nickname.slice(0, 2).toUpperCase() : "PO";
+
+  const displayName = user?.nickname ?? "Player One";
+  const rankLabel = getRankLabel(stats?.rating);
+
   return (
     <main className="min-h-screen bg-neutral-950 px-4 py-6 text-neutral-100 sm:px-6 lg:px-8">
       <section className="mx-auto flex min-h-[calc(100vh-6.5rem)] w-full max-w-6xl flex-col gap-4">
@@ -84,12 +121,25 @@ export default function LobbyPage() {
 
             <div className="flex flex-1 items-start justify-center py-6 md:items-center md:py-8">
               <div className="w-full max-w-xs rounded-[2rem] border border-neutral-700/80 bg-neutral-950/80 p-6 text-center shadow-2xl shadow-black/40 backdrop-blur-md sm:max-w-sm sm:p-8">
-                <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border-4 border-neutral-700 bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900 text-4xl font-semibold tracking-wide text-white shadow-lg shadow-black/30 sm:h-32 sm:w-32">
-                  {mockProfile.avatarInitials}
-                </div>
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={`${displayName} avatar`}
+                    className="mx-auto h-28 w-28 rounded-full border-4 border-neutral-700 bg-neutral-900 object-cover shadow-lg shadow-black/30 sm:h-32 sm:w-32"
+                  />
+                ) : (
+                  <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border-4 border-neutral-700 bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900 text-4xl font-semibold tracking-wide text-white shadow-lg shadow-black/30 sm:h-32 sm:w-32">
+                    {avatarInitials}
+                  </div>
+                )}
                 <p className="mt-6 text-sm uppercase tracking-[0.3em] text-neutral-500">Current avatar</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight">{mockProfile.displayName}</h2>
-                <p className="mt-2 text-sm text-neutral-400">{mockProfile.rankLabel}</p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight">{displayName}</h2>
+                <p className="mt-2 text-sm text-neutral-400">{rankLabel}</p>
+                {stats ? (
+                  <p className="mt-2 text-xs text-neutral-500">
+                    Wins {stats.wins} • Losses {stats.losses} • Rating {stats.rating}
+                  </p>
+                ) : null}
 
                 {/* TODO: Connect this button to the future profile editor or avatar customization flow. */}
                 <Link

@@ -2,19 +2,31 @@
 
 import { AuthCard } from "@/app/components/AuthCard";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { apiLogin, saveToken } from "@/lib/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
+    setStatusMessage("");
 
-    setStatusMessage("Login is not connected yet.");
-
-    // TODO: Replace this placeholder with the real login API request.
+    try {
+      const { access_token } = await apiLogin(email, password);
+      saveToken(access_token);
+      router.push("/lobby");
+    } catch (err) {
+      setStatusMessage(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,9 +75,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500"
+              disabled={loading}
+              className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
             >
-              Sign in
+              {loading ? "Signing in…" : "Sign in"}
             </button>
           </form>
 
