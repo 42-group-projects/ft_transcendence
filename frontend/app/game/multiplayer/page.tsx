@@ -10,11 +10,14 @@ import { GameLobbyControls } from "../components/GameLobbyControls";
 import { WorldScene } from "../components/WorldScene";
 import { useGameSession } from "../hooks/useGameSession";
 import { useMovementInput } from "../hooks/useMovementInput";
+import { FrameRateDisplay } from "../components/FrameRateDispay";
+import { FpsCounter } from "../utils/FpsCounter";
 
 export default function GamePage() {
   const [name, setName] = useState("Player");
   const [roomId, setRoomId] = useState("");
   const [password, setPassword] = useState("");
+  const [fps, setFps] = useState(0);
   const {
     socketRef,
     connected,
@@ -79,8 +82,10 @@ export default function GamePage() {
 
         <div className="relative h-[72vh] overflow-hidden rounded-lg border border-neutral-700">
           <Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
+            <FpsCounter setFps={setFps} />
             <WorldScene players={players} localPlayerId={localPlayerId} gameConstants={gameConstants} />
           </Canvas>
+          <FrameRateDisplay fps={fps} />
           {countdown && countdown > 0 ? <CountdownOverlay seconds={countdown} /> : null}
           {showGameResult ? <GameResultOverlay title={resultTitle} description={systemMessage} /> : null}
         </div>

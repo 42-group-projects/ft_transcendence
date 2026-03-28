@@ -9,10 +9,13 @@ import { CountdownOverlay } from "@/app/game/components/CountdownOverlay";
 import { WorldScene } from "../components/WorldScene";
 import { useGameSession } from "../hooks/useGameSession";
 import { useMovementInput } from "../hooks/useMovementInput";
+import { FrameRateDisplay } from "../components/FrameRateDispay";
+import { FpsCounter } from "../utils/FpsCounter";
 
 type SoloDifficulty = "dummy" | "easy" | "medium" | "hard";
 
 export default function SoloPage() {
+	const [fps, setFps] = useState(0);
 	const [name, setName] = useState("Dev");
 	const [difficulty, setDifficulty] = useState<SoloDifficulty>("easy");
 	const {
@@ -105,8 +108,10 @@ export default function SoloPage() {
 
 				<div className="relative h-[70vh] overflow-hidden rounded-lg border border-neutral-700">
 					<Canvas shadows="basic" camera={{ position: [0, 8, 10], fov: 55 }}>
+						<FpsCounter setFps={setFps} />
 						<WorldScene players={players} localPlayerId={localPlayerId} gameConstants={gameConstants} />
 					</Canvas>
+						<FrameRateDisplay fps={fps} />
 					{countdown && countdown > 0 ? <CountdownOverlay seconds={countdown} /> : null}
 					{showGameResult ? <GameResultOverlay title={resultTitle} description={systemMessage} /> : null}
 				</div>
