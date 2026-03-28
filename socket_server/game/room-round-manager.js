@@ -21,6 +21,8 @@ const {
   advanceHorizontalPosition,
 } = require("./physics-utils");
 
+const { sanitizePlayerNumbers } = require("./player-utils");
+
 const GAME_FINISH_REASON = "game_finished";
 
 function normalizeAngle(angle) {
@@ -123,6 +125,8 @@ function createRoomRoundManager({
   }
 
   function tickPlayer(room, player, dt) {
+    // sanitize numbers early to prevent NaN from spreading through physics
+    sanitizePlayerNumbers(player);
     if (player.disconnected) {
       stopPlayerHorizontalMovement(player);
       return;

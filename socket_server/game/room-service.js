@@ -4,6 +4,9 @@ const {
   MAX_PLAYERS_PER_ROOM,
   SOLO_CPU_DIFFICULTY,
   SOLO_CPU_ID,
+  MAX_SPEED,
+  DASH_IMPULSE, 
+  DASH_COOLDOWN_MS
 } = require("./constants");
 const {
   clamp,
@@ -229,8 +232,78 @@ function createRoomService(io) {
       return;
     }
 
-    player.input.x = clamp(Number(x) || 0, -1, 1);
-    player.input.z = clamp(Number(z) || 0, -1, 1);
+    const nx = Number(x);
+    const nz = Number(z);
+    player.input.x = Number.isFinite(nx) ? clamp(nx, -1, 1) : 0;
+    player.input.z = Number.isFinite(nz) ? clamp(nz, -1, 1) : 0;
+  }
+
+  // Apply a short forward jolt (dash) to the player's velocity if allowed by cooldown.
+  function handlePlayerDash(roomId, userId) {
+    const room = rooms.get(roomId);
+    if (!room) {
+      return;
+    }
+
+    const player = room.players.get(userId);
+    if (!player) {
+      return;
+    }
+
+    if (!room.roundInProgress || room.paused || player.eliminated || player.disconnected) {
+      return;
+    }
+
+    const now = Date.now();
+
+    if (player.lastDashAt && now - player.lastDashAt < DASH_COOLDOWN_MS) {
+      return; // still on cooldown
+    }
+
+    player.lastDashAt = now;
+    // Emit dash_confirmed to the player who successfully dashed
+    if (player.socketId) {
+      io.to(player.socketId).emit("dash_confirmed");
+    }
+    const heading = Number(player.heading) || 0;
+    const forwardX = Math.sin(heading);
+    const forwardZ = -Math.cos(heading);
+
+    const vxBefore = Number(player.velocity.x) || 0;
+    const vzBefore = Number(player.velocity.z) || 0;
+    const speedBefore = Math.hypot(vxBefore, vzBefore);
+
+    // project current velocity onto forward vector and perpendicular component
+    const projBefore = vxBefore * forwardX + vzBefore * forwardZ;
+    const perpX = vxBefore - forwardX * projBefore;
+    const perpZ = vzBefore - forwardZ * projBefore;
+
+    // increase forward projection by DASH_IMPULSE (guarded)
+    const dashImpulse = Number(DASH_IMPULSE) || 0;
+    const projAfter = Number.isFinite(projBefore) && Number.isFinite(dashImpulse) ? projBefore + dashImpulse : projBefore;
+
+    let newVx = perpX + forwardX * projAfter;
+    let newVz = perpZ + forwardZ * projAfter;
+
+    // cap to MAX_SPEED if present
+    const speedAfterUncapped = Math.hypot(newVx, newVz);
+    if (Number.isFinite(MAX_SPEED) && speedAfterUncapped > MAX_SPEED) {
+      const scale = MAX_SPEED / speedAfterUncapped;
+      newVx *= scale;
+      newVz *= scale;
+    }
+
+    // apply sanitized values
+    player.velocity.x = Number.isFinite(newVx) ? newVx : vxBefore;
+    player.velocity.z = Number.isFinite(newVz) ? newVz : vzBefore;
+
+    // debug log for dash (can be removed later)
+    try {
+      // eslint-disable-next-line no-console
+      console.debug(
+        `dash: user=${userId} heading=${heading.toFixed(3)} vxBefore=${vxBefore.toFixed(3)} vzBefore=${vzBefore.toFixed(3)} projBefore=${projBefore.toFixed(3)} projAfter=${projAfter.toFixed(3)} speedBefore=${speedBefore.toFixed(3)} speedAfter=${Math.hypot(player.velocity.x, player.velocity.z).toFixed(3)}`
+      );
+    } catch (e) {}
   }
 
   function isRoomPasswordValid(room, password) {
@@ -260,6 +333,7 @@ function createRoomService(io) {
     isRoomPasswordValid,
     isRoomFull,
     isRoundInProgress,
+    handlePlayerDash,
     notifyWaitingForOpponent: roundManager.notifyWaitingForOpponent,
     broadcastRoomState: emitGameState,
     getRoomCount: () => rooms.size,

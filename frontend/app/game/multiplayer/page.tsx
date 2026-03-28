@@ -10,6 +10,7 @@ import { GameLobbyControls } from "../components/GameLobbyControls";
 import { WorldScene } from "../components/WorldScene";
 import { useGameSession } from "../hooks/useGameSession";
 import { useMovementInput } from "../hooks/useMovementInput";
+import { useDashCooldown } from "../hooks/useDashCooldown";
 import { FrameRateDisplay } from "../components/FrameRateDispay";
 import { FpsCounter } from "../utils/FpsCounter";
 
@@ -36,7 +37,9 @@ export default function GamePage() {
     leaveRoom,
   } = useGameSession({ onRoomCreated: setRoomId });
 
-  useMovementInput({ joinedRoomId, socketRef });
+  const dashCooldownTotalMs = gameConstants?.DASH_COOLDOWN_MS ?? 800;
+  const { dashCooldownMs, triggerDash } = useDashCooldown(dashCooldownTotalMs);
+  useMovementInput({ joinedRoomId, socketRef, onDash: triggerDash });
 
   const handleCreateRoom = () => {
     createRoom({ name, password });
@@ -83,7 +86,13 @@ export default function GamePage() {
         <div className="relative h-[72vh] overflow-hidden rounded-lg border border-neutral-700">
           <Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
             <FpsCounter setFps={setFps} />
-            <WorldScene players={players} localPlayerId={localPlayerId} gameConstants={gameConstants} />
+            <WorldScene
+              players={players}
+              localPlayerId={localPlayerId}
+              gameConstants={gameConstants}
+              dashCooldownMs={dashCooldownMs}
+              dashCooldownTotalMs={dashCooldownTotalMs}
+            />
           </Canvas>
           <FrameRateDisplay fps={fps} />
           {countdown && countdown > 0 ? <CountdownOverlay seconds={countdown} /> : null}

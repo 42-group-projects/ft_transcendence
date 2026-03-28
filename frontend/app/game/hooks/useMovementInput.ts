@@ -21,9 +21,11 @@ function createEmptyInputState(): InputState {
 export function useMovementInput({
   joinedRoomId,
   socketRef,
+  onDash,
 }: {
   joinedRoomId: string | null;
   socketRef: MutableRefObject<Socket | null>;
+  onDash?: () => void;
 }) {
   const inputRef = useRef<InputState>(createEmptyInputState());
 
@@ -52,6 +54,14 @@ export function useMovementInput({
       if (event.code === "KeyD" || event.code === "ArrowRight") {
         inputRef.current.right = pressed;
       }
+      if (event.code === "Space") {
+        // only emit dash on keydown
+        if (pressed) {
+          // event.preventDefault();
+          // Instead of triggering dash cooldown here, only emit dash event
+          socket?.emit("dash");
+        }
+      }
     };
 
     const onKeyDown = (event: KeyboardEvent) => handleKey(event, true);
@@ -60,10 +70,19 @@ export function useMovementInput({
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
 
+    // Listen for dash confirmation from server
+    function handleDashConfirmed() {
+      if (typeof onDash === "function") {
+        try {
+          onDash();
+        } catch (e) {}
+      }
+    }
+    socket?.on && socket.on("dash_confirmed", handleDashConfirmed);
+
     const sendInput = setInterval(() => {
       const x = Number(inputRef.current.right) - Number(inputRef.current.left);
       const z = Number(inputRef.current.down) - Number(inputRef.current.up);
-
       socket?.emit("move", { x, z });
     }, 1000 / 30);
 
@@ -73,6 +92,7 @@ export function useMovementInput({
       clearInterval(sendInput);
       inputRef.current = createEmptyInputState();
       socket?.emit("move", { x: 0, z: 0 });
+      socket?.off && socket.off("dash_confirmed", handleDashConfirmed);
     };
   }, [joinedRoomId, socketRef]);
 }

@@ -12,6 +12,8 @@ const CHARGE_BONUS = 1.8;  // up to +180% impulse for a direct front-on hit
 const TURN_SPEED = 3.4;
 const PLATE_RADIUS = WORLD_HALF;
 const GRAVITY = 30;
+const DASH_IMPULSE = 100; // instantaneous speed added when dashing (tweakable)
+const DASH_COOLDOWN_MS = 1000; // cooldown between dashes in ms
 const FALL_ELIMINATION_Y = -2;
 const SPAWN_DISTANCE = 6;
 const PLATE_SURFACE_Y = PLAYER_RADIUS;
@@ -80,6 +82,8 @@ module.exports = {
   CHARGE_BONUS,
   TURN_SPEED,
   GRAVITY,
+  DASH_IMPULSE,
+  DASH_COOLDOWN_MS,
   FALL_ELIMINATION_Y,
   SPAWN_DISTANCE,
   PLATE_SURFACE_Y,

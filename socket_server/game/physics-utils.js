@@ -73,14 +73,22 @@ function isPlayerOnPlate(player) {
 }
 
 function applyMovementInput(player, dt) {
-  player.heading += player.input.x * TURN_SPEED * dt;
+  const inputX = Number(player.input.x) || 0;
+  const inputZ = Number(player.input.z) || 0;
 
-  const throttle = -player.input.z;
+  const heading = Number(player.heading) || 0;
+  const newHeading = heading + inputX * TURN_SPEED * dt;
+  player.heading = Number.isFinite(newHeading) ? newHeading : 0;
+
+  const throttle = -inputZ;
   const forwardX = Math.sin(player.heading);
   const forwardZ = -Math.cos(player.heading);
 
-  player.velocity.x += forwardX * throttle * ACCEL * dt;
-  player.velocity.z += forwardZ * throttle * ACCEL * dt;
+  const vx = Number(player.velocity.x) + forwardX * throttle * ACCEL * dt;
+  const vz = Number(player.velocity.z) + forwardZ * throttle * ACCEL * dt;
+
+  player.velocity.x = Number.isFinite(vx) ? vx : 0;
+  player.velocity.z = Number.isFinite(vz) ? vz : 0;
 }
 
 function capHorizontalSpeed(player) {
@@ -100,8 +108,16 @@ function applyHorizontalFriction(player) {
 }
 
 function advanceHorizontalPosition(player, dt) {
-  player.position.x += player.velocity.x * dt;
-  player.position.z += player.velocity.z * dt;
+  const px = Number(player.position.x) || 0;
+  const pz = Number(player.position.z) || 0;
+  const vx = Number(player.velocity.x) || 0;
+  const vz = Number(player.velocity.z) || 0;
+
+  const nx = px + vx * dt;
+  const nz = pz + vz * dt;
+
+  player.position.x = Number.isFinite(nx) ? nx : px;
+  player.position.z = Number.isFinite(nz) ? nz : pz;
 }
 
 module.exports = {
