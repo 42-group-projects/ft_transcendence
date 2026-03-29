@@ -1,15 +1,10 @@
-const { PLAYER_RADIUS, SPAWN_DISTANCE, WORLD_HALF, DASH_COOLDOWN_MS } = require("./game/constants");
+const gameConstants = require("./game/constants");
 
 function registerSocketHandlers(io, roomService) {
   io.on("connection", (socket) => {
     const userId = socket.data.userId;
 
-    socket.emit("gameConstants", {
-      PLAYER_RADIUS,
-      SPAWN_DISTANCE,
-      WORLD_HALF,
-      DASH_COOLDOWN_MS,
-    });
+    socket.emit("gameConstants", gameConstants);
 
     const reconnectResult = roomService.reconnectPlayer(userId, socket.id);
     if (reconnectResult.ok && reconnectResult.room) {

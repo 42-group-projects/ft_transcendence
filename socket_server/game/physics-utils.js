@@ -39,6 +39,7 @@ function resolveBallCollision(a, b) {
 
   // Front-hit bonus: if a player's nose is pointing toward the target they
   // deliver a harder hit (max +CHARGE_BONUS at perfectly head-on angle).
+
   const aFwdX = Math.sin(a.heading);
   const aFwdZ = -Math.cos(a.heading);
   const bFwdX = Math.sin(b.heading);
@@ -47,13 +48,24 @@ function resolveBallCollision(a, b) {
   const bFrontHit = Math.max(0, -(bFwdX * nx + bFwdZ * nz)); // B charging into A
   const chargeFactor = 1 + CHARGE_BONUS * Math.max(aFrontHit, bFrontHit);
 
+  // Dash collision logic
+  let dashMultiplierA = 1;
+  let dashMultiplierB = 1;
+  if (a.isDashing && !b.isDashing) {
+    dashMultiplierA = 0.2; // dashing player gets much less knockback
+    dashMultiplierB = 3.5; // opponent gets much more knockback
+  } else if (!a.isDashing && b.isDashing) {
+    dashMultiplierA = 3.5;
+    dashMultiplierB = 0.2;
+  }
+
   const impulse =
     (-(1 + RESTITUTION) * velAlongNormal * chargeFactor) / (1 / PLAYER_MASS + 1 / PLAYER_MASS);
 
-  a.velocity.x -= (impulse / PLAYER_MASS) * nx;
-  a.velocity.z -= (impulse / PLAYER_MASS) * nz;
-  b.velocity.x += (impulse / PLAYER_MASS) * nx;
-  b.velocity.z += (impulse / PLAYER_MASS) * nz;
+  a.velocity.x -= (impulse / PLAYER_MASS) * nx * dashMultiplierA;
+  a.velocity.z -= (impulse / PLAYER_MASS) * nz * dashMultiplierA;
+  b.velocity.x += (impulse / PLAYER_MASS) * nx * dashMultiplierB;
+  b.velocity.z += (impulse / PLAYER_MASS) * nz * dashMultiplierB;
 
   const overlap = (minDist - dist) / 2;
   a.position.x -= overlap * nx;
@@ -103,8 +115,9 @@ function capHorizontalSpeed(player) {
 }
 
 function applyHorizontalFriction(player) {
-  player.velocity.x *= FRICTION;
-  player.velocity.z *= FRICTION;
+  const friction = player.dashFriction != null ? player.dashFriction : FRICTION;
+  player.velocity.x *= friction;
+  player.velocity.z *= friction;
 }
 
 function advanceHorizontalPosition(player, dt) {

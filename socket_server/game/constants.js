@@ -1,7 +1,10 @@
+const PLATE_THICKNESS = 0.5;
+const SPAWN_LINE_LENGTH = 3.6;
+const SPAWN_LINE_THICKNESS = 0.12;
 const TICK_RATE = 60;
 const TICK_MS = 1000 / TICK_RATE;
 const WORLD_HALF = 11;
-const PLAYER_RADIUS = 0.6;
+const PLAYER_RADIUS = 0.8;
 const PLAYER_MASS = 1;
 const MAX_PLAYERS_PER_ROOM = 8;
 const ACCEL = 70;
@@ -35,7 +38,7 @@ const SOLO_CPU_DIFFICULTY = {
   },
   easy: {
     turnGain: 0.65,
-    maxThrottle: 0.2,
+    maxThrottle: 0.5,
     chargeBoost: 0.08,
     predictionTime: 0,
     wobbleAmp: 0.08,
@@ -46,7 +49,7 @@ const SOLO_CPU_DIFFICULTY = {
   },
   medium: {
     turnGain: 0.95,
-    maxThrottle: 0.6,
+    maxThrottle: 0.725,
     chargeBoost: 0.22,
     predictionTime: 0.15,
     wobbleAmp: 0.03,
@@ -57,7 +60,7 @@ const SOLO_CPU_DIFFICULTY = {
   },
   hard: {
     turnGain: 1.15,
-    maxThrottle: 0.95,
+    maxThrottle: 0.99,
     chargeBoost: 0.4,
     predictionTime: 0.3,
     wobbleAmp: 0,
@@ -86,6 +89,9 @@ module.exports = {
   DASH_COOLDOWN_MS,
   FALL_ELIMINATION_Y,
   SPAWN_DISTANCE,
+  PLATE_THICKNESS,
+  SPAWN_LINE_LENGTH,
+  SPAWN_LINE_THICKNESS,
   PLATE_SURFACE_Y,
   PLATE_BOUNDARY_RADIUS,
   PLATE_EDGE_TOLERANCE,

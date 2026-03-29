@@ -11,9 +11,6 @@ import {
 import type { GameConstants, PlayerState } from "../types";
 import DashCooldownIndicator from "./DashCooldownIndicator";
 
-const PLATE_THICKNESS = 0.5;
-const SPAWN_LINE_LENGTH = 3.6;
-const SPAWN_LINE_THICKNESS = 0.12;
 
 type FollowCameraProps = {
   target: THREE.Vector3 | null;
@@ -63,9 +60,14 @@ export function WorldScene({ players, localPlayerId, dashCooldownMs, dashCooldow
   // Use passed constants or fallback to imports (for backwards compatibility)
   const PLAYER_RADIUS = gameConstants?.PLAYER_RADIUS ?? IMPORTED_PLAYER_RADIUS;
   const SPAWN_DISTANCE = gameConstants?.SPAWN_DISTANCE ?? IMPORTED_SPAWN_DISTANCE;
+  const PLATE_THICKNESS = gameConstants?.PLATE_THICKNESS ?? 0.5;
+  const SPAWN_LINE_LENGTH = gameConstants?.SPAWN_LINE_LENGTH ?? 3.6;
+  const SPAWN_LINE_THICKNESS = gameConstants?.SPAWN_LINE_THICKNESS ?? 0.12;
   const WORLD_SIZE = gameConstants?.WORLD_HALF ? gameConstants.WORLD_HALF * 2 : 22;
   const PLATE_RADIUS = WORLD_SIZE / 2;
 
+  console.log("Using constants:", gameConstants);
+  
   const localPlayer = useMemo(
     () => players.find((player) => player.id === localPlayerId) || null,
     [players, localPlayerId]

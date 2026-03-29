@@ -24,10 +24,12 @@ function makePlayer({ userId, socketId, name }) {
     heading: 0,
     fallVelocityY: 0,
     lastDashAt: 0,
+    isDashing: false,
     isCpu: false,
     eliminated: false,
     disconnected: false,
     roundResult: null,
+    dashFriction: null,
   };
 }
 
@@ -43,10 +45,12 @@ function makeCPUball(id, name) {
     heading: 0,
     fallVelocityY: 0,
     lastDashAt: 0,
+    isDashing: false,
     isCpu: true,
     eliminated: false,
     disconnected: false,
     roundResult: null,
+    dashFriction: null,
   };
 }
 

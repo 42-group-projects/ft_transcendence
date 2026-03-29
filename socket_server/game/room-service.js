@@ -261,6 +261,12 @@ function createRoomService(io) {
     }
 
     player.lastDashAt = now;
+    player.isDashing = true;
+    player.dashFriction = 0.97; // Lower friction for momentum effect
+    setTimeout(() => {
+      player.isDashing = false;
+      player.dashFriction = null;
+    }, 320); // Dash state lasts 320ms
     // Emit dash_confirmed to the player who successfully dashed
     if (player.socketId) {
       io.to(player.socketId).emit("dash_confirmed");
