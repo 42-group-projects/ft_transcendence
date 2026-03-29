@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [statusMessage, setStatusMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  
   const isDEV = process.env.NODE_ENV === "development";
 
   //TODO: remove this dev shortcut before launch
@@ -36,13 +37,7 @@ export default function LoginPage() {
     event.preventDefault();
     setLoading(true);
     setStatusMessage("");
-
     try {
-      if(email == "" || password == "")
-      {
-        setEmail("player1@example.com");
-        setPassword("password1");
-      }
       const { access_token } = await apiLogin(email, password);
       saveToken(access_token);
       router.push("/lobby");
