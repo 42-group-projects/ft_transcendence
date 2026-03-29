@@ -76,7 +76,6 @@ export default function LoginPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
                 className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-blue-500"
-                {/* TODO: remove // to make this required */}
                 // required
               />
             </label>
@@ -89,7 +88,6 @@ export default function LoginPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="••••••••"
                 className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-blue-500"
-                {/* TODO: remove // to make this required */}
                 // required
               />
             </label>
