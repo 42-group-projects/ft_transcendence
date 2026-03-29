@@ -105,6 +105,8 @@ export default function LoginPage() {
               {loading ? "Signing in…" : "Sign in"}
             </button>
           </form>
+          {/* TODO: remove this dev shortcut before launch */}
+          <p>if you click sign in without entering credentials, default dev credentials will be used.</p>
 
           {statusMessage ? <p className="mt-4 text-sm text-amber-400">{statusMessage}</p> : null}
         </AuthCard>
