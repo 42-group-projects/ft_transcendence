@@ -9,6 +9,7 @@ import {
   SPAWN_LINE_OFFSET,
 } from "../constants";
 import type { GameConstants, PlayerState } from "../types";
+import DashCooldownIndicator from "./DashCooldownIndicator";
 
 const PLATE_THICKNESS = 0.5;
 const SPAWN_LINE_LENGTH = 3.6;
@@ -53,10 +54,12 @@ function FollowCamera({ target, heading }: FollowCameraProps) {
 type WorldSceneProps = {
   players: PlayerState[];
   localPlayerId: string | null;
+  dashCooldownMs?: number;
+  dashCooldownTotalMs?: number;
   gameConstants?: GameConstants | null;
 };
 
-export function WorldScene({ players, localPlayerId, gameConstants }: WorldSceneProps) {
+export function WorldScene({ players, localPlayerId, dashCooldownMs, dashCooldownTotalMs, gameConstants }: WorldSceneProps) {
   // Use passed constants or fallback to imports (for backwards compatibility)
   const PLAYER_RADIUS = gameConstants?.PLAYER_RADIUS ?? IMPORTED_PLAYER_RADIUS;
   const SPAWN_DISTANCE = gameConstants?.SPAWN_DISTANCE ?? IMPORTED_SPAWN_DISTANCE;
@@ -92,6 +95,7 @@ export function WorldScene({ players, localPlayerId, gameConstants }: WorldScene
         <boxGeometry args={[SPAWN_LINE_LENGTH, SPAWN_LINE_THICKNESS, 0.18]} />
         <meshStandardMaterial color="#f5f5f5" emissive="#737373" emissiveIntensity={0.3} />
       </mesh>
+
       <mesh position={[0, 0.02, -SPAWN_DISTANCE + SPAWN_LINE_OFFSET]} receiveShadow>
         <boxGeometry args={[SPAWN_LINE_LENGTH, SPAWN_LINE_THICKNESS, 0.18]} />
         <meshStandardMaterial color="#f5f5f5" emissive="#737373" emissiveIntensity={0.3} />
@@ -109,10 +113,9 @@ export function WorldScene({ players, localPlayerId, gameConstants }: WorldScene
               <sphereGeometry args={[PLAYER_RADIUS, 24, 24]} />
               <meshStandardMaterial color={isSelf ? "#3b82f6" : "#f97316"} />
             </mesh>
-            <mesh position={[0, PLAYER_RADIUS + 0.35, 0]}>
-              <planeGeometry args={[1.8, 0.45]} />
-              <meshBasicMaterial color="#000000" transparent opacity={0.35} />
-            </mesh>
+            {isSelf ? (
+              <DashCooldownIndicator dashCooldownMs={dashCooldownMs} dashCooldownTotalMs={dashCooldownTotalMs} offsetY={PLAYER_RADIUS + 0.5} />
+            ) : null}
           </group>
         );
       })}

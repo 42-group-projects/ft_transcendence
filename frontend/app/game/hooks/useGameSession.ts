@@ -65,6 +65,11 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
 
     socketRef.current = socket;
 
+    // Listen for gameConstants from server
+    socket.on("gameConstants", (constants) => {
+      setGameConstants(constants);
+    });
+
     registerGameSessionSocketHandlers({
       socket,
       socketUrl,

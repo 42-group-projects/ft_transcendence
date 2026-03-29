@@ -13,6 +13,7 @@ export type GameConstants = {
   PLAYER_RADIUS: number;
   SPAWN_DISTANCE: number;
   WORLD_HALF: number;
+  DASH_COOLDOWN_MS: number;
 };
 
 export type RoomStatePayload = {

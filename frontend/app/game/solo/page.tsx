@@ -9,10 +9,14 @@ import { CountdownOverlay } from "@/app/game/components/CountdownOverlay";
 import { WorldScene } from "../components/WorldScene";
 import { useGameSession } from "../hooks/useGameSession";
 import { useMovementInput } from "../hooks/useMovementInput";
+import { useDashCooldown } from "../hooks/useDashCooldown";
+import { FrameRateDisplay } from "../components/FrameRateDispay";
+import { FpsCounter } from "../utils/FpsCounter";
 
 type SoloDifficulty = "dummy" | "easy" | "medium" | "hard";
 
 export default function SoloPage() {
+	const [fps, setFps] = useState(0);
 	const [name, setName] = useState("Dev");
 	const [difficulty, setDifficulty] = useState<SoloDifficulty>("easy");
 	const {
@@ -31,7 +35,10 @@ export default function SoloPage() {
 		leaveRoom,
 	} = useGameSession();
 
-	useMovementInput({ joinedRoomId, socketRef });
+	const dashCooldownTotalMs = gameConstants?.DASH_COOLDOWN_MS ?? 800;
+	const { dashCooldownMs, triggerDash } = useDashCooldown(dashCooldownTotalMs);
+
+	useMovementInput({ joinedRoomId, socketRef, onDash: triggerDash });
 
 	const handleStart = () => {
 		socketRef.current?.emit("soloStart", { name, difficulty });
@@ -105,8 +112,16 @@ export default function SoloPage() {
 
 				<div className="relative h-[70vh] overflow-hidden rounded-lg border border-neutral-700">
 					<Canvas shadows="basic" camera={{ position: [0, 8, 10], fov: 55 }}>
-						<WorldScene players={players} localPlayerId={localPlayerId} gameConstants={gameConstants} />
+						<FpsCounter setFps={setFps} />
+						<WorldScene
+							players={players}
+							localPlayerId={localPlayerId}
+							gameConstants={gameConstants}
+							dashCooldownMs={dashCooldownMs}
+							dashCooldownTotalMs={dashCooldownTotalMs}
+						/>
 					</Canvas>
+						<FrameRateDisplay fps={fps} />
 					{countdown && countdown > 0 ? <CountdownOverlay seconds={countdown} /> : null}
 					{showGameResult ? <GameResultOverlay title={resultTitle} description={systemMessage} /> : null}
 				</div>

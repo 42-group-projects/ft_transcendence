@@ -1,4 +1,4 @@
-const { PLAYER_RADIUS, SPAWN_DISTANCE, WORLD_HALF } = require("./game/constants");
+const { PLAYER_RADIUS, SPAWN_DISTANCE, WORLD_HALF, DASH_COOLDOWN_MS } = require("./game/constants");
 
 function registerSocketHandlers(io, roomService) {
   io.on("connection", (socket) => {
@@ -8,6 +8,7 @@ function registerSocketHandlers(io, roomService) {
       PLAYER_RADIUS,
       SPAWN_DISTANCE,
       WORLD_HALF,
+      DASH_COOLDOWN_MS,
     });
 
     const reconnectResult = roomService.reconnectPlayer(userId, socket.id);
@@ -128,6 +129,17 @@ function registerSocketHandlers(io, roomService) {
       }
 
       roomService.setPlayerInput(roomId, userId, x, z);
+    });
+
+    socket.on("dash", () => {
+      const roomId = socket.data.roomId;
+      if (!roomId) {
+        return;
+      }
+
+      if (typeof roomService.handlePlayerDash === "function") {
+        roomService.handlePlayerDash(roomId, userId);
+      }
     });
 
     socket.on("moveInput", ({ x, z }) => {

@@ -23,6 +23,7 @@ function makePlayer({ userId, socketId, name }) {
     input: { x: 0, z: 0 },
     heading: 0,
     fallVelocityY: 0,
+    lastDashAt: 0,
     isCpu: false,
     eliminated: false,
     disconnected: false,
@@ -41,6 +42,7 @@ function makeCPUball(id, name) {
     input: { x: 0, z: 0 },
     heading: 0,
     fallVelocityY: 0,
+    lastDashAt: 0,
     isCpu: true,
     eliminated: false,
     disconnected: false,
@@ -88,9 +90,34 @@ function resetPlayerForRound(player) {
   player.input.z = 0;
   player.fallVelocityY = 0;
   player.position.y = PLATE_SURFACE_Y;
+  player.lastDashAt = 0;
   player.eliminated = false;
   player.disconnected = false;
   player.roundResult = null;
+}
+
+function safeNumber(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function sanitizePlayerNumbers(player) {
+  // Ensure core numeric fields are finite numbers to prevent NaN propagation
+  player.position.x = safeNumber(player.position.x, 0);
+  player.position.y = safeNumber(player.position.y, PLATE_SURFACE_Y);
+  player.position.z = safeNumber(player.position.z, 0);
+
+  player.velocity.x = safeNumber(player.velocity.x, 0);
+  player.velocity.z = safeNumber(player.velocity.z, 0);
+
+  player.input.x = safeNumber(player.input.x, 0);
+  player.input.z = safeNumber(player.input.z, 0);
+
+  player.heading = safeNumber(player.heading, 0);
+  player.fallVelocityY = safeNumber(player.fallVelocityY, 0);
+
+  // sanitize lastDashAt
+  player.lastDashAt = safeNumber(player.lastDashAt, 0);
 }
 
 function stopPlayerHorizontalMovement(player) {
@@ -124,4 +151,6 @@ module.exports = {
   resetPlayerForRound,
   stopPlayerHorizontalMovement,
   serializePlayers,
+  sanitizePlayerNumbers,
+  safeNumber,
 };
