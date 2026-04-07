@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 4001
 
-CMD ["pnpm", "run", "dev"]
+CMD ["pnpm", "run", "dev:compose"]

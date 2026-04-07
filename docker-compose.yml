@@ -11,7 +11,13 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
+      - game-network
       - private-network
     restart: unless-stopped
 
@@ -45,11 +51,16 @@ services:
       - NODE_ENV=${NODE_ENV}
       - PORT=4001
       - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     volumes:
       - ./api_server:/app
       - /app/node_modules
     networks:
       - game-network
+      - private-network
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   # Mock REST API (Hono) — kept for comparison/testing during migration
