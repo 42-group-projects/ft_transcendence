@@ -11,7 +11,9 @@ import { useGameSession } from "../hooks/useGameSession";
 import { useMovementInput } from "../hooks/useMovementInput";
 import { useDashCooldown } from "../hooks/useDashCooldown";
 import { FrameRateDisplay } from "../components/FrameRateDispay";
+import { CustomizationPanel } from "../components/CustomizationPanel";
 import { FpsCounter } from "../utils/FpsCounter";
+import { useCustomization } from "../hooks/useCustomization";
 
 type SoloDifficulty = "dummy" | "easy" | "medium" | "hard";
 
@@ -35,6 +37,7 @@ export default function SoloPage() {
 		leaveRoom,
 	} = useGameSession();
 
+	const { mawashiColor, dohyoTheme, update: updateCustomization } = useCustomization();
 	const dashCooldownTotalMs = gameConstants?.DASH_COOLDOWN_MS ?? 800;
 	const { dashCooldownMs, triggerDash } = useDashCooldown(dashCooldownTotalMs);
 
@@ -106,6 +109,8 @@ export default function SoloPage() {
 					</div>
 				)}
 
+				<CustomizationPanel mawashiColor={mawashiColor} dohyoTheme={dohyoTheme} onUpdate={updateCustomization} />
+
 				{errorMessage && <p className="text-sm text-red-400">{errorMessage}</p>}
 				{systemMessage && !errorMessage && <p className="text-sm text-neutral-400">{systemMessage}</p>}
 				{roundResultMessage && <p className="text-sm font-medium text-yellow-400">{roundResultMessage}</p>}
@@ -119,6 +124,8 @@ export default function SoloPage() {
 							gameConstants={gameConstants}
 							dashCooldownMs={dashCooldownMs}
 							dashCooldownTotalMs={dashCooldownTotalMs}
+							mawashiColor={mawashiColor}
+							dohyoTheme={dohyoTheme}
 						/>
 					</Canvas>
 						<FrameRateDisplay fps={fps} />

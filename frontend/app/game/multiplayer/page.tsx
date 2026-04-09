@@ -12,7 +12,9 @@ import { useGameSession } from "../hooks/useGameSession";
 import { useMovementInput } from "../hooks/useMovementInput";
 import { useDashCooldown } from "../hooks/useDashCooldown";
 import { FrameRateDisplay } from "../components/FrameRateDispay";
+import { CustomizationPanel } from "../components/CustomizationPanel";
 import { FpsCounter } from "../utils/FpsCounter";
+import { useCustomization } from "../hooks/useCustomization";
 
 export default function GamePage() {
   const [name, setName] = useState("Player");
@@ -37,6 +39,7 @@ export default function GamePage() {
     leaveRoom,
   } = useGameSession({ onRoomCreated: setRoomId });
 
+  const { mawashiColor, dohyoTheme, update: updateCustomization } = useCustomization();
   const dashCooldownTotalMs = gameConstants?.DASH_COOLDOWN_MS ?? 800;
   const { dashCooldownMs, triggerDash } = useDashCooldown(dashCooldownTotalMs);
   useMovementInput({ joinedRoomId, socketRef, onDash: triggerDash });
@@ -65,6 +68,8 @@ export default function GamePage() {
           </Link>
         </div>
 
+        <CustomizationPanel mawashiColor={mawashiColor} dohyoTheme={dohyoTheme} onUpdate={updateCustomization} />
+
         <GameLobbyControls
           name={name}
           roomId={roomId}
@@ -92,6 +97,8 @@ export default function GamePage() {
               gameConstants={gameConstants}
               dashCooldownMs={dashCooldownMs}
               dashCooldownTotalMs={dashCooldownTotalMs}
+              mawashiColor={mawashiColor}
+              dohyoTheme={dohyoTheme}
             />
           </Canvas>
           <FrameRateDisplay fps={fps} />
