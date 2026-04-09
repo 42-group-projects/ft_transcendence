@@ -1,18 +1,16 @@
 import { Hono } from "hono";
-import { type JwtUser, authMiddleware } from ../middleware/auth;
-import { analysisRoutes } from "./analysis";
-import { mockRoutes } from "./mock";
+import { analysisRoutes } from "./analysis/index";
+import { adminRoutes } from "./admin/index";
+import { mockRoutes } from "./mock/index";
 
-const app = new Hono<{ Variables: { user: JwtUser } }>()
-    .use(authMiddleware)
+const app = new Hono()
     .basePath("/api")
     .route("/mock", mockRoutes)
     .route("/analysis", analysisRoutes)
-
+    .route("/admin", adminRoutes)
     .get("/", (c) => {
         return c.text("This is the API root.");
-    });
-
+    })
     .get("/health", (c) => {
         return c.text("API is healthy!");
     });

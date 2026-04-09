@@ -1,8 +1,7 @@
 import { Hono } from "hono";
-import { analysisRoutes } from "./analysis";
+import { analysisRoutes } from "./analysis/index";
 
 const app = new Hono()
-    .basePath("/mock")
     .route("/analysis", analysisRoutes)
 
     .get("/", (c) => {

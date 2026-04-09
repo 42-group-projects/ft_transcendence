@@ -1,8 +1,10 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import { apiRoutes } from "./routes";
+import { cors } from "hono/cors";
+import { apiRoutes } from "./routes/index";
 
 const app = new Hono()
+  .use("/*", cors())
   .get("/health", (c) => {
     return c.text("Hello World!");
   })

@@ -21,6 +21,9 @@ importers:
         specifier: ^3.4.7
         version: 3.4.8
     devDependencies:
+      '@types/node':
+        specifier: ^25.5.2
+        version: 25.5.2
       drizzle-kit:
         specifier: ^0.31.4
         version: 0.31.10
@@ -494,6 +497,9 @@ packages:
     peerDependencies:
       hono: ^4
 
+  '@types/node@25.5.2':
+    resolution: {integrity: sha512-tO4ZIRKNC+MDWV4qKVZe3Ql/woTnmHDr5JD8UI5hn2pwBrHEwOEMZK7WlNb5RKB6EoJ02gwmQS9OrjuFnZYdpg==}
+
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
 
@@ -643,6 +649,9 @@ packages:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
+
+  undici-types@7.18.2:
+    resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
 snapshots:
 
@@ -884,6 +893,10 @@ snapshots:
     dependencies:
       hono: 4.12.9
 
+  '@types/node@25.5.2':
+    dependencies:
+      undici-types: 7.18.2
+
   buffer-from@1.1.2: {}
 
   drizzle-kit@0.31.10:
@@ -1008,3 +1021,5 @@ snapshots:
       fsevents: 2.3.3
 
   typescript@5.9.3: {}
+
+  undici-types@7.18.2: {}
