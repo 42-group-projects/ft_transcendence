@@ -9,6 +9,7 @@ import {
   SPAWN_LINE_OFFSET,
 } from "../constants";
 import type { GameConstants, PlayerState } from "../types";
+import { DOHYO_THEMES, type DohyoTheme } from "../hooks/useCustomization";
 import DashCooldownIndicator from "./DashCooldownIndicator";
 
 const PLATE_THICKNESS = 0.5;
@@ -57,14 +58,18 @@ type WorldSceneProps = {
   dashCooldownMs?: number;
   dashCooldownTotalMs?: number;
   gameConstants?: GameConstants | null;
+  mawashiColor?: string;
+  dohyoTheme?: DohyoTheme;
 };
 
-export function WorldScene({ players, localPlayerId, dashCooldownMs, dashCooldownTotalMs, gameConstants }: WorldSceneProps) {
+export function WorldScene({ players, localPlayerId, dashCooldownMs, dashCooldownTotalMs, gameConstants, mawashiColor = "#3b82f6", dohyoTheme = "default" }: WorldSceneProps) {
   // Use passed constants or fallback to imports (for backwards compatibility)
   const PLAYER_RADIUS = gameConstants?.PLAYER_RADIUS ?? IMPORTED_PLAYER_RADIUS;
   const SPAWN_DISTANCE = gameConstants?.SPAWN_DISTANCE ?? IMPORTED_SPAWN_DISTANCE;
   const WORLD_SIZE = gameConstants?.WORLD_HALF ? gameConstants.WORLD_HALF * 2 : 22;
   const PLATE_RADIUS = WORLD_SIZE / 2;
+
+  const theme = DOHYO_THEMES[dohyoTheme];
 
   const localPlayer = useMemo(
     () => players.find((player) => player.id === localPlayerId) || null,
@@ -88,17 +93,17 @@ export function WorldScene({ players, localPlayerId, dashCooldownMs, dashCooldow
 
       <mesh position={[0, -PLATE_THICKNESS / 2, 0]} receiveShadow>
         <cylinderGeometry args={[PLATE_RADIUS, PLATE_RADIUS, PLATE_THICKNESS, 80]} />
-        <meshStandardMaterial color="#2f2f2f" />
+        <meshStandardMaterial color={theme.surface} />
       </mesh>
 
       <mesh position={[0, 0.02, SPAWN_DISTANCE - SPAWN_LINE_OFFSET]} receiveShadow>
         <boxGeometry args={[SPAWN_LINE_LENGTH, SPAWN_LINE_THICKNESS, 0.18]} />
-        <meshStandardMaterial color="#f5f5f5" emissive="#737373" emissiveIntensity={0.3} />
+        <meshStandardMaterial color={theme.border} emissive={theme.border} emissiveIntensity={0.3} />
       </mesh>
 
       <mesh position={[0, 0.02, -SPAWN_DISTANCE + SPAWN_LINE_OFFSET]} receiveShadow>
         <boxGeometry args={[SPAWN_LINE_LENGTH, SPAWN_LINE_THICKNESS, 0.18]} />
-        <meshStandardMaterial color="#f5f5f5" emissive="#737373" emissiveIntensity={0.3} />
+        <meshStandardMaterial color={theme.border} emissive={theme.border} emissiveIntensity={0.3} />
       </mesh>
 
       {players.map((player) => {
@@ -111,7 +116,7 @@ export function WorldScene({ players, localPlayerId, dashCooldownMs, dashCooldow
           >
             <mesh castShadow>
               <sphereGeometry args={[PLAYER_RADIUS, 24, 24]} />
-              <meshStandardMaterial color={isSelf ? "#3b82f6" : "#f97316"} />
+              <meshStandardMaterial color={isSelf ? mawashiColor : "#f97316"} />
             </mesh>
             {isSelf ? (
               <DashCooldownIndicator dashCooldownMs={dashCooldownMs} dashCooldownTotalMs={dashCooldownTotalMs} offsetY={PLAYER_RADIUS + 0.5} />
