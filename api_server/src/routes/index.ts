@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { friendsRoute } from "./friends/index";
 import { analysisRoutes } from "./analysis/index";
 import { adminRoutes } from "./admin/index";
 import { rankingsRoutes } from "./rankings/index";
@@ -12,6 +13,7 @@ const app = new Hono()
     .route("/admin", adminRoutes)
     .route("/rankings", rankingsRoutes)
     .route("/users", usersRoutes)
+    .route("/friends", friendsRoute)
     .get("/", (c) => {
         return c.text("This is the API root.");
     })
