@@ -1,17 +1,36 @@
 import { friendRepository } from '../repository/friendRepository';
 import { ApiError } from '../utils/apiError';
-import { createDbClient } from '../repository/dbClient'; /
+import { createDbClient } from '../repository/dbClient';
 
 export const friendService = {
   sendFriendRequest: async (senderId: string, receiverId: string) => {
-    const { db, close } = createDbClient(); 
+    const { db, close } = createDbClient();
     try {
       if (senderId === receiverId) {
         throw new ApiError(400, "Cannot send friend request to yourself");
       }
-      return await friendRepository.createRequest(db, senderId, receiverId);
+
+      const existingFriendship = await friendRepository.getFriendshipBetweenUsers(db, senderId, receiverId);
+      if (existingFriendship) {
+        throw new ApiError(409, "Users are already friends");
+      }
+
+      const existingRequest = await friendRepository.getPendingRequestBetweenUsers(db, senderId, receiverId);
+      if (existingRequest) {
+        throw new ApiError(409, "A pending friend request already exists between these users");
+      }
+
+      try {
+        return await friendRepository.createRequest(db, senderId, receiverId);
+      } catch (error: any) {
+        if (error.message && (error.message.includes('duplicate key') || error.message.includes('unique constraint'))) {
+          throw new ApiError(409, "A friend request already exists between these users");
+        }
+        throw error;
+      }
+
     } finally {
-      await close(); 
+      await close();
     }
   },
 

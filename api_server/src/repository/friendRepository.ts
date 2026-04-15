@@ -1,5 +1,6 @@
 import { eq, or, and } from 'drizzle-orm';
 import { friendRequests, friendships, users } from '../db/schema';
+import type { AppDb } from './dbClient';
 
 export const friendRepository = {
   createRequest: async (db: AppDb, senderId: string, receiverId: string) => {
@@ -8,6 +9,32 @@ export const friendRepository = {
       receiverId,
       status: 'pending'
     }).returning();
+    return result[0];
+  },
+
+  getPendingRequestBetweenUsers: async (db: AppDb, user1Id: string, user2Id: string) => {
+    const result = await db.select().from(friendRequests).where(
+      and(
+        eq(friendRequests.status, 'pending'),
+        or(
+          and(eq(friendRequests.senderId, user1Id), eq(friendRequests.receiverId, user2Id)),
+          and(eq(friendRequests.senderId, user2Id), eq(friendRequests.receiverId, user1Id))
+        )
+      )
+    );
+    return result[0];
+  },
+
+  getFriendshipBetweenUsers: async (db: AppDb, user1Id: string, user2Id: string) => {
+    const result = await db.select().from(friendships).where(
+      and(
+        eq(friendships.status, 'accepted'),
+        or(
+          and(eq(friendships.userId, user1Id), eq(friendships.friendId, user2Id)),
+          and(eq(friendships.userId, user2Id), eq(friendships.friendId, user1Id))
+        )
+      )
+    );
     return result[0];
   },
 
