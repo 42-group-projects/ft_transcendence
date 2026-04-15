@@ -65,12 +65,12 @@ export const friendRepository = {
   },
 
   createFriendship: async (db: AppDb, userId: string, friendId: string) => {
-    const result = await db.insert(friendships).values({
-      userId,
-      friendId,
-      status: 'accepted'
-    }).returning();
-    return result[0];
+    const result = await db.insert(friendships).values([
+      { userId: userId, friendId: friendId, status: 'accepted' },
+      { userId: friendId, friendId: userId, status: 'accepted' }
+    ]).returning();
+    
+    return result;
   },
 
   getFriendsByUserId: async (db: AppDb, userId: string) => {
