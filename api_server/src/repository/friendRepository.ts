@@ -1,11 +1,8 @@
 import { eq, or, and } from 'drizzle-orm';
-import { createDbClient } from './dbClient';
 import { friendRequests, friendships, users } from '../db/schema';
 
-const { db } = createDbClient();
-
 export const friendRepository = {
-  createRequest: async (senderId: string, receiverId: string) => {
+  createRequest: async (db: AppDb, senderId: string, receiverId: string) => {
     const result = await db.insert(friendRequests).values({
       senderId,
       receiverId,
@@ -14,7 +11,7 @@ export const friendRepository = {
     return result[0];
   },
 
-  getPendingRequestsByUserId: async (userId: string) => {
+  getPendingRequestsByUserId: async (db: AppDb, userId: string) => {
     return await db.select({
       id: friendRequests.id,
       senderId: friendRequests.senderId,
@@ -27,7 +24,7 @@ export const friendRepository = {
     .where(and(eq(friendRequests.receiverId, userId), eq(friendRequests.status, 'pending')));
   },
 
-  updateRequestStatus: async (requestId: string, status: 'accepted' | 'rejected') => {
+  updateRequestStatus: async (db: AppDb, requestId: string, status: 'accepted' | 'rejected') => {
     const result = await db.update(friendRequests)
       .set({ status, updatedAt: new Date() })
       .where(eq(friendRequests.id, requestId))
@@ -35,12 +32,12 @@ export const friendRepository = {
     return result[0];
   },
 
-  getRequestById: async (requestId: string) => {
+  getRequestById: async (db: AppDb, requestId: string) => {
     const result = await db.select().from(friendRequests).where(eq(friendRequests.id, requestId));
     return result[0];
   },
 
-  createFriendship: async (userId: string, friendId: string) => {
+  createFriendship: async (db: AppDb, userId: string, friendId: string) => {
     const result = await db.insert(friendships).values({
       userId,
       friendId,
@@ -49,7 +46,7 @@ export const friendRepository = {
     return result[0];
   },
 
-  getFriendsByUserId: async (userId: string) => {
+  getFriendsByUserId: async (db: AppDb, userId: string) => {
     return await db.select()
       .from(friendships)
       .where(
@@ -60,7 +57,7 @@ export const friendRepository = {
       );
   },
 
-  removeFriendship: async (userId: string, friendId: string) => {
+  removeFriendship: async (db: AppDb, userId: string, friendId: string) => {
     const result = await db.update(friendships)
       .set({ status: 'removed', updatedAt: new Date() })
       .where(
