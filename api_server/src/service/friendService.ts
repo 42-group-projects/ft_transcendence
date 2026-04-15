@@ -59,7 +59,13 @@ export const friendService = {
       }
       
       await friendRepository.updateRequestStatus(db, requestId, 'accepted');
-      await friendRepository.createFriendship(db, request.senderId, request.receiverId);
+      
+      try {
+        await friendRepository.createFriendship(db, request.senderId, request.receiverId);
+      } catch (error) {
+        await friendRepository.updateRequestStatus(db, requestId, 'pending');
+        throw new ApiError(500, "Failed to create friendship. Process rolled back.");
+      }
       
       return { success: true, message: "Friend request accepted" };
     } finally {
