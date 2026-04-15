@@ -5,10 +5,24 @@ export const friendsRoute = new Hono();
 
 friendsRoute.post('/requests', async (c) => {
   try {
-    const body = await c.req.json();
+    const body = await c.req.json().catch(() => null);
+    
+    if (!body) {
+      return c.json({ error: "Invalid JSON format" }, 400);
+    }
+
     const { senderId, receiverId } = body; 
+
+    if (!senderId || typeof senderId !== 'string') {
+      return c.json({ error: "senderId is required and must be a string" }, 400);
+    }
+    if (!receiverId || typeof receiverId !== 'string') {
+      return c.json({ error: "receiverId is required and must be a string" }, 400);
+    }
+
     const result = await friendService.sendFriendRequest(senderId, receiverId);
     return c.json(result, 201);
+    
   } catch (error: any) {
     return c.json({ error: error.message }, 400);
   }
