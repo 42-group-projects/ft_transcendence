@@ -34,13 +34,17 @@ export const friendService = {
     return { success: true, message: "Friend request rejected" };
   },
 
-  getFriendList: async (userId: string) => {
+getFriendList: async (userId: string) => {
     const friendships = await friendRepository.getFriendsByUserId(userId);
     
-    const friendIds = friendships.map(f => f.userId === userId ? f.friendId : f.userId);
+    // 相手のIDだけを抽出（ここまでは重複が含まれている可能性がある）
+    const rawFriendIds = friendships.map(f => f.userId === userId ? f.friendId : f.userId);
+    
+    // 重複を削除 
+    const uniqueFriendIds = Array.from(new Set(rawFriendIds));
     
     // Socket連携前のモックとしてオフラインを返す
-    return friendIds.map(id => ({
+    return uniqueFriendIds.map(id => ({
       userId: id,
       onlineStatus: "offline"
     }));
