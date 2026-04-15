@@ -23,8 +23,9 @@ friendsRoute.post('/requests', async (c) => {
     const result = await friendService.sendFriendRequest(senderId, receiverId);
     return c.json(result, 201);
     
-  } catch (error: any) {
-    return c.json({ error: error.message }, 400);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to send friend request";
+    return c.json({ error: message }, 400);
   }
 });
 
@@ -35,8 +36,9 @@ friendsRoute.get('/requests', async (c) => {
 
     const requests = await friendService.getPendingRequests(userId);
     return c.json(requests, 200);
-  } catch (error: any) {
-    return c.json({ error: error.message }, 500);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch friend requests";
+    return c.json({ error: message }, 500);
   }
 });
 
@@ -45,8 +47,9 @@ friendsRoute.post('/requests/:id/accept', async (c) => {
     const requestId = c.req.param('id');
     const result = await friendService.acceptFriendRequest(requestId);
     return c.json(result, 200);
-  } catch (error: any) {
-    return c.json({ error: error.message }, 400);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to accept friend request";
+    return c.json({ error: message }, 400);
   }
 });
 
@@ -55,8 +58,9 @@ friendsRoute.post('/requests/:id/reject', async (c) => {
     const requestId = c.req.param('id');
     const result = await friendService.rejectFriendRequest(requestId);
     return c.json(result, 200);
-  } catch (error: any) {
-    return c.json({ error: error.message }, 400);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to reject friend request";
+    return c.json({ error: message }, 400);
   }
 });
 
@@ -67,20 +71,31 @@ friendsRoute.get('/', async (c) => {
 
     const friends = await friendService.getFriendList(userId);
     return c.json(friends, 200);
-  } catch (error: any) {
-    return c.json({ error: error.message }, 500);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch friend list";
+    return c.json({ error: message }, 500);
   }
 });
 
 friendsRoute.post('/:id/remove', async (c) => {
   try {
     const friendId = c.req.param('id');
-    const body = await c.req.json();
+    
+    const body = await c.req.json().catch(() => null);
+    if (!body) {
+      return c.json({ error: "Invalid JSON format" }, 400);
+    }
+
     const { userId } = body; 
+    
+    if (!userId || typeof userId !== 'string') {
+      return c.json({ error: "userId is required and must be a string" }, 400);
+    }
     
     const result = await friendService.removeFriend(userId, friendId);
     return c.json(result, 200);
-  } catch (error: any) {
-    return c.json({ error: error.message }, 400);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to remove friend";
+    return c.json({ error: message }, 400);
   }
 });
