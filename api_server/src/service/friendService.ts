@@ -1,9 +1,10 @@
 import { friendRepository } from '../repository/friendRepository';
+import { ApiError } from '../utils/apiError';
 
 export const friendService = {
   sendFriendRequest: async (senderId: string, receiverId: string) => {
     if (senderId === receiverId) {
-      throw new Error("Cannot send friend request to yourself");
+      throw new ApiError(400, "Cannot send friend request to yourself");
     }
     return await friendRepository.createRequest(senderId, receiverId);
   },
@@ -12,10 +13,17 @@ export const friendService = {
     return await friendRepository.getPendingRequestsByUserId(userId);
   },
 
-  acceptFriendRequest: async (requestId: string) => {
+  acceptFriendRequest: async (userId: string, requestId: string) => {
     const request = await friendRepository.getRequestById(requestId);
-    if (!request || request.status !== 'pending') {
-      throw new Error("Invalid or already processed request");
+    
+    if (!request) {
+      throw new ApiError(404, "Friend request not found");
+    }
+    if (request.receiverId !== userId) {
+      throw new ApiError(403, "You are not authorized to accept this request");
+    }
+    if (request.status !== 'pending') {
+      throw new ApiError(409, "Friend request already processed");
     }
     
     await friendRepository.updateRequestStatus(requestId, 'accepted');
@@ -24,17 +32,24 @@ export const friendService = {
     return { success: true, message: "Friend request accepted" };
   },
 
-  rejectFriendRequest: async (requestId: string) => {
+  rejectFriendRequest: async (userId: string, requestId: string) => {
     const request = await friendRepository.getRequestById(requestId);
-    if (!request || request.status !== 'pending') {
-      throw new Error("Invalid or already processed request");
+    
+    if (!request) {
+      throw new ApiError(404, "Friend request not found");
+    }
+    if (request.receiverId !== userId) {
+      throw new ApiError(403, "You are not authorized to reject this request");
+    }
+    if (request.status !== 'pending') {
+      throw new ApiError(409, "Friend request already processed");
     }
     
     await friendRepository.updateRequestStatus(requestId, 'rejected');
     return { success: true, message: "Friend request rejected" };
   },
 
-getFriendList: async (userId: string) => {
+  getFriendList: async (userId: string) => {
     const friendships = await friendRepository.getFriendsByUserId(userId);
     
     // 相手のIDだけを抽出（ここまでは重複が含まれている可能性がある）
@@ -53,7 +68,7 @@ getFriendList: async (userId: string) => {
   removeFriend: async (userId: string, friendId: string) => {
     const result = await friendRepository.removeFriendship(userId, friendId);
     if (result.length === 0) {
-      throw new Error("Friendship does not exist");
+      throw new ApiError(404, "Friendship does not exist");
     }
     return { success: true, message: "Friend removed" };
   }
