@@ -3,6 +3,11 @@ import { friendRequests, friendships, users } from '../db/schema';
 import type { AppDb } from './dbClient';
 
 export const friendRepository = {
+  checkUserExists: async (db: AppDb, userId: string) => {
+    const result = await db.select().from(users).where(eq(users.id, userId));
+    return result.length > 0;
+  },
+
   createRequest: async (db: AppDb, senderId: string, receiverId: string) => {
     const result = await db.insert(friendRequests).values({
       senderId,
