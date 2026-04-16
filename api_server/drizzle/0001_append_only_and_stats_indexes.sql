@@ -16,8 +16,5 @@ FOR EACH ROW EXECUTE FUNCTION prevent_mutation_on_match_records();
 CREATE INDEX idx_user_stats_rating_desc
 ON user_stats (rating DESC, user_id ASC);
 
-CREATE INDEX idx_match_records_player1_played_at_desc
-ON match_records (player1_id, played_at DESC, id DESC);
-
-CREATE INDEX idx_match_records_player2_played_at_desc
-ON match_records (player2_id, played_at DESC, id DESC);
+CREATE INDEX idx_match_records_played_at_desc
+ON match_records (played_at DESC, id DESC);
