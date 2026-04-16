@@ -42,6 +42,23 @@ export type MatchHistoryRow = {
   playedAt: string;
 };
 
+const RANKED_USERS_CTE = sql`
+  with ranked_users as (
+    select
+      u.id as "userId",
+      u.nickname as "nickname",
+      u.avatar_url as "avatarUrl",
+      coalesce(s.wins, 0)::int as "wins",
+      coalesce(s.losses, 0)::int as "losses",
+      coalesce(s.rating, 1000)::int as "rating",
+      row_number() over (
+        order by coalesce(s.rating, 1000) desc, u.id asc
+      )::int as "rank"
+    from users u
+    left join user_stats s on s.user_id = u.id
+  )
+`;
+
 function encodeCursor(value: RankingCursor | HistoryCursor): string {
   return Buffer.from(JSON.stringify(value), "utf8").toString("base64url");
 }
@@ -127,20 +144,7 @@ export async function getRankingsPage(
   params: { cursor: RankingCursor | null; limit: number }
 ): Promise<RankingRow[]> {
   const rows = await db.execute<RankingRow>(sql`
-    with ranked_users as (
-      select
-        u.id as "userId",
-        u.nickname as "nickname",
-        u.avatar_url as "avatarUrl",
-        coalesce(s.wins, 0)::int as "wins",
-        coalesce(s.losses, 0)::int as "losses",
-        coalesce(s.rating, 1000)::int as "rating",
-        row_number() over (
-          order by coalesce(s.rating, 1000) desc, u.id asc
-        )::int as "rank"
-      from users u
-      left join user_stats s on s.user_id = u.id
-    )
+    ${RANKED_USERS_CTE}
     select *
     from ranked_users
     ${buildRankingsCursorFilter(params.cursor)}
@@ -153,18 +157,7 @@ export async function getRankingsPage(
 
 export async function getUserStatsRow(db: AppDb, userId: string): Promise<UserStatsRow | null> {
   const rows = await db.execute<UserStatsRow>(sql`
-    with ranked_users as (
-      select
-        u.id as "userId",
-        coalesce(s.wins, 0)::int as "wins",
-        coalesce(s.losses, 0)::int as "losses",
-        coalesce(s.rating, 1000)::int as "rating",
-        row_number() over (
-          order by coalesce(s.rating, 1000) desc, u.id asc
-        )::int as "rank"
-      from users u
-      left join user_stats s on s.user_id = u.id
-    )
+    ${RANKED_USERS_CTE}
     select *
     from ranked_users
     where "userId" = ${userId}
