@@ -29,7 +29,7 @@ friendsRoute.post('/requests', async (c) => {
       return c.json({ error: error.message }, error.statusCode as any);
     }
     const message = error instanceof Error ? error.message : "Failed to send friend request";
-    return c.json({ error: message }, 400);
+    return c.json({ error: message }, 500);
   }
 });
 
