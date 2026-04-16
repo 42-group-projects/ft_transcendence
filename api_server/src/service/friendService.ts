@@ -3,28 +3,33 @@ import { ApiError } from '../utils/apiError';
 import { createDbClient } from '../repository/dbClient';
 
 export const friendService = {
-  sendFriendRequest: async (senderId: string, receiverId: string) => {
+sendFriendRequest: async (senderId: string, receiverId: string) => {
     const { db, close } = createDbClient();
     try {
       if (senderId === receiverId) {
-        throw new ApiError(400, "Cannot send friend request to yourself");
+        throw new ApiError(422, "SOCIAL_SELF_REQUEST");
+      }
+
+      const receiverExists = await friendRepository.checkUserExists(db, receiverId);
+      if (!receiverExists) {
+        throw new ApiError(404, "NOT_FOUND");
       }
 
       const existingFriendship = await friendRepository.getFriendshipBetweenUsers(db, senderId, receiverId);
       if (existingFriendship) {
-        throw new ApiError(409, "Users are already friends");
+        throw new ApiError(409, "SOCIAL_ALREADY_FRIENDS");
       }
 
       const existingRequest = await friendRepository.getPendingRequestBetweenUsers(db, senderId, receiverId);
       if (existingRequest) {
-        throw new ApiError(409, "A pending friend request already exists between these users");
+        throw new ApiError(409, "SOCIAL_REQUEST_EXISTS");
       }
 
       try {
         return await friendRepository.createRequest(db, senderId, receiverId);
       } catch (error: any) {
         if (error.message && (error.message.includes('duplicate key') || error.message.includes('unique constraint'))) {
-          throw new ApiError(409, "A friend request already exists between these users");
+          throw new ApiError(409, "SOCIAL_REQUEST_EXISTS");
         }
         throw error;
       }
