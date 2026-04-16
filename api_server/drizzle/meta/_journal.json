@@ -8,6 +8,13 @@
       "when": 1774893516583,
       "tag": "0000_wet_hobgoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776299000000,
+      "tag": "0001_append_only_and_stats_indexes",
+      "breakpoints": true
     }
   ]
 }
