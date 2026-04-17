@@ -185,6 +185,16 @@ export async function getUserStatsResponse(userId: string): Promise<UserStatsRes
   }
 }
 
+export async function userExists(db: DbClient, userId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  return !!row;
+}
+
 export async function getUserHistoryResponse(
   userId: string,
   rawCursor: string | null | undefined,
@@ -195,16 +205,17 @@ export async function getUserHistoryResponse(
   const dbClient = createDbClient();
 
   try {
-    const user = await getUserStatsRow(dbClient.db, userId);
+    const exists = await userExists(dbClient.db, userId);
 
-    if (!user) {
+    if (!exists) {
       throw new NotFoundError("User not found");
     }
 
     const rows = await getUserMatchHistoryPage(dbClient.db, { userId, cursor, limit });
     const hasMore = rows.length > limit;
     const items = rows.slice(0, limit).map(mapHistoryRow);
-    const nextCursor = hasMore && items.length > 0 ? buildNextHistoryCursor(rows[limit - 1]) : null;
+    const nextCursor =
+      hasMore && items.length > 0 ? buildNextHistoryCursor(rows[limit - 1]) : null;
 
     return {
       data: items,
