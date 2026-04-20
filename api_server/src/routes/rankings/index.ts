@@ -1,21 +1,17 @@
 import { Hono } from "hono";
-import { BadRequestError, getRankingsResponse } from "../../service/statsService";
+import { getRankingsResponse } from "../../service/statsService";
+import { errorHandler } from "../../utils/errorHandler";
 
-const app = new Hono().get("/", async (c) => {
-  try {
-    const cursor = c.req.query("cursor");
-    const limit = c.req.query("limit");
-    const result = await getRankingsResponse(cursor, limit);
+const app = new Hono();
 
-    return c.json(result);
-  } catch (error) {
-    if (error instanceof BadRequestError) {
-      return c.json({ error: error.message }, 400);
-    }
+app.onError(errorHandler);
 
-    const message = error instanceof Error ? error.message : "Failed to fetch rankings";
-    return c.json({ error: message }, 500);
-  }
+app.get("/", async (c) => {
+  const cursor = c.req.query("cursor");
+  const limit = c.req.query("limit");
+  const result = await getRankingsResponse(cursor, limit);
+
+  return c.json(result);
 });
 
 export { app as rankingsRoutes };

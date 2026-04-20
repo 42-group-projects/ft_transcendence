@@ -2,59 +2,35 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { userIdSchema } from "../../schema/userSchema";
 import {
-  BadRequestError,
-  NotFoundError,
   getUserHistoryResponse,
   getUserStatsResponse,
 } from "../../service/statsService";
+import { errorHandler } from "../../utils/errorHandler";
 
-const app = new Hono()
-  .get(
-    "/:id/stats",
-    zValidator("param", userIdSchema),
-    async (c) => {
-      const { id } = c.req.valid("param");
+const app = new Hono();
 
-      try {
-        const result = await getUserStatsResponse(id);
-        return c.json(result);
-      } catch (error) {
-        if (error instanceof NotFoundError) {
-          return c.json({ error: error.message }, 404);
-        }
+app.onError(errorHandler);
 
-        const message =
-          error instanceof Error ? error.message : "Failed to fetch user stats";
-        return c.json({ error: message }, 500);
-      }
-    }
-  )
-  .get(
-    "/:id/history",
-    zValidator("param", userIdSchema),
-    async (c) => {
-      const { id } = c.req.valid("param");
+app.get(
+  "/:id/stats",
+  zValidator("param", userIdSchema),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const result = await getUserStatsResponse(id);
+    return c.json(result);
+  }
+);
 
-      try {
-        const cursor = c.req.query("cursor");
-        const limit = c.req.query("limit");
-        const result = await getUserHistoryResponse(id, cursor, limit);
-
-        return c.json(result);
-      } catch (error) {
-        if (error instanceof NotFoundError) {
-          return c.json({ error: error.message }, 404);
-        }
-
-        if (error instanceof BadRequestError) {
-          return c.json({ error: error.message }, 400);
-        }
-
-        const message =
-          error instanceof Error ? error.message : "Failed to fetch user history";
-        return c.json({ error: message }, 500);
-      }
-    }
-  );
+app.get(
+  "/:id/history",
+  zValidator("param", userIdSchema),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const cursor = c.req.query("cursor");
+    const limit = c.req.query("limit");
+    const result = await getUserHistoryResponse(id, cursor, limit);
+    return c.json(result);
+  }
+);
 
 export { app as usersRoutes };

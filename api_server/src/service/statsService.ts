@@ -1,4 +1,5 @@
 import { createDbClient } from "../repository/dbClient";
+import { ApiError } from "../utils/apiError";
 import {
   buildNextHistoryCursor,
   buildNextRankingCursor,
@@ -12,9 +13,6 @@ import {
   type MatchHistoryRow,
   type RankingRow,
 } from "../repository/statsRepository";
-
-export class BadRequestError extends Error {}
-export class NotFoundError extends Error {}
 
 export type RankingsResponseItem = {
   user_id: string;
@@ -72,7 +70,7 @@ function normalizeLimit(rawLimit: string | null | undefined): number {
 
   const parsed = Number(rawLimit);
   if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new BadRequestError("limit must be a positive integer");
+    throw new ApiError(400, "limit must be a positive integer");
   }
 
   return Math.min(parsed, MAX_PAGE_LIMIT);
@@ -86,7 +84,7 @@ function parseRankingCursor(rawCursor: string | null | undefined) {
   try {
     return decodeRankingCursor(rawCursor);
   } catch {
-    throw new BadRequestError("Invalid cursor format");
+    throw new ApiError(400, "Invalid cursor format");
   }
 }
 
@@ -98,7 +96,7 @@ function parseHistoryCursor(rawCursor: string | null | undefined) {
   try {
     return decodeHistoryCursor(rawCursor);
   } catch {
-    throw new BadRequestError("Invalid cursor format");
+    throw new ApiError(400, "Invalid cursor format");
   }
 }
 
@@ -167,7 +165,7 @@ export async function getUserStatsResponse(userId: string): Promise<UserStatsRes
     const row = await getUserStatsRow(dbClient.db, userId);
 
     if (!row) {
-      throw new NotFoundError("User not found");
+      throw new ApiError(404, "User not found");
     }
 
     return {
@@ -208,7 +206,7 @@ export async function getUserHistoryResponse(
     const exists = await userExists(dbClient.db, userId);
 
     if (!exists) {
-      throw new NotFoundError("User not found");
+      throw new ApiError(404, "User not found");
     }
 
     const rows = await getUserMatchHistoryPage(dbClient.db, { userId, cursor, limit });
