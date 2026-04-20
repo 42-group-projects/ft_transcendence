@@ -1,4 +1,6 @@
 import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { userIdSchema } from "../../schema/userSchema";
 import {
   BadRequestError,
   NotFoundError,
@@ -6,58 +8,53 @@ import {
   getUserStatsResponse,
 } from "../../service/statsService";
 
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function isValidUuid(value: string): boolean {
-  return UUID_PATTERN.test(value);
-}
-
 const app = new Hono()
-  .get("/:id/stats", async (c) => {
-    const userId = c.req.param("id");
+  .get(
+    "/:id/stats",
+    zValidator("param", userIdSchema),
+    async (c) => {
+      const { id } = c.req.valid("param");
 
-    if (!isValidUuid(userId)) {
-      return c.json({ error: "Invalid user id" }, 400);
-    }
+      try {
+        const result = await getUserStatsResponse(id);
+        return c.json(result);
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          return c.json({ error: error.message }, 404);
+        }
 
-    try {
-      const result = await getUserStatsResponse(userId);
-      return c.json(result);
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        return c.json({ error: error.message }, 404);
+        const message =
+          error instanceof Error ? error.message : "Failed to fetch user stats";
+        return c.json({ error: message }, 500);
       }
-
-      const message = error instanceof Error ? error.message : "Failed to fetch user stats";
-      return c.json({ error: message }, 500);
     }
-  })
-  .get("/:id/history", async (c) => {
-    const userId = c.req.param("id");
+  )
+  .get(
+    "/:id/history",
+    zValidator("param", userIdSchema), // Zodバリデーションを適用
+    async (c) => {
+      const { id } = c.req.valid("param");
 
-    if (!isValidUuid(userId)) {
-      return c.json({ error: "Invalid user id" }, 400);
-    }
+      try {
+        const cursor = c.req.query("cursor");
+        const limit = c.req.query("limit");
+        const result = await getUserHistoryResponse(id, cursor, limit);
 
-    try {
-      const cursor = c.req.query("cursor");
-      const limit = c.req.query("limit");
-      const result = await getUserHistoryResponse(userId, cursor, limit);
+        return c.json(result);
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          return c.json({ error: error.message }, 404);
+        }
 
-      return c.json(result);
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        return c.json({ error: error.message }, 404);
+        if (error instanceof BadRequestError) {
+          return c.json({ error: error.message }, 400);
+        }
+
+        const message =
+          error instanceof Error ? error.message : "Failed to fetch user history";
+        return c.json({ error: message }, 500);
       }
-
-      if (error instanceof BadRequestError) {
-        return c.json({ error: error.message }, 400);
-      }
-
-      const message = error instanceof Error ? error.message : "Failed to fetch user history";
-      return c.json({ error: message }, 500);
     }
-  });
+  );
 
 export { app as usersRoutes };
