@@ -1,15 +1,13 @@
 import { createDbClient } from "../repository/dbClient";
 import { ApiError } from "../utils/apiError";
+import type { HistoryCursor, RankingCursor } from "../lib/statsCursor";
 import {
   buildNextHistoryCursor,
   buildNextRankingCursor,
-  decodeHistoryCursor,
-  decodeRankingCursor,
-  DEFAULT_PAGE_LIMIT,
   getRankingsPage,
+  getUserExists,
   getUserMatchHistoryPage,
   getUserStatsRow,
-  MAX_PAGE_LIMIT,
   type MatchHistoryRow,
   type RankingRow,
 } from "../repository/statsRepository";
@@ -63,43 +61,6 @@ export type UserHistoryResponse = {
   };
 };
 
-function normalizeLimit(rawLimit: string | null | undefined): number {
-  if (rawLimit == null || rawLimit === "") {
-    return DEFAULT_PAGE_LIMIT;
-  }
-
-  const parsed = Number(rawLimit);
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new ApiError(400, "limit must be a positive integer");
-  }
-
-  return Math.min(parsed, MAX_PAGE_LIMIT);
-}
-
-function parseRankingCursor(rawCursor: string | null | undefined) {
-  if (!rawCursor) {
-    return null;
-  }
-
-  try {
-    return decodeRankingCursor(rawCursor);
-  } catch {
-    throw new ApiError(400, "Invalid cursor format");
-  }
-}
-
-function parseHistoryCursor(rawCursor: string | null | undefined) {
-  if (!rawCursor) {
-    return null;
-  }
-
-  try {
-    return decodeHistoryCursor(rawCursor);
-  } catch {
-    throw new ApiError(400, "Invalid cursor format");
-  }
-}
-
 function calculateWinRate(wins: number, losses: number): number {
   const total = wins + losses;
   if (total <= 0) {
@@ -135,9 +96,10 @@ function mapHistoryRow(row: MatchHistoryRow): UserHistoryResponseItem {
   };
 }
 
-export async function getRankingsResponse(rawCursor: string | null | undefined, rawLimit: string | null | undefined): Promise<RankingsResponse> {
-  const limit = normalizeLimit(rawLimit);
-  const cursor = parseRankingCursor(rawCursor);
+export async function getRankingsResponse(
+  cursor: RankingCursor | null,
+  limit: number
+): Promise<RankingsResponse> {
   const dbClient = createDbClient();
 
   try {
@@ -183,27 +145,15 @@ export async function getUserStatsResponse(userId: string): Promise<UserStatsRes
   }
 }
 
-export async function userExists(db: DbClient, userId: string): Promise<boolean> {
-  const [row] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
-
-  return !!row;
-}
-
 export async function getUserHistoryResponse(
   userId: string,
-  rawCursor: string | null | undefined,
-  rawLimit: string | null | undefined
+  cursor: HistoryCursor | null,
+  limit: number
 ): Promise<UserHistoryResponse> {
-  const limit = normalizeLimit(rawLimit);
-  const cursor = parseHistoryCursor(rawCursor);
   const dbClient = createDbClient();
 
   try {
-    const exists = await userExists(dbClient.db, userId);
+    const exists = await getUserExists(dbClient.db, userId);
 
     if (!exists) {
       throw new ApiError(404, "User not found");

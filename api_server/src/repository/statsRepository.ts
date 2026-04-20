@@ -1,18 +1,11 @@
 import { sql } from "drizzle-orm";
 import type { AppDb } from "./dbClient";
-
-export const DEFAULT_PAGE_LIMIT = 20;
-export const MAX_PAGE_LIMIT = 100;
-
-export type RankingCursor = {
-  rating: number;
-  userId: string;
-};
-
-export type HistoryCursor = {
-  playedAt: string;
-  matchId: string;
-};
+import {
+  encodeHistoryCursor,
+  encodeRankingCursor,
+  type HistoryCursor,
+  type RankingCursor,
+} from "../lib/statsCursor";
 
 export type RankingRow = {
   userId: string;
@@ -59,26 +52,6 @@ const RANKED_USERS_CTE = sql`
   )
 `;
 
-function encodeCursor(value: RankingCursor | HistoryCursor): string {
-  return Buffer.from(JSON.stringify(value), "utf8").toString("base64url");
-}
-
-function decodeCursor<T extends object>(cursor: string): T {
-  let parsed: unknown;
-
-  try {
-    parsed = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8"));
-  } catch {
-    throw new Error("Invalid cursor format");
-  }
-
-  if (!parsed || typeof parsed !== "object") {
-    throw new Error("Invalid cursor format");
-  }
-
-  return parsed as T;
-}
-
 function buildRankingsCursorFilter(cursor: RankingCursor | null) {
   if (!cursor) {
     return sql``;
@@ -103,40 +76,6 @@ function buildHistoryCursorFilter(cursor: HistoryCursor | null) {
       or (mr.played_at = ${cursor.playedAt}::timestamptz and mr.id < ${cursor.matchId})
     )
   `;
-}
-
-export function encodeRankingCursor(cursor: RankingCursor): string {
-  return encodeCursor(cursor);
-}
-
-export function encodeHistoryCursor(cursor: HistoryCursor): string {
-  return encodeCursor(cursor);
-}
-
-export function decodeRankingCursor(cursor: string): RankingCursor {
-  const parsed = decodeCursor<Partial<RankingCursor>>(cursor);
-
-  if (typeof parsed.rating !== "number" || typeof parsed.userId !== "string") {
-    throw new Error("Invalid cursor format");
-  }
-
-  return {
-    rating: parsed.rating,
-    userId: parsed.userId,
-  };
-}
-
-export function decodeHistoryCursor(cursor: string): HistoryCursor {
-  const parsed = decodeCursor<Partial<HistoryCursor>>(cursor);
-
-  if (typeof parsed.playedAt !== "string" || typeof parsed.matchId !== "string") {
-    throw new Error("Invalid cursor format");
-  }
-
-  return {
-    playedAt: parsed.playedAt,
-    matchId: parsed.matchId,
-  };
 }
 
 export async function getRankingsPage(
@@ -165,6 +104,18 @@ export async function getUserStatsRow(db: AppDb, userId: string): Promise<UserSt
   `);
 
   return rows[0] ?? null;
+}
+
+export async function getUserExists(db: AppDb, userId: string): Promise<boolean> {
+  const rows = await db.execute<{ exists: boolean }>(sql`
+    select exists(
+      select 1
+      from users
+      where id = ${userId}
+    ) as "exists"
+  `);
+
+  return rows[0]?.exists ?? false;
 }
 
 export async function getUserMatchHistoryPage(
