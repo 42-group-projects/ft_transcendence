@@ -31,7 +31,7 @@ const app = new Hono()
   )
   .get(
     "/:id/history",
-    zValidator("param", userIdSchema), // Zodバリデーションを適用
+    zValidator("param", userIdSchema),
     async (c) => {
       const { id } = c.req.valid("param");
 
