@@ -15,7 +15,6 @@ const app = new Hono()
     .route("/users", usersRoutes)
     .route("/friends", friendsRoute)
     .route("/rankings", rankingsRoutes)
-    .route("/users", usersRoutes)
     .get("/", (c) => {
         return c.text("This is the API root.");
     })
