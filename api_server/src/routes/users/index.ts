@@ -6,11 +6,8 @@ import {
   getUserHistoryResponse,
   getUserStatsResponse,
 } from "../../service/statsService";
-import { errorHandler } from "../../utils/errorHandler";
 
 const app = new Hono();
-
-app.onError(errorHandler);
 
 app.get(
   "/:id/stats",
