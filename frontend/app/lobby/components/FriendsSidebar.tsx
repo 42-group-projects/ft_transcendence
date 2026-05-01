@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { 
-  apiGetFriends, 
-  apiGetFriendRequests, 
-  apiSendFriendRequest, 
-  apiAcceptFriendRequest, 
-  apiRejectFriendRequest, 
-  apiRemoveFriend, 
-  apiGetMe 
+import {
+  apiGetFriends,
+  apiGetFriendRequests,
+  apiSendFriendRequest,
+  apiAcceptFriendRequest,
+  apiRejectFriendRequest,
+  apiRemoveFriend,
+  apiGetMe,
 } from "@/lib/api";
 import { usePresence } from "../hooks/usePresence";
 
 export function FriendsSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  
+
   // データステート
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [friends, setFriends] = useState<any[]>([]);
@@ -29,7 +29,7 @@ export function FriendsSidebar() {
   // 初期化：自分の情報を取得し、その後フレンド情報を取得
   const fetchData = async () => {
     try {
-      // 🌟 モックサーバーから「自分のダミー情報」を受け取る
+      // モックサーバーから「自分のダミー情報」を受け取る
       const { user } = await apiGetMe();
       const myId = user?.id;
 
@@ -38,7 +38,7 @@ export function FriendsSidebar() {
 
       const [friendsData, requestsData] = await Promise.all([
         apiGetFriends(myId),
-        apiGetFriendRequests(myId)
+        apiGetFriendRequests(myId),
       ]);
       setFriends(friendsData);
       setRequests(requestsData);
@@ -52,7 +52,9 @@ export function FriendsSidebar() {
   }, []);
 
   const onlineCount = useMemo(() => {
-    return friends.filter(f => (onlineStatuses[f.userId] || f.onlineStatus) === "online").length;
+    return friends.filter(
+      (f) => (onlineStatuses[f.userId] || f.onlineStatus) === "online",
+    ).length;
   }, [friends, onlineStatuses]);
 
   // アクションハンドラ
@@ -89,16 +91,19 @@ export function FriendsSidebar() {
   };
 
   // --- 内部UIコンテンツ（モバイル・PCで共通化） ---
-  // 🌟 ここをコンポーネントではなく、単なる「関数」にしました
+  // ここをコンポーネントではなく、単なる「関数」にしました
   const renderSidebarContent = () => (
     <div className="flex h-full flex-col">
       <div className="mb-3 mt-3 px-3">
-        <p className="text-xs uppercase tracking-[0.25em] text-neutral-500">Friends</p>
-        <p className="mt-1 text-xs text-neutral-400">{onlineCount} online • {friends.length} total</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-neutral-500">
+          Friends
+        </p>
+        <p className="mt-1 text-xs text-neutral-400">
+          {onlineCount} online • {friends.length} total
+        </p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-5">
-        
         {/* フレンド追加フォーム */}
         <div className="space-y-2">
           <input
@@ -120,14 +125,31 @@ export function FriendsSidebar() {
         {/* 承認待ちリクエスト */}
         {requests.length > 0 && (
           <div>
-            <p className="mb-2 text-[10px] uppercase tracking-wider text-amber-500">Pending Requests</p>
+            <p className="mb-2 text-[10px] uppercase tracking-wider text-amber-500">
+              Pending Requests
+            </p>
             <ul className="space-y-2">
               {requests.map((req) => (
-                <li key={req.id} className="rounded-lg border border-neutral-800 bg-neutral-900/80 p-2">
-                  <span className="block text-xs text-neutral-200 mb-2 truncate">{req.senderNickname || req.senderId}</span>
+                <li
+                  key={req.id}
+                  className="rounded-lg border border-neutral-800 bg-neutral-900/80 p-2"
+                >
+                  <span className="block text-xs text-neutral-200 mb-2 truncate">
+                    {req.senderNickname || req.senderId}
+                  </span>
                   <div className="flex gap-2">
-                    <button onClick={() => handleAccept(req.id)} className="flex-1 rounded bg-emerald-500/20 text-emerald-400 py-1 text-[10px] hover:bg-emerald-500/40 transition">Accept</button>
-                    <button onClick={() => handleReject(req.id)} className="flex-1 rounded bg-rose-500/20 text-rose-400 py-1 text-[10px] hover:bg-rose-500/40 transition">Decline</button>
+                    <button
+                      onClick={() => handleAccept(req.id)}
+                      className="flex-1 rounded bg-emerald-500/20 text-emerald-400 py-1 text-[10px] hover:bg-emerald-500/40 transition"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => handleReject(req.id)}
+                      className="flex-1 rounded bg-rose-500/20 text-rose-400 py-1 text-[10px] hover:bg-rose-500/40 transition"
+                    >
+                      Decline
+                    </button>
                   </div>
                 </li>
               ))}
@@ -137,27 +159,42 @@ export function FriendsSidebar() {
 
         {/* フレンドリスト */}
         <div>
-          <p className="mb-2 text-[10px] uppercase tracking-wider text-neutral-500">My Friends</p>
+          <p className="mb-2 text-[10px] uppercase tracking-wider text-neutral-500">
+            My Friends
+          </p>
           <ul className="space-y-2">
-            {friends.length === 0 && <p className="text-xs text-neutral-600">No friends yet.</p>}
+            {friends.length === 0 && (
+              <p className="text-xs text-neutral-600">No friends yet.</p>
+            )}
             {friends.map((friend) => {
-              const status = onlineStatuses[friend.userId] || friend.onlineStatus || "offline";
+              const status =
+                onlineStatuses[friend.userId] ||
+                friend.onlineStatus ||
+                "offline";
               let statusColor = "bg-neutral-600";
               if (status === "online") statusColor = "bg-emerald-400";
               if (status === "in_game") statusColor = "bg-blue-400";
 
               return (
-                <li key={friend.userId} className="group flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900/80 px-3 py-2 transition hover:border-neutral-700">
+                <li
+                  key={friend.userId}
+                  className="group flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900/80 px-3 py-2 transition hover:border-neutral-700"
+                >
                   <div className="flex flex-col truncate pr-2">
-                    <span className="text-sm text-neutral-100 truncate" title={friend.userId}>
+                    <span
+                      className="text-sm text-neutral-100 truncate"
+                      title={friend.userId}
+                    >
                       {friend.userId.substring(0, 8)}...
                     </span>
                     <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
-                      <span className={`h-1.5 w-1.5 rounded-full ${statusColor}`} />
-                      {status.replace('_', ' ')}
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${statusColor}`}
+                      />
+                      {status.replace("_", " ")}
                     </span>
                   </div>
-                  <button 
+                  <button
                     onClick={() => handleRemove(friend.userId)}
                     className="opacity-0 group-hover:opacity-100 text-[10px] text-rose-500 hover:text-rose-400 transition"
                   >
@@ -187,7 +224,6 @@ export function FriendsSidebar() {
 
           {mobileOpen && (
             <div className="mt-2 w-[min(88vw,20rem)] max-h-[80vh] flex flex-col overflow-hidden rounded-2xl border border-neutral-700/80 bg-neutral-950/95 shadow-2xl shadow-black/40 backdrop-blur-md">
-              {/* 🌟 呼び出し方を関数に変更 */}
               {renderSidebarContent()}
             </div>
           )}
@@ -197,7 +233,6 @@ export function FriendsSidebar() {
       {/* --- Desktop Drawer --- */}
       <div className="pointer-events-none absolute inset-y-0 right-0 z-20 hidden items-start md:flex">
         <div className="pointer-events-auto flex h-full w-[min(80vw,18rem)] flex-col overflow-hidden rounded-l-2xl border-l border-neutral-700/80 bg-neutral-950/90 shadow-2xl shadow-black/40 backdrop-blur-md sm:w-72">
-          {/* 🌟 呼び出し方を関数に変更 */}
           {renderSidebarContent()}
         </div>
       </div>
