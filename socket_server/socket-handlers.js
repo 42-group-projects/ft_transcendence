@@ -14,6 +14,12 @@ function registerSocketHandlers(io, roomService) {
     // フロントエンドが指定したフレンドたちの今の状態を教えて、と聞いてきた時の処理
     socket.on("get_users_status", (userIds, callback) => {
       if (Array.isArray(userIds) && typeof callback === "function") {
+        
+        // このユーザーが知りたい相手の「専用Room」にすべて参加(Join)させる
+        userIds.forEach(id => {
+          socket.join(`presence_${id}`); // 例: "presence_ed193ec9..." という部屋
+        });
+
         const statuses = presenceManager.getMultipleUsersStatus(userIds);
         callback(statuses);
       }
@@ -202,7 +208,7 @@ function registerSocketHandlers(io, roomService) {
 
       // ルームを抜けたら「オンライン（待機中）」に戻す
       presenceManager.markUserOnline(userId);
-      io.emit("user_status_changed", { userId, status: "online" });
+      io.to(`presence_${userId}`).emit("user_status_changed", { userId, status: "online" });
 
       if (result.player) {
         io.to(roomId).emit("systemMessage", { message: `${result.player.name} left.` });
@@ -218,7 +224,7 @@ function registerSocketHandlers(io, roomService) {
       // 切断されたら「オフライン」として登録し、全員に通知
       if (userId) {
         presenceManager.markUserOffline(userId);
-        io.emit("user_status_changed", { userId, status: "offline" });
+      io.to(`presence_${userId}`).emit("user_status_changed", { userId, status: "offline" });
       }
 
       const roomId = socket.data.roomId;
