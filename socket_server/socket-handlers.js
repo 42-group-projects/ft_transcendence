@@ -13,7 +13,10 @@ function registerSocketHandlers(io, roomService) {
     // 接続されたら「オンライン」として登録し、全員に通知
     if (userId) {
       presenceManager.markUserOnline(userId);
-      io.emit("user_status_changed", { userId, status: "online" });
+      io.to(`presence_${userId}`).emit("user_status_changed", {
+        userId,
+        status: "online",
+      });
     }
 
     // フロントエンドが指定したフレンドたちの今の状態を教えて、と聞いてきた時の処理
@@ -43,7 +46,10 @@ function registerSocketHandlers(io, roomService) {
 
       // 再接続でゲームに戻ったら「ゲーム中」にする
       presenceManager.markUserInGame(userId);
-      io.emit("user_status_changed", { userId, status: "in_game" });
+      io.to(`presence_${userId}`).emit("user_status_changed", {
+        userId,
+        status: "in_game",
+      });
 
       socket.emit("joinedRoom", {
         roomId: reconnectResult.room.id,
@@ -79,7 +85,10 @@ function registerSocketHandlers(io, roomService) {
 
       // ルームに入ったら「ゲーム中」にする
       presenceManager.markUserInGame(userId);
-      io.emit("user_status_changed", { userId, status: "in_game" });
+      io.to(`presence_${userId}`).emit("user_status_changed", {
+        userId,
+        status: "in_game",
+      });
 
       socket.emit("joinedRoom", { roomId: room.id, playerId: player.userId });
       roomService.broadcastRoomState(room);
@@ -124,7 +133,10 @@ function registerSocketHandlers(io, roomService) {
 
       // ルームに入ったら「ゲーム中」にする
       presenceManager.markUserInGame(userId);
-      io.emit("user_status_changed", { userId, status: "in_game" });
+      io.to(`presence_${userId}`).emit("user_status_changed", {
+        userId,
+        status: "in_game",
+      });
 
       socket.emit("joinedRoom", { roomId: room.id, playerId: player.userId });
       socket.emit("systemMessage", { message: `Joined room: ${room.id}` });
@@ -164,7 +176,10 @@ function registerSocketHandlers(io, roomService) {
 
       // ソロプレイ開始時も「ゲーム中」にする
       presenceManager.markUserInGame(userId);
-      io.emit("user_status_changed", { userId, status: "in_game" });
+      io.to(`presence_${userId}`).emit("user_status_changed", {
+        userId,
+        status: "in_game",
+      });
 
       socket.emit("joinedRoom", { roomId: room.id, playerId: player.userId });
       socket.emit("systemMessage", {
@@ -203,7 +218,10 @@ function registerSocketHandlers(io, roomService) {
 
       // 再接続成功時
       presenceManager.markUserInGame(userId);
-      io.emit("user_status_changed", { userId, status: "in_game" });
+      io.to(`presence_${userId}`).emit("user_status_changed", {
+        userId,
+        status: "in_game",
+      });
 
       socket.emit("joinedRoom", {
         roomId: result.room.id,
