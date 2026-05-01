@@ -1,5 +1,10 @@
-const { PLAYER_RADIUS, SPAWN_DISTANCE, WORLD_HALF, DASH_COOLDOWN_MS } = require("./game/constants");
-const presenceManager = require('./presence-manager'); // ★ 追加: プレゼンスマネージャーを読み込む
+const {
+  PLAYER_RADIUS,
+  SPAWN_DISTANCE,
+  WORLD_HALF,
+  DASH_COOLDOWN_MS,
+} = require("./game/constants");
+const presenceManager = require("./presence-manager"); // ★ 追加: プレゼンスマネージャーを読み込む
 
 function registerSocketHandlers(io, roomService) {
   io.on("connection", (socket) => {
@@ -14,9 +19,8 @@ function registerSocketHandlers(io, roomService) {
     // フロントエンドが指定したフレンドたちの今の状態を教えて、と聞いてきた時の処理
     socket.on("get_users_status", (userIds, callback) => {
       if (Array.isArray(userIds) && typeof callback === "function") {
-        
         // このユーザーが知りたい相手の「専用Room」にすべて参加(Join)させる
-        userIds.forEach(id => {
+        userIds.forEach((id) => {
           socket.join(`presence_${id}`); // 例: "presence_ed193ec9..." という部屋
         });
 
@@ -36,7 +40,7 @@ function registerSocketHandlers(io, roomService) {
     if (reconnectResult.ok && reconnectResult.room) {
       socket.join(reconnectResult.room.id);
       socket.data.roomId = reconnectResult.room.id;
-      
+
       // 再接続でゲームに戻ったら「ゲーム中」にする
       presenceManager.markUserInGame(userId);
       io.emit("user_status_changed", { userId, status: "in_game" });
@@ -45,13 +49,17 @@ function registerSocketHandlers(io, roomService) {
         roomId: reconnectResult.room.id,
         playerId: reconnectResult.player.userId,
       });
-      socket.emit("systemMessage", { message: "Reconnected to active session." });
+      socket.emit("systemMessage", {
+        message: "Reconnected to active session.",
+      });
     }
 
     socket.on("createRoom", ({ password, name }) => {
       const trimmedPassword = (password || "").trim();
       if (!trimmedPassword) {
-        socket.emit("roomError", { message: "Password is required to create a room." });
+        socket.emit("roomError", {
+          message: "Password is required to create a room.",
+        });
         return;
       }
 
@@ -120,7 +128,9 @@ function registerSocketHandlers(io, roomService) {
 
       socket.emit("joinedRoom", { roomId: room.id, playerId: player.userId });
       socket.emit("systemMessage", { message: `Joined room: ${room.id}` });
-      io.to(room.id).emit("systemMessage", { message: `${player.name} joined.` });
+      io.to(room.id).emit("systemMessage", {
+        message: `${player.name} joined.`,
+      });
 
       roomService.broadcastRoomState(room);
       const started = roomService.tryStartRound(room);
@@ -138,7 +148,9 @@ function registerSocketHandlers(io, roomService) {
         return;
       }
 
-      const soloPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      const soloPassword =
+        Math.random().toString(36).slice(2) +
+        Math.random().toString(36).slice(2);
       const room = roomService.createRoom(soloPassword);
 
       const player = roomService.addPlayerToRoom(room, {
@@ -155,7 +167,9 @@ function registerSocketHandlers(io, roomService) {
       io.emit("user_status_changed", { userId, status: "in_game" });
 
       socket.emit("joinedRoom", { roomId: room.id, playerId: player.userId });
-      socket.emit("systemMessage", { message: `Solo room created: ${room.id}` });
+      socket.emit("systemMessage", {
+        message: `Solo room created: ${room.id}`,
+      });
 
       roomService.startSoloRound(room, difficulty);
     });
@@ -186,7 +200,7 @@ function registerSocketHandlers(io, roomService) {
 
       socket.join(result.room.id);
       socket.data.roomId = result.room.id;
-      
+
       // 再接続成功時
       presenceManager.markUserInGame(userId);
       io.emit("user_status_changed", { userId, status: "in_game" });
@@ -208,10 +222,15 @@ function registerSocketHandlers(io, roomService) {
 
       // ルームを抜けたら「オンライン（待機中）」に戻す
       presenceManager.markUserOnline(userId);
-      io.to(`presence_${userId}`).emit("user_status_changed", { userId, status: "online" });
+      io.to(`presence_${userId}`).emit("user_status_changed", {
+        userId,
+        status: "online",
+      });
 
       if (result.player) {
-        io.to(roomId).emit("systemMessage", { message: `${result.player.name} left.` });
+        io.to(roomId).emit("systemMessage", {
+          message: `${result.player.name} left.`,
+        });
       }
 
       if (result.room) {
@@ -224,7 +243,10 @@ function registerSocketHandlers(io, roomService) {
       // 切断されたら「オフライン」として登録し、全員に通知
       if (userId) {
         presenceManager.markUserOffline(userId);
-      io.to(`presence_${userId}`).emit("user_status_changed", { userId, status: "offline" });
+        io.to(`presence_${userId}`).emit("user_status_changed", {
+          userId,
+          status: "offline",
+        });
       }
 
       const roomId = socket.data.roomId;
