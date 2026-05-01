@@ -72,26 +72,40 @@ export function FriendsSidebar() {
 
   const handleAccept = async (reqId: string) => {
     if (!currentUserId) return;
-    await apiAcceptFriendRequest(reqId, currentUserId);
-    fetchData();
+    try {
+      await apiAcceptFriendRequest(reqId, currentUserId);
+      fetchData(); // 成功したらリストを更新
+    } catch (error: any) {
+      setMessage(error.message || "承認に失敗しました");
+      setTimeout(() => setMessage(""), 3000); // 3秒後にメッセージを消す
+    }
   };
 
   const handleReject = async (reqId: string) => {
     if (!currentUserId) return;
-    await apiRejectFriendRequest(reqId, currentUserId);
-    fetchData();
+    try {
+      await apiRejectFriendRequest(reqId, currentUserId);
+      fetchData();
+    } catch (error: any) {
+      setMessage(error.message || "拒否に失敗しました");
+      setTimeout(() => setMessage(""), 3000);
+    }
   };
 
   const handleRemove = async (friendId: string) => {
     if (!currentUserId) return;
     if (confirm("本当にフレンドを解除しますか？")) {
-      await apiRemoveFriend(friendId, currentUserId);
-      fetchData();
+      try {
+        await apiRemoveFriend(friendId, currentUserId);
+        fetchData();
+      } catch (error: any) {
+        setMessage(error.message || "フレンドの解除に失敗しました");
+        setTimeout(() => setMessage(""), 3000);
+      }
     }
   };
 
-  // --- 内部UIコンテンツ（モバイル・PCで共通化） ---
-  // ここをコンポーネントではなく、単なる「関数」にしました
+  // --- 内部UIコンテンツ ---
   const renderSidebarContent = () => (
     <div className="flex h-full flex-col">
       <div className="mb-3 mt-3 px-3">
