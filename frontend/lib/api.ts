@@ -1,5 +1,6 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4001/api";
-const MOCK_API_BASE = process.env.NEXT_PUBLIC_MOCK_API_URL ?? "http://localhost:4000";
+const MOCK_API_BASE =
+  process.env.NEXT_PUBLIC_MOCK_API_URL ?? "http://localhost:4000";
 
 // ── Types (mirrors the mock store / schema) ────────────────────────────────
 
@@ -77,10 +78,10 @@ async function apiFetch<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-// TODO: バックエンドの認証API完成後、この分岐を消して const url = `${API_BASE}${path}`; に統一する
-  const isRealApi = path.startsWith("/friends");
-  const baseUrl = isRealApi ? API_BASE : MOCK_API_BASE;
-  
+  // TODO: バックエンドの認証API完成後、以下の baseUrl を MOCK_API_BASE から API_BASE に戻す
+  // 現在はフロントエンド単体テストのため、すべてモックサーバーに向けています
+  const baseUrl = MOCK_API_BASE;
+
   const cleanBaseUrl = baseUrl.replace(/\/$/, "");
   const url = `${cleanBaseUrl}${path}`;
   const res = await fetch(url, { ...options, headers });
@@ -102,7 +103,10 @@ async function apiFetch<T>(
 
 // ── Auth endpoints ─────────────────────────────────────────────────────────
 
-export async function apiLogin(email: string, password: string): Promise<AuthResponse> {
+export async function apiLogin(
+  email: string,
+  password: string,
+): Promise<AuthResponse> {
   return apiFetch<AuthResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
@@ -143,7 +147,10 @@ export async function apiGetFriendRequests(userId: string): Promise<any[]> {
 }
 
 // フレンド申請を送信
-export async function apiSendFriendRequest(senderId: string, receiverId: string) {
+export async function apiSendFriendRequest(
+  senderId: string,
+  receiverId: string,
+) {
   return apiFetch("/friends/requests", {
     method: "POST",
     body: JSON.stringify({ senderId, receiverId }),
@@ -151,7 +158,10 @@ export async function apiSendFriendRequest(senderId: string, receiverId: string)
 }
 
 // 申請を承諾
-export async function apiAcceptFriendRequest(requestId: string, userId: string) {
+export async function apiAcceptFriendRequest(
+  requestId: string,
+  userId: string,
+) {
   return apiFetch(`/friends/requests/${requestId}/accept`, {
     method: "POST",
     body: JSON.stringify({ userId }),
@@ -159,7 +169,10 @@ export async function apiAcceptFriendRequest(requestId: string, userId: string) 
 }
 
 // 申請を拒否
-export async function apiRejectFriendRequest(requestId: string, userId: string) {
+export async function apiRejectFriendRequest(
+  requestId: string,
+  userId: string,
+) {
   return apiFetch(`/friends/requests/${requestId}/reject`, {
     method: "POST",
     body: JSON.stringify({ userId }),
