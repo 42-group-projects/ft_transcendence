@@ -4,7 +4,7 @@ const {
   WORLD_HALF,
   DASH_COOLDOWN_MS,
 } = require("./game/constants");
-const presenceManager = require("./presence-manager"); // ★ 追加: プレゼンスマネージャーを読み込む
+const presenceManager = require("./presence-manager"); //プレゼンスマネージャーを読み込む
 
 function registerSocketHandlers(io, roomService) {
   io.on("connection", (socket) => {
