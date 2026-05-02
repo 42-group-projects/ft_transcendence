@@ -58,7 +58,7 @@ export const usePresence = (currentUserId: string, friendIds: string[]) => {
     return () => {
       socket.disconnect();
     };
-  }, [currentUserId, JSON.stringify(friendIds)]);
+  }, [currentUserId, [...friendIds].sort().join(",")]);
 
   return onlineFriends;
 };
