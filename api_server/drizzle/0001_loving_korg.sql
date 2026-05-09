@@ -1,0 +1,2 @@
+CREATE INDEX "idx_match_records_played_at_desc" ON "match_records" USING btree ("played_at" DESC NULLS LAST,"id" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "idx_user_stats_rating_desc" ON "user_stats" USING btree ("rating" DESC NULLS LAST,"user_id");

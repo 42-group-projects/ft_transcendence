@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
 	boolean,
 	check,
+	index,
 	integer,
 	pgEnum,
 	pgTable,
@@ -187,7 +188,10 @@ export const matchRecords = pgTable(
 		playedAt: timestamp("played_at", { withTimezone: true }).notNull(),
 		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 	},
-	(table) => [uniqueIndex("match_records_session_uq").on(table.sessionId)]
+	(table) => [
+		uniqueIndex("match_records_session_uq").on(table.sessionId),
+		index("idx_match_records_played_at_desc").on(table.playedAt.desc(), table.id.desc()),
+	]
 );
 
 export const userStats = pgTable(
@@ -202,6 +206,7 @@ export const userStats = pgTable(
 		updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 	},
 	(table) => [
+		index("idx_user_stats_rating_desc").on(table.rating.desc(), table.userId.asc()),
 		check("user_stats_wins_non_negative_chk", sql`${table.wins} >= 0`),
 		check("user_stats_losses_non_negative_chk", sql`${table.losses} >= 0`),
 		check("user_stats_rating_non_negative_chk", sql`${table.rating} >= 0`),

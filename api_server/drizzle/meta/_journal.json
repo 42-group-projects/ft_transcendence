@@ -8,6 +8,13 @@
       "when": 1774893516583,
       "tag": "0000_wet_hobgoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776748198423,
+      "tag": "0001_loving_korg",
+      "breakpoints": true
     }
   ]
 }
