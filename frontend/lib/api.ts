@@ -1,4 +1,6 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4001/api";
+const MOCK_API_BASE =
+  process.env.NEXT_PUBLIC_MOCK_API_URL ?? "http://localhost:4000";
 
 // ── Types (mirrors the mock store / schema) ────────────────────────────────
 
@@ -76,9 +78,21 @@ async function apiFetch<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const url = new URL(path, API_BASE);
-  const res = await fetch(url.toString(), { ...options, headers });
-  const data = await res.json();
+  // TODO: バックエンドの認証API完成後、以下の baseUrl を MOCK_API_BASE から API_BASE に戻す
+  // 現在はフロントエンド単体テストのため、すべてモックサーバーに向けています
+  const baseUrl = MOCK_API_BASE;
+
+  const cleanBaseUrl = baseUrl.replace(/\/$/, "");
+  const url = `${cleanBaseUrl}${path}`;
+  const res = await fetch(url, { ...options, headers });
+
+  const text = await res.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (error) {
+    throw new Error(`API Error (${url}): Invalid response format.`);
+  }
 
   if (!res.ok) {
     throw new Error((data as ApiError).error ?? "Unknown API error");
@@ -89,7 +103,10 @@ async function apiFetch<T>(
 
 // ── Auth endpoints ─────────────────────────────────────────────────────────
 
-export async function apiLogin(email: string, password: string): Promise<AuthResponse> {
+export async function apiLogin(
+  email: string,
+  password: string,
+): Promise<AuthResponse> {
   return apiFetch<AuthResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
@@ -115,4 +132,57 @@ export async function apiGetMe(): Promise<{ user: User }> {
 
 export async function apiGetMyStats(): Promise<{ stats: UserStats }> {
   return apiFetch<{ stats: UserStats }>("/users/me/stats");
+}
+
+// ── Friend endpoints (require token) ──────────────────────────────────────
+
+// フレンドリスト取得
+export async function apiGetFriends(userId: string): Promise<any[]> {
+  return apiFetch<any[]>(`/friends?userId=${userId}`);
+}
+
+// 自分宛ての申請一覧取得
+export async function apiGetFriendRequests(userId: string): Promise<any[]> {
+  return apiFetch<any[]>(`/friends/requests?userId=${userId}`);
+}
+
+// フレンド申請を送信
+export async function apiSendFriendRequest(
+  senderId: string,
+  receiverId: string,
+) {
+  return apiFetch("/friends/requests", {
+    method: "POST",
+    body: JSON.stringify({ senderId, receiverId }),
+  });
+}
+
+// 申請を承諾
+export async function apiAcceptFriendRequest(
+  requestId: string,
+  userId: string,
+) {
+  return apiFetch(`/friends/requests/${requestId}/accept`, {
+    method: "POST",
+    body: JSON.stringify({ userId }),
+  });
+}
+
+// 申請を拒否
+export async function apiRejectFriendRequest(
+  requestId: string,
+  userId: string,
+) {
+  return apiFetch(`/friends/requests/${requestId}/reject`, {
+    method: "POST",
+    body: JSON.stringify({ userId }),
+  });
+}
+
+// フレンド削除
+export async function apiRemoveFriend(friendId: string, userId: string) {
+  return apiFetch(`/friends/${friendId}/remove`, {
+    method: "POST",
+    body: JSON.stringify({ userId }),
+  });
 }
