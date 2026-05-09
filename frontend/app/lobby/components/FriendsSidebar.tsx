@@ -37,8 +37,8 @@ export function FriendsSidebar() {
       setCurrentUserId(myId);
 
       const [friendsData, requestsData] = await Promise.all([
-        apiGetFriends(myId),
-        apiGetFriendRequests(myId),
+        apiGetFriends(),
+        apiGetFriendRequests(),
       ]);
       setFriends(friendsData);
       setRequests(requestsData);
@@ -61,7 +61,7 @@ export function FriendsSidebar() {
   const handleSendRequest = async () => {
     if (!currentUserId || !targetId) return;
     try {
-      await apiSendFriendRequest(currentUserId, targetId);
+      await apiSendFriendRequest(targetId);
       setMessage("申請を送信しました");
       setTargetId("");
     } catch (error: any) {
@@ -73,7 +73,7 @@ export function FriendsSidebar() {
   const handleAccept = async (reqId: string) => {
     if (!currentUserId) return;
     try {
-      await apiAcceptFriendRequest(reqId, currentUserId);
+      await apiAcceptFriendRequest(reqId);
       fetchData(); // 成功したらリストを更新
     } catch (error: any) {
       setMessage(error.message || "承認に失敗しました");
@@ -84,7 +84,7 @@ export function FriendsSidebar() {
   const handleReject = async (reqId: string) => {
     if (!currentUserId) return;
     try {
-      await apiRejectFriendRequest(reqId, currentUserId);
+      await apiRejectFriendRequest(reqId);
       fetchData();
     } catch (error: any) {
       setMessage(error.message || "拒否に失敗しました");
@@ -96,7 +96,7 @@ export function FriendsSidebar() {
     if (!currentUserId) return;
     if (confirm("本当にフレンドを解除しますか？")) {
       try {
-        await apiRemoveFriend(friendId, currentUserId);
+        await apiRemoveFriend(friendId);
         fetchData();
       } catch (error: any) {
         setMessage(error.message || "フレンドの解除に失敗しました");
