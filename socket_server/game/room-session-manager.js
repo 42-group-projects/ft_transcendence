@@ -10,6 +10,7 @@ function createRoomSessionManager({
   findRoomByUserId,
   hasDisconnectedHuman,
   handleLeave,
+  presenceManager,
 }) {
   function clearReconnectTimer(room, userId) {
     const timeoutId = room.reconnectTimeouts.get(userId);
@@ -59,6 +60,19 @@ function createRoomSessionManager({
 
     if (message) {
       io.to(room.id).emit("systemMessage", { message });
+    }
+
+    // セッション終了時、全ての人間プレイヤーをオンラインに戻す
+    if (presenceManager) {
+      for (const player of room.players.values()) {
+        if (!player.isCpu) {
+          presenceManager.markUserOnline(player.userId);
+          io.to(`presence_${player.userId}`).emit("user_status_changed", {
+            userId: player.userId,
+            status: "online",
+          });
+        }
+      }
     }
 
     removeSocketsFromRoom(room);

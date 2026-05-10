@@ -1,67 +1,52 @@
-import { useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
-import { getToken } from "@/lib/api";
-
-const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
+import { useEffect, useState } from "react";
+import { usePresenceSocket } from "@/app/components/PresenceProvider";
 
 export const usePresence = (currentUserId: string, friendIds: string[]) => {
   const [onlineFriends, setOnlineFriends] = useState<Record<string, string>>(
     {},
   );
-  const socketRef = useRef<Socket | null>(null);
+  // Use the shared socket from PresenceProvider (lives in root layout,
+  // persists across page navigations so users never appear offline mid-session).
+  // socket is null until PresenceProvider connects — effects re-run when it arrives.
+  const socket = usePresenceSocket();
 
   useEffect(() => {
-    if (!currentUserId) return;
-
-    const token = getToken();
-    if (!token) return;
-
-    const socket: Socket = io(SOCKET_URL, {
-      auth: { token },
-    });
-
-    socketRef.current = socket;
-
-    // 接続成功時、初期ステータスを取得する
-    socket.on("connect", () => {
-      if (friendIds.length > 0) {
-        socket.emit(
-          "get_users_status",
-          friendIds,
-          (initialStatuses: Record<string, string>) => {
-            setOnlineFriends((prev) => ({ ...prev, ...initialStatuses }));
-          },
-        );
-      }
-    });
+    if (!currentUserId || !socket) return;
 
     // 誰かのステータスが変わった時のリアルタイム通知を受け取る
-    socket.on("user_status_changed", ({ userId, status }) => {
+    const onStatusChanged = ({ userId, status }: { userId: string; status: string }) => {
       setOnlineFriends((prev) => ({ ...prev, [userId]: status }));
-    });
+    };
+    socket.on("user_status_changed", onStatusChanged);
 
     return () => {
-      socket.disconnect();
-      socketRef.current = null;
+      socket.off("user_status_changed", onStatusChanged);
     };
-  }, [currentUserId]);
+  }, [currentUserId, socket]);
 
   // フレンドリストが変わった時、既存のソケット接続で再購読する
   const friendKey = [...friendIds].sort().join(",");
   useEffect(() => {
-    const socket = socketRef.current;
-    if (!socket || !socket.connected || friendIds.length === 0) return;
+    if (!socket || friendIds.length === 0) return;
 
-    socket.emit(
-      "get_users_status",
-      friendIds,
-      (initialStatuses: Record<string, string>) => {
-        setOnlineFriends((prev) => ({ ...prev, ...initialStatuses }));
-      },
-    );
+    const subscribe = () => {
+      socket.emit(
+        "get_users_status",
+        friendIds,
+        (initialStatuses: Record<string, string>) => {
+          setOnlineFriends((prev) => ({ ...prev, ...initialStatuses }));
+        },
+      );
+    };
+
+    if (socket.connected) {
+      subscribe();
+    } else {
+      socket.once("connect", subscribe);
+      return () => { socket.off("connect", subscribe); };
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [friendKey]);
+  }, [friendKey, socket]);
 
   return onlineFriends;
 };
