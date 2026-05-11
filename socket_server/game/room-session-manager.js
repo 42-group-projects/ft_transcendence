@@ -70,10 +70,17 @@ function createRoomSessionManager({
       });
     }
 
-    // セッション終了時、全ての人間プレイヤーをオンラインに戻す
+    // セッション終了時、まだ接続中の人間プレイヤーのみオンラインに戻す。
+    // 既にdisconnectしたプレイヤーはofflineのままにする。
     if (presenceManager) {
       for (const player of room.players.values()) {
-        if (!player.isCpu) {
+        if (player.isCpu) {
+          continue;
+        }
+
+        const isStillConnected = !player.disconnected && player.socketId && io.sockets.sockets.has(player.socketId);
+
+        if (isStillConnected) {
           presenceManager.markUserOnline(player.userId);
           io.to(`presence_${player.userId}`).emit("user_status_changed", {
             userId: player.userId,
