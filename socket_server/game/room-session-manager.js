@@ -11,6 +11,7 @@ function createRoomSessionManager({
   hasDisconnectedHuman,
   handleLeave,
   presenceManager,
+  saveMatchResult,
 }) {
   function clearReconnectTimer(room, userId) {
     const timeoutId = room.reconnectTimeouts.get(userId);
@@ -60,6 +61,13 @@ function createRoomSessionManager({
 
     if (message) {
       io.to(room.id).emit("systemMessage", { message });
+    }
+
+    // Persist match result when a game finishes with a clear winner
+    if (reason === "game_finished" && payload.winnerId && saveMatchResult) {
+      saveMatchResult(room, payload.winnerId).catch((err) => {
+        console.error("[endSession] saveMatchResult failed", err);
+      });
     }
 
     // セッション終了時、全ての人間プレイヤーをオンラインに戻す
