@@ -3,8 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { getToken } from "@/lib/api";
-
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
+import { resolveSocketUrl } from "@/app/game/socket-url";
 
 // Expose socket as state so consumers re-render (and re-run effects) when it appears.
 const PresenceContext = createContext<Socket | null>(null);
@@ -28,7 +27,7 @@ export function PresenceProvider({ children }: { children: React.ReactNode }) {
       const token = getToken();
       if (!token) return;
 
-      const s = io(SOCKET_URL, { auth: { token } });
+      const s = io(resolveSocketUrl(), { auth: { token } });
       socketRef.current = s;
       setSocket(s);
     }
