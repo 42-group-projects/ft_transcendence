@@ -61,9 +61,7 @@ usersRoutes.patch("/me", async (c) => {
     const { db, close } = createDbClient();
     try {
       if (updates.nickname) {
-        const { db: db2, close: close2 } = createDbClient();
-        const exists = await userRepository.nicknameExists(db2, updates.nickname);
-        await close2();
+        const exists = await userRepository.nicknameExists(db, updates.nickname);
         if (exists) return c.json({ error: "AUTH_NICKNAME_EXISTS" }, 409);
       }
       const updated = await userRepository.update(db, userId, updates);
