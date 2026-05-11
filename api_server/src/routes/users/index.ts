@@ -96,7 +96,7 @@ usersRoutes.get("/me/stats", async (c) => {
   }
 });
 
-// GET /users/:id  — public profile, no email exposed
+// GET /users/:id  — requires JWT; returns a public profile shape with no email exposed
 usersRoutes.get("/:id", async (c) => {
   const id = c.req.param("id");
   const { db, close } = createDbClient();
