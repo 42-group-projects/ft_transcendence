@@ -33,6 +33,7 @@ services:
       - PORT=${NEXT_PUBLIC_SOCKET_PORT}
       - JWT_SECRET=${JWT_SECRET}
       - RECONNECT_GRACE_MS=${RECONNECT_GRACE_MS:-30000}
+      - API_URL=http://api-server:4001
     volumes:
       - ./socket_server:/app
       - /app/node_modules

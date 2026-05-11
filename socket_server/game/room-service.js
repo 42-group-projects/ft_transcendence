@@ -8,6 +8,7 @@ const {
   DASH_IMPULSE, 
   DASH_COOLDOWN_MS
 } = require("./constants");
+const { API_URL } = require("../config");
 const {
   clamp,
   sanitizeName,
@@ -145,6 +146,39 @@ function createRoomService(io, presenceManager) {
     return { room, player, removedRoom: false };
   }
 
+  function saveMatchResult(room, winnerId) {
+    const humanPlayers = [...room.players.values()].filter((p) => !p.isCpu);
+    const player1 = humanPlayers[0];
+    const player2 = humanPlayers[1] ?? null;
+
+    if (!player1) {
+      return Promise.resolve(); // nothing to save if no human player
+    }
+
+    const body = JSON.stringify({
+      player1Id: player1.userId,
+      player2Id: player2 ? player2.userId : null,
+      winnerId,
+      isCpuGame: room.solo === true,
+      cpuLevel: room.soloDifficulty ?? null,
+      startedAt: room.roundStartedAt ? room.roundStartedAt.toISOString() : new Date().toISOString(),
+    });
+
+    return fetch(`${API_URL}/api/internal/match-result`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body,
+    }).then((res) => {
+      if (!res.ok) {
+        return res.text().then((text) => {
+          console.error(`[saveMatchResult] API returned ${res.status}: ${text}`);
+        });
+      }
+    });
+  }
+
   const sessionManager = createRoomSessionManager({
     io,
     rooms,
@@ -155,6 +189,7 @@ function createRoomService(io, presenceManager) {
     hasDisconnectedHuman,
     handleLeave,
     presenceManager,
+    saveMatchResult,
   });
 
   const roundManager = createRoomRoundManager({
