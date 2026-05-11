@@ -37,8 +37,6 @@ authRoutes.post("/register", async (c) => {
 });
 
 // POST /auth/login
-// Also accepts the mock-server's legacy field name "signup" = "register" so
-// the endpoint is  compatible with both /auth/login  and the legacy /auth/login
 authRoutes.post("/login", async (c) => {
   try {
     const body = await c.req.json().catch(() => null);
