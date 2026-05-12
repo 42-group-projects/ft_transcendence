@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { registerSchema, loginSchema } from "./schemas";
 import { authService } from "../../service/authService";
-import { ApiError } from "../../utils/apiError";
 
 export const authRoutes = new Hono();
 
@@ -19,25 +18,15 @@ function toPublicUser(user: Record<string, any>) {
 
 // --- Routes ---
 authRoutes.post("/register", zValidator("json", registerSchema), async (c) => {
-  try {
-    const { email, nickname, password } = c.req.valid("json");
-    const { access_token, user } = await authService.register(email, nickname, password);
-    return c.json({ access_token, user: toPublicUser(user) }, 201);
-  } catch (error) {
-    if (error instanceof ApiError) return c.json({ error: error.message }, error.statusCode as any);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
-  }
+  const { email, nickname, password } = c.req.valid("json");
+  const { access_token, user } = await authService.register(email, nickname, password);
+  return c.json({ access_token, user: toPublicUser(user) }, 201);
 });
 
 authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
-  try {
-    const { email, password } = c.req.valid("json");
-    const { access_token, user } = await authService.login(email, password);
-    return c.json({ access_token, user: toPublicUser(user) }, 200);
-  } catch (error) {
-    if (error instanceof ApiError) return c.json({ error: error.message }, error.statusCode as any);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
-  }
+  const { email, password } = c.req.valid("json");
+  const { access_token, user } = await authService.login(email, password);
+  return c.json({ access_token, user: toPublicUser(user) }, 200);
 });
 
 // JWT is stateless — client discards the token. Endpoint exists as clean API contract.
