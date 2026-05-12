@@ -7,7 +7,7 @@ export const userService = {
     const { db, close } = createDbClient();
     try {
       const user = await userRepository.findById(db, userId);
-      if (!user) throw new ApiError("NOT_FOUND", 404);
+      if (!user) throw new ApiError(404, "NOT_FOUND");
       return user;
     } finally {
       await close();
@@ -23,26 +23,26 @@ export const userService = {
         body.nickname.length < 1 ||
         body.nickname.length > 20
       ) {
-        throw new ApiError("UNPROCESSABLE", 422);
+        throw new ApiError(422, "UNPROCESSABLE");
       }
       updates.nickname = body.nickname;
     }
 
     if (body.avatar_url !== undefined) {
-      if (typeof body.avatar_url !== "string") throw new ApiError("UNPROCESSABLE", 422);
+      if (typeof body.avatar_url !== "string") throw new ApiError(422, "UNPROCESSABLE");
       updates.avatarUrl = body.avatar_url;
     }
 
-    if (Object.keys(updates).length === 0) throw new ApiError("UNPROCESSABLE", 422);
+    if (Object.keys(updates).length === 0) throw new ApiError(422, "UNPROCESSABLE");
 
     const { db, close } = createDbClient();
     try {
       if (updates.nickname) {
         const exists = await userRepository.nicknameExists(db, updates.nickname);
-        if (exists) throw new ApiError("AUTH_NICKNAME_EXISTS", 409);
+        if (exists) throw new ApiError(409, "AUTH_NICKNAME_EXISTS");
       }
       const updated = await userRepository.update(db, userId, updates);
-      if (!updated) throw new ApiError("NOT_FOUND", 404);
+      if (!updated) throw new ApiError(404, "NOT_FOUND");
       return updated;
     } finally {
       await close();
@@ -53,7 +53,7 @@ export const userService = {
     const { db, close } = createDbClient();
     try {
       const stats = await userRepository.getStats(db, userId);
-      if (!stats) throw new ApiError("NOT_FOUND", 404);
+      if (!stats) throw new ApiError(404, "NOT_FOUND");
       const total = stats.wins + stats.losses;
       const win_rate = total === 0 ? 0.0 : Math.round((stats.wins / total) * 100) / 100;
       return { user_id: stats.userId, wins: stats.wins, losses: stats.losses, win_rate, rating: stats.rating };
