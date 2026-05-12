@@ -2,9 +2,8 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { registerSchema, loginSchema } from "./schemas";
 import { authService } from "../../service/authService";
-import type { AppEnv } from "../../middleware/db";
 
-export const authRoutes = new Hono<AppEnv>();
+export const authRoutes = new Hono();
 
 function toPublicUser(user: Record<string, any>) {
   return {
@@ -19,16 +18,14 @@ function toPublicUser(user: Record<string, any>) {
 
 // --- Routes ---
 authRoutes.post("/register", zValidator("json", registerSchema), async (c) => {
-  const db = c.get("db");
   const { email, nickname, password } = c.req.valid("json");
-  const { access_token, user } = await authService.register(db, email, nickname, password);
+  const { access_token, user } = await authService.register(email, nickname, password);
   return c.json({ access_token, user: toPublicUser(user) }, 201);
 });
 
 authRoutes.post("/login", zValidator("json", loginSchema), async (c) => {
-  const db = c.get("db");
   const { email, password } = c.req.valid("json");
-  const { access_token, user } = await authService.login(db, email, password);
+  const { access_token, user } = await authService.login(email, password);
   return c.json({ access_token, user: toPublicUser(user) }, 200);
 });
 
