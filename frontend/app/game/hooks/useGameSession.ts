@@ -47,6 +47,10 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [gameConstants, setGameConstants] = useState<GameConstants | null>(null);
 
+  // Track the joined room ID in a ref so the unmount cleanup can read the
+  // latest value without needing it in the effect dependency array.
+  const joinedRoomIdRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (!socket) return;
 
@@ -62,7 +66,12 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
       socketUrl,
       onRoomCreated,
       setConnected,
-      setJoinedRoomId,
+      setJoinedRoomId: (value) => {
+        // Mirror every update into the ref so the unmount handler can read it.
+        const next = typeof value === "function" ? value(joinedRoomIdRef.current) : value;
+        joinedRoomIdRef.current = next;
+        setJoinedRoomId(value);
+      },
       setLocalPlayerId,
       setPlayers,
       setErrorMessage,
@@ -76,7 +85,18 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
 
     // On unmount: remove only game-specific handlers. Do NOT disconnect —
     // the socket belongs to PresenceProvider and must stay alive.
-    return cleanup;
+    // However, if the player is still inside a room we must tell the server
+    // they are leaving, because the socket itself won't disconnect (it is
+    // shared with PresenceProvider). Without this the server never calls
+    // handleDisconnect, the opponent's game is never paused, and the room
+    // leaks until the reconnect timeout fires.
+    return () => {
+      cleanup();
+      if (joinedRoomIdRef.current) {
+        socket.emit("leaveRoom");
+        joinedRoomIdRef.current = null;
+      }
+    };
   }, [socket, onRoomCreated, socketUrl]);
 
   const createRoom = useCallback(

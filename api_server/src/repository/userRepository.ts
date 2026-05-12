@@ -35,22 +35,26 @@ export const userRepository = {
   },
 
   /**
-   * Creates a user row AND an initial user_stats row in one call.
+   * Creates a user row AND an initial user_stats row atomically.
    * The schema requires user_stats for every user (1-to-1 relation).
+   * Both inserts run inside a single transaction so a failure in either
+   * leaves the database in a clean state (no orphaned user without stats).
    */
   create: async (db: AppDb, data: NewUser) => {
-    const [user] = await db
-      .insert(users)
-      .values({
-        email: data.email,
-        nickname: data.nickname,
-        passwordHash: data.passwordHash,
-      })
-      .returning();
+    return await db.transaction(async (tx) => {
+      const [user] = await tx
+        .insert(users)
+        .values({
+          email: data.email,
+          nickname: data.nickname,
+          passwordHash: data.passwordHash,
+        })
+        .returning();
 
-    await db.insert(userStats).values({ userId: user.id });
+      await tx.insert(userStats).values({ userId: user.id });
 
-    return user;
+      return user;
+    });
   },
 
   update: async (db: AppDb, id: string, data: UpdateUser) => {

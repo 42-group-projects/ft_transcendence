@@ -2,13 +2,19 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
 import { apiRoutes } from "./routes/index";
+import { ApiError } from "./utils/apiError";
 
 const app = new Hono()
   .use("/*", cors())
-  .get("/health", (c) => {
-    return c.text("Hello World!");
-  })
   .route("/", apiRoutes);
+
+app.onError((err, c) => {
+  if (err instanceof ApiError) {
+    return c.json({ error: err.message }, err.statusCode as any);
+  }
+  console.error(err);
+  return c.json({ error: "INTERNAL_ERROR" }, 500);
+});
 
 const port = Number(process.env.PORT ?? 4001);
 
