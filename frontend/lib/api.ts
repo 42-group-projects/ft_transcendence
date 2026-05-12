@@ -121,7 +121,7 @@ export async function apiSignup(
   nickname: string,
   password: string,
 ): Promise<AuthResponse> {
-  return apiFetch<AuthResponse>("/auth/signup", {
+  return apiFetch<AuthResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify({ email, nickname, password }),
   });
