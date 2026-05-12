@@ -1,8 +1,4 @@
 import { Hono } from "hono";
-import { createDbClient } from "../../repository/dbClient";
-import { userRepository } from "../../repository/userRepository";
-import { matchRepository } from "../../repository/matchRepository";
-import { ApiError } from "../../utils/apiError";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { userService } from "../../service/userService";
@@ -24,7 +20,7 @@ function toPublicUser(user: Record<string, any>) {
 // All routes require authMiddleware applied at the router level in routes/index.ts.
 // c.get("userId") is the verified caller's UUID from the JWT.
 
-type MatchRow = Awaited<ReturnType<typeof matchRepository.getMatchHistory>>[number];
+type MatchRow = Awaited<ReturnType<typeof userService.getMatchHistory>>[number];
 
 function serializeMatches(matches: MatchRow[]) {
   return matches.map((m) => ({
@@ -39,6 +35,7 @@ function serializeMatches(matches: MatchRow[]) {
     played_at: m.playedAt instanceof Date ? m.playedAt.toISOString() : m.playedAt,
   }));
 }
+
 const updateMeSchema = z.object({
   nickname: z.string().min(1).max(20).optional(),
   avatar_url: z.string().optional(),
@@ -64,13 +61,8 @@ usersRoutes.patch("/me", zValidator("json", updateMeSchema), async (c) => {
 usersRoutes.get("/me/matches", async (c) => {
   const userId = c.get("userId") as string;
   const limit = Math.min(Number(c.req.query("limit") ?? 20), 100);
-  const { db, close } = createDbClient();
-  try {
-    const matches = await matchRepository.getMatchHistory(db, userId, limit);
-    return c.json({ matches: serializeMatches(matches) });
-  } finally {
-    await close();
-  }
+  const matches = await userService.getMatchHistory(userId, limit);
+  return c.json({ matches: serializeMatches(matches) });
 });
 
 // GET /users/me/stats
@@ -83,27 +75,21 @@ usersRoutes.get("/me/stats", async (c) => {
 // GET /users/ranking?limit=50 — leaderboard sorted by rating
 usersRoutes.get("/ranking", async (c) => {
   const limit = Math.min(Number(c.req.query("limit") ?? 50), 100);
-  const { db, close } = createDbClient();
-  try {
-    const rows = await matchRepository.getRanking(db, limit);
-    return c.json({
-      ranking: rows.map((r, i) => ({
-        rank: i + 1,
-        id: r.id,
-        nickname: r.nickname,
-        avatar_url: r.avatarUrl ?? null,
-        wins: Number(r.wins),
-        losses: Number(r.losses),
-        rating: Number(r.rating),
-      })),
-    });
-  } finally {
-    await close();
-  }
+  const rows = await userService.getRanking(limit);
+  return c.json({
+    ranking: rows.map((r, i) => ({
+      rank: i + 1,
+      id: r.id,
+      nickname: r.nickname,
+      avatar_url: r.avatarUrl ?? null,
+      wins: Number(r.wins),
+      losses: Number(r.losses),
+      rating: Number(r.rating),
+    })),
+  });
 });
 
 // GET /users/:id  — public profile, no email exposed
-// GET /users/:id — returns a public profile with no email exposed
 usersRoutes.get("/:id", async (c) => {
   const id = c.req.param("id");
   const user = await userService.getById(id);
@@ -126,12 +112,7 @@ usersRoutes.get("/:id/stats", async (c) => {
 usersRoutes.get("/:id/matches", async (c) => {
   const id = c.req.param("id");
   const limit = Math.min(Number(c.req.query("limit") ?? 20), 100);
-  const { db, close } = createDbClient();
-  try {
-    const matches = await matchRepository.getMatchHistory(db, id, limit);
-    return c.json({ matches: serializeMatches(matches) });
-  } finally {
-    await close();
-  }
+  const matches = await userService.getMatchHistory(id, limit);
+  return c.json({ matches: serializeMatches(matches) });
 });
 

@@ -1,5 +1,6 @@
 import { createDbClient } from "../repository/dbClient";
 import { userRepository } from "../repository/userRepository";
+import { matchRepository } from "../repository/matchRepository";
 import { ApiError } from "../utils/apiError";
 
 export const userService = {
@@ -57,6 +58,24 @@ export const userService = {
       const total = stats.wins + stats.losses;
       const win_rate = total === 0 ? 0.0 : Math.round((stats.wins / total) * 100) / 100;
       return { user_id: stats.userId, wins: stats.wins, losses: stats.losses, win_rate, rating: stats.rating };
+    } finally {
+      await close();
+    }
+  },
+
+  async getMatchHistory(userId: string, limit: number) {
+    const { db, close } = createDbClient();
+    try {
+      return await matchRepository.getMatchHistory(db, userId, limit);
+    } finally {
+      await close();
+    }
+  },
+
+  async getRanking(limit: number) {
+    const { db, close } = createDbClient();
+    try {
+      return await matchRepository.getRanking(db, limit);
     } finally {
       await close();
     }
