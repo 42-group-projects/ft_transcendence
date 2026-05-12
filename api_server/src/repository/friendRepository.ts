@@ -9,11 +9,18 @@ export const friendRepository = {
   },
 
   createRequest: async (db: AppDb, senderId: string, receiverId: string) => {
+    // Upsert: if a previous request row exists (e.g. was accepted then friendship removed),
+    // reset it back to pending instead of failing on the unique constraint.
     const result = await db.insert(friendRequests).values({
       senderId,
       receiverId,
       status: 'pending'
-    }).returning();
+    })
+    .onConflictDoUpdate({
+      target: [friendRequests.senderId, friendRequests.receiverId],
+      set: { status: 'pending', updatedAt: new Date() },
+    })
+    .returning();
     return result[0];
   },
 
@@ -70,11 +77,17 @@ export const friendRepository = {
   },
 
   createFriendship: async (db: AppDb, userId: string, friendId: string) => {
+    // Use upsert so re-friending after removal doesn't hit the unique constraint.
     const result = await db.insert(friendships).values([
       { userId: userId, friendId: friendId, status: 'accepted' },
       { userId: friendId, friendId: userId, status: 'accepted' }
-    ]).returning();
-    
+    ])
+    .onConflictDoUpdate({
+      target: [friendships.userId, friendships.friendId],
+      set: { status: 'accepted', updatedAt: new Date() },
+    })
+    .returning();
+
     return result;
   },
 

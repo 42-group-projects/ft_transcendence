@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
 
 import { getToken } from "@/lib/api";
+import { usePresenceSocket } from "@/app/components/PresenceProvider";
 import { resolveSocketUrl } from "../socket-url";
 import type { GameConstants, PlayerState } from "../types";
 import { registerGameSessionSocketHandlers } from "./registerGameSessionSocketHandlers";
@@ -22,10 +22,14 @@ type UseGameSessionArgs = {
 };
 
 export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
-  const socketRef = useRef<Socket | null>(null);
+  // Reuse the shared socket from PresenceProvider so disconnecting the game
+  // page doesn't trigger an offline broadcast for this user.
+  const socket = usePresenceSocket();
+  const socketRef = useRef(socket);
+  socketRef.current = socket; // keep ref in sync for emit callbacks
   const socketUrl = useMemo(() => resolveSocketUrl(), []);
 
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(() => socketRef.current?.connected ?? false);
   const [joinedRoomId, setJoinedRoomId] = useState<string | null>(null);
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   const [players, setPlayers] = useState<PlayerState[]>([]);
@@ -43,39 +47,31 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [gameConstants, setGameConstants] = useState<GameConstants | null>(null);
 
-  useEffect(() => {
-    const token = getToken();
+  // Track the joined room ID in a ref so the unmount cleanup can read the
+  // latest value without needing it in the effect dependency array.
+  const joinedRoomIdRef = useRef<string | null>(null);
 
-    if (!token) {
-      return;
+  useEffect(() => {
+    if (!socket) return;
+
+    // Socket is already connected (shared from PresenceProvider) — sync state immediately.
+    if (socket.connected) {
+      setConnected(true);
+      setErrorMessage(null);
+      socket.emit("reconnect"); // let server know we're (re)joining the game page
     }
 
-    const socket = io(socketUrl, {
-      transports: ["websocket"],
-      autoConnect: false,
-      auth: { token },
-    });
-
-    let disposed = false;
-    const connectTimeout = window.setTimeout(() => {
-      if (!disposed) {
-        socket.connect();
-      }
-    }, 0);
-
-    socketRef.current = socket;
-
-    // Listen for gameConstants from server
-    socket.on("gameConstants", (constants) => {
-      setGameConstants(constants);
-    });
-
-    registerGameSessionSocketHandlers({
+    const cleanup = registerGameSessionSocketHandlers({
       socket,
       socketUrl,
       onRoomCreated,
       setConnected,
-      setJoinedRoomId,
+      setJoinedRoomId: (value) => {
+        // Mirror every update into the ref so the unmount handler can read it.
+        const next = typeof value === "function" ? value(joinedRoomIdRef.current) : value;
+        joinedRoomIdRef.current = next;
+        setJoinedRoomId(value);
+      },
       setLocalPlayerId,
       setPlayers,
       setErrorMessage,
@@ -87,16 +83,21 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
       setGameConstants,
     });
 
+    // On unmount: remove only game-specific handlers. Do NOT disconnect —
+    // the socket belongs to PresenceProvider and must stay alive.
+    // However, if the player is still inside a room we must tell the server
+    // they are leaving, because the socket itself won't disconnect (it is
+    // shared with PresenceProvider). Without this the server never calls
+    // handleDisconnect, the opponent's game is never paused, and the room
+    // leaks until the reconnect timeout fires.
     return () => {
-      disposed = true;
-      window.clearTimeout(connectTimeout);
-      socket.removeAllListeners();
-      if (socket.connected || socket.active) {
-        socket.disconnect();
+      cleanup();
+      if (joinedRoomIdRef.current) {
+        socket.emit("leaveRoom");
+        joinedRoomIdRef.current = null;
       }
-      socketRef.current = null;
     };
-  }, [onRoomCreated, socketUrl]);
+  }, [socket, onRoomCreated, socketUrl]);
 
   const createRoom = useCallback(
     ({ name, password }: CreateRoomArgs) => {

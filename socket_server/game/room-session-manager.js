@@ -10,6 +10,8 @@ function createRoomSessionManager({
   findRoomByUserId,
   hasDisconnectedHuman,
   handleLeave,
+  presenceManager,
+  saveMatchResult,
 }) {
   function clearReconnectTimer(room, userId) {
     const timeoutId = room.reconnectTimeouts.get(userId);
@@ -59,6 +61,33 @@ function createRoomSessionManager({
 
     if (message) {
       io.to(room.id).emit("systemMessage", { message });
+    }
+
+    // Persist match result when a game finishes with a clear winner
+    if (reason === "game_finished" && payload.winnerId && saveMatchResult) {
+      saveMatchResult(room, payload.winnerId).catch((err) => {
+        console.error("[endSession] saveMatchResult failed", err);
+      });
+    }
+
+    // セッション終了時、まだ接続中の人間プレイヤーのみオンラインに戻す。
+    // 既にdisconnectしたプレイヤーはofflineのままにする。
+    if (presenceManager) {
+      for (const player of room.players.values()) {
+        if (player.isCpu) {
+          continue;
+        }
+
+        const isStillConnected = !player.disconnected && player.socketId && io.sockets.sockets.has(player.socketId);
+
+        if (isStillConnected) {
+          presenceManager.markUserOnline(player.userId);
+          io.to(`presence_${player.userId}`).emit("user_status_changed", {
+            userId: player.userId,
+            status: "online",
+          });
+        }
+      }
     }
 
     removeSocketsFromRoom(room);

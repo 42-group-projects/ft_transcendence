@@ -1,6 +1,4 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4001/api";
-const MOCK_API_BASE =
-  process.env.NEXT_PUBLIC_MOCK_API_URL ?? "http://localhost:4000";
 
 // ── Types (mirrors the mock store / schema) ────────────────────────────────
 
@@ -78,9 +76,7 @@ async function apiFetch<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  // TODO: バックエンドの認証API完成後、以下の baseUrl を MOCK_API_BASE から API_BASE に戻す
-  // 現在はフロントエンド単体テストのため、すべてモックサーバーに向けています
-  const baseUrl = MOCK_API_BASE;
+  const baseUrl = API_BASE;
 
   const cleanBaseUrl = baseUrl.replace(/\/$/, "");
   const url = `${cleanBaseUrl}${path}`;
@@ -95,7 +91,9 @@ async function apiFetch<T>(
   }
 
   if (!res.ok) {
-    throw new Error((data as ApiError).error ?? "Unknown API error");
+    const message = (data as ApiError).error ?? "Unknown API error";
+    console.error(`[apiFetch] ${res.status} ${res.url}:`, message, data);
+    throw new Error(message);
   }
 
   return data as T;
@@ -113,12 +111,17 @@ export async function apiLogin(
   });
 }
 
+export async function apiLogout(): Promise<void> {
+  await apiFetch("/auth/logout", { method: "POST" }).catch(() => {});
+  clearToken();
+}
+
 export async function apiSignup(
   email: string,
   nickname: string,
   password: string,
 ): Promise<AuthResponse> {
-  return apiFetch<AuthResponse>("/auth/signup", {
+  return apiFetch<AuthResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify({ email, nickname, password }),
   });
@@ -136,53 +139,44 @@ export async function apiGetMyStats(): Promise<{ stats: UserStats }> {
 
 // ── Friend endpoints (require token) ──────────────────────────────────────
 
-// フレンドリスト取得
-export async function apiGetFriends(userId: string): Promise<any[]> {
-  return apiFetch<any[]>(`/friends?userId=${userId}`);
+// フレンドリスト取得 (認証済みユーザーのリストを返す — userId は JWTから取得)
+export async function apiGetFriends(): Promise<any[]> {
+  return apiFetch<any[]>("/friends");
 }
 
 // 自分宛ての申請一覧取得
-export async function apiGetFriendRequests(userId: string): Promise<any[]> {
-  return apiFetch<any[]>(`/friends/requests?userId=${userId}`);
+export async function apiGetFriendRequests(): Promise<any[]> {
+  return apiFetch<any[]>("/friends/requests");
 }
 
-// フレンド申請を送信
-export async function apiSendFriendRequest(
-  senderId: string,
-  receiverId: string,
-) {
+// フレンド申請を送信 (senderId は JWT から取得 — 呼び出し元は receiverId のみ渡す)
+export async function apiSendFriendRequest(receiverId: string) {
   return apiFetch("/friends/requests", {
     method: "POST",
-    body: JSON.stringify({ senderId, receiverId }),
+    body: JSON.stringify({ receiver_id: receiverId }),
   });
 }
 
 // 申請を承諾
-export async function apiAcceptFriendRequest(
-  requestId: string,
-  userId: string,
-) {
+export async function apiAcceptFriendRequest(requestId: string) {
   return apiFetch(`/friends/requests/${requestId}/accept`, {
     method: "POST",
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify({}),
   });
 }
 
 // 申請を拒否
-export async function apiRejectFriendRequest(
-  requestId: string,
-  userId: string,
-) {
+export async function apiRejectFriendRequest(requestId: string) {
   return apiFetch(`/friends/requests/${requestId}/reject`, {
     method: "POST",
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify({}),
   });
 }
 
 // フレンド削除
-export async function apiRemoveFriend(friendId: string, userId: string) {
+export async function apiRemoveFriend(friendId: string) {
   return apiFetch(`/friends/${friendId}/remove`, {
     method: "POST",
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify({}),
   });
 }

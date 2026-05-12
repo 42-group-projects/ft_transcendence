@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const { PORT, JWT_SECRET, SOCKET_CORS } = require("./config");
 const { createRoomService } = require("./game/room-service");
 const { registerSocketHandlers } = require("./socket-handlers");
+const presenceManager = require("./presence-manager");
 
 const app = express();
 app.use(cors());
@@ -37,7 +38,7 @@ io.use((socket, next) => {
   }
 });
 
-const roomService = createRoomService(io);
+const roomService = createRoomService(io, presenceManager);
 
 registerSocketHandlers(io, roomService);
 

@@ -25,14 +25,7 @@ sendFriendRequest: async (senderId: string, receiverId: string) => {
         throw new ApiError(409, "SOCIAL_REQUEST_EXISTS");
       }
 
-      try {
-        return await friendRepository.createRequest(db, senderId, receiverId);
-      } catch (error: any) {
-        if (error.message && (error.message.includes('duplicate key') || error.message.includes('unique constraint'))) {
-          throw new ApiError(409, "SOCIAL_REQUEST_EXISTS");
-        }
-        throw error;
-      }
+      return await friendRepository.createRequest(db, senderId, receiverId);
 
     } finally {
       await close();
@@ -51,28 +44,24 @@ sendFriendRequest: async (senderId: string, receiverId: string) => {
   acceptFriendRequest: async (userId: string, requestId: string) => {
     const { db, close } = createDbClient();
     try {
-      const request = await friendRepository.getRequestById(db, requestId);
-      
-      if (!request) {
-        throw new ApiError(404, "Friend request not found");
-      }
-      if (request.receiverId !== userId) {
-        throw new ApiError(403, "You are not authorized to accept this request");
-      }
-      if (request.status !== 'pending') {
-        throw new ApiError(409, "Friend request already processed");
-      }
-      
-      await friendRepository.updateRequestStatus(db, requestId, 'accepted');
-      
-      try {
-        await friendRepository.createFriendship(db, request.senderId, request.receiverId);
-      } catch (error) {
-        await friendRepository.updateRequestStatus(db, requestId, 'pending');
-        throw new ApiError(500, "Failed to create friendship. Process rolled back.");
-      }
-      
-      return { success: true, message: "Friend request accepted" };
+      return await db.transaction(async (tx) => {
+        const request = await friendRepository.getRequestById(tx as any, requestId);
+
+        if (!request) {
+          throw new ApiError(404, "Friend request not found");
+        }
+        if (request.receiverId !== userId) {
+          throw new ApiError(403, "You are not authorized to accept this request");
+        }
+        if (request.status !== 'pending') {
+          throw new ApiError(409, "Friend request already processed");
+        }
+
+        await friendRepository.updateRequestStatus(tx as any, requestId, 'accepted');
+        await friendRepository.createFriendship(tx as any, request.senderId, request.receiverId);
+
+        return { success: true, message: "Friend request accepted" };
+      });
     } finally {
       await close();
     }

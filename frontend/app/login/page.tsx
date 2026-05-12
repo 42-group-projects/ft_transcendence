@@ -12,27 +12,6 @@ export default function LoginPage() {
   const [statusMessage, setStatusMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  
-  const isDEV = process.env.NODE_ENV === "development";
-
-  //TODO: remove this dev shortcut before launch
-  const handleDevSubmit = async () => {
-    event.preventDefault();
-    setLoading(true);
-    setStatusMessage("");
-
-    try {
-      const { access_token } = await apiLogin("player1@example.com", "password1");
-      saveToken(access_token);
-      router.push("/lobby");
-    } catch (err) {
-      setStatusMessage(err instanceof Error ? err.message : "Login failed");
-    } finally {
-      setLoading(false);
-    }
-
-  }
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
@@ -67,7 +46,7 @@ export default function LoginPage() {
             </>
           }
         >
-          <form className="space-y-4" onSubmit={isDEV ? handleDevSubmit : handleSubmit}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-neutral-200">Email</span>
               <input
@@ -100,9 +79,6 @@ export default function LoginPage() {
               {loading ? "Signing in…" : "Sign in"}
             </button>
           </form>
-          {/* TODO: remove this dev shortcut before launch */}
-          <p>if you click sign in without entering credentials, default dev credentials will be used.</p>
-
           {statusMessage ? <p className="mt-4 text-sm text-amber-400">{statusMessage}</p> : null}
         </AuthCard>
       </section>

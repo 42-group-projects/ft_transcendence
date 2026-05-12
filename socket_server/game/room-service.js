@@ -20,7 +20,7 @@ const {
 const { createRoomRoundManager } = require("./room-round-manager");
 const { createRoomSessionManager } = require("./room-session-manager");
 
-function createRoomService(io) {
+function createRoomService(io, presenceManager) {
   const rooms = new Map();
   const userSessions = new Map();
 
@@ -154,6 +154,7 @@ function createRoomService(io) {
     findRoomByUserId,
     hasDisconnectedHuman,
     handleLeave,
+    presenceManager,
   });
 
   const roundManager = createRoomRoundManager({

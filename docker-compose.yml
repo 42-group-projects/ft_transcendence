@@ -63,24 +63,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Mock REST API (Hono) — kept for comparison/testing during migration
-  mock-server:
-    build:
-      context: ./mock_server
-      dockerfile: Dockerfile
-    ports:
-      - "${MOCK_API_PORT:-4000}:4000"
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - PORT=4000
-      - JWT_SECRET=${JWT_SECRET}
-    volumes:
-      - ./mock_server:/app
-      - /app/node_modules
-    networks:
-      - game-network
-    restart: unless-stopped
-
   # Frontend (Next.js)
   frontend:
     build:
@@ -90,7 +72,7 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL}
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4001/api}
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -98,7 +80,7 @@ services:
       - game-network
     depends_on:
       - socket-server
-      - mock-server
+      - api-server
     restart: unless-stopped
 
 networks:

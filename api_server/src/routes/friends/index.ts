@@ -1,132 +1,68 @@
-import { Hono } from 'hono';
-import { friendService } from '../../service/friendService';
-import { ApiError } from '../../utils/apiError';
+import { Hono } from "hono";
+import { z } from "zod";
+import { zValidator } from "@hono/zod-validator";
+import { friendService } from "../../service/friendService";
+import type { AuthEnv } from "../../middleware/auth";
 
-export const friendsRoute = new Hono();
+// All routes are mounted behind authMiddleware in routes/index.ts.
+// Errors bubble up to the global onError handler in index.ts.
+export const friendsRoute = new Hono<AuthEnv>();
 
-friendsRoute.post('/requests', async (c) => {
-  try {
-    const body = await c.req.json().catch(() => null);
-    
-    if (!body) {
-      return c.json({ error: "Invalid JSON format" }, 422);
-    }
+// --- Schemas ---
+const sendRequestSchema = z
+  .object({
+    receiver_id: z.string().optional(),
+    receiverId: z.string().optional(),
+  })
+  .refine((data) => data.receiver_id || data.receiverId, {
+    message: "receiver_id is required",
+  })
+  .transform((data) => ({ receiverId: (data.receiver_id ?? data.receiverId) as string }));
 
-    const { senderId, receiverId } = body; 
+// --- Routes ---
 
-    if (!senderId || typeof senderId !== 'string') {
-      return c.json({ error: "senderId is required and must be a string" }, 422);
-    }
-    if (!receiverId || typeof receiverId !== 'string') {
-      return c.json({ error: "receiverId is required and must be a string" }, 422);
-    }
-
-    const result = await friendService.sendFriendRequest(senderId, receiverId);
-    return c.json(result, 201);
-    
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return c.json({ error: error.message }, error.statusCode as any);
-    }
-    const message = error instanceof Error ? error.message : "Failed to send friend request";
-    return c.json({ error: message }, 500);
-  }
+// GET /friends
+friendsRoute.get("/", async (c) => {
+  const userId = c.get("userId");
+  const friends = await friendService.getFriendList(userId);
+  return c.json(friends, 200);
 });
 
-friendsRoute.get('/requests', async (c) => {
-  try {
-    const userId = c.req.query('userId');
-    if (!userId) return c.json({ error: "userId is required" }, 422);
-
-    const requests = await friendService.getPendingRequests(userId);
-    return c.json(requests, 200);
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return c.json({ error: error.message }, error.statusCode as any);
-    }
-    const message = error instanceof Error ? error.message : "Failed to fetch friend requests";
-    return c.json({ error: message }, 500);
-  }
+// GET /friends/requests
+friendsRoute.get("/requests", async (c) => {
+  const userId = c.get("userId");
+  const requests = await friendService.getPendingRequests(userId);
+  return c.json(requests, 200);
 });
 
-friendsRoute.post('/requests/:id/accept', async (c) => {
-  try {
-    const requestId = c.req.param('id');
-    
-    const body = await c.req.json().catch(() => null);
-    if (!body || !body.userId || typeof body.userId !== 'string') {
-      return c.json({ error: "userId is required in body and must be a string" }, 422);
-    }
-
-    const result = await friendService.acceptFriendRequest(body.userId, requestId);
-    return c.json(result, 200);
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return c.json({ error: error.message }, error.statusCode as any);
-    }
-    const message = error instanceof Error ? error.message : "Failed to accept friend request";
-    return c.json({ error: message }, 500);
-  }
+// POST /friends/requests
+friendsRoute.post("/requests", zValidator("json", sendRequestSchema), async (c) => {
+  const userId = c.get("userId");
+  const { receiverId } = c.req.valid("json");
+  const result = await friendService.sendFriendRequest(userId, receiverId);
+  return c.json(result, 201);
 });
 
-friendsRoute.post('/requests/:id/reject', async (c) => {
-  try {
-    const requestId = c.req.param('id');
-    
-    const body = await c.req.json().catch(() => null);
-    if (!body || !body.userId || typeof body.userId !== 'string') {
-      return c.json({ error: "userId is required in body and must be a string" }, 422);
-    }
-
-    const result = await friendService.rejectFriendRequest(body.userId, requestId);
-    return c.json(result, 200);
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return c.json({ error: error.message }, error.statusCode as any);
-    }
-    const message = error instanceof Error ? error.message : "Failed to reject friend request";
-    return c.json({ error: message }, 500);
-  }
+// POST /friends/requests/:id/accept
+friendsRoute.post("/requests/:id/accept", async (c) => {
+  const userId = c.get("userId");
+  const requestId = c.req.param("id");
+  const result = await friendService.acceptFriendRequest(userId, requestId);
+  return c.json(result, 200);
 });
 
-friendsRoute.get('/', async (c) => {
-  try {
-    const userId = c.req.query('userId');
-    if (!userId) return c.json({ error: "userId is required" }, 422);
-
-    const friends = await friendService.getFriendList(userId);
-    return c.json(friends, 200);
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return c.json({ error: error.message }, error.statusCode as any);
-    }
-    const message = error instanceof Error ? error.message : "Failed to fetch friend list";
-    return c.json({ error: message }, 500);
-  }
+// POST /friends/requests/:id/reject
+friendsRoute.post("/requests/:id/reject", async (c) => {
+  const userId = c.get("userId");
+  const requestId = c.req.param("id");
+  const result = await friendService.rejectFriendRequest(userId, requestId);
+  return c.json(result, 200);
 });
 
-friendsRoute.post('/:id/remove', async (c) => {
-  try {
-    const friendId = c.req.param('id');
-    
-    const body = await c.req.json().catch(() => null);
-    if (!body) {
-      return c.json({ error: "Invalid JSON format" }, 422);
-    }
-
-    const { userId } = body; 
-    
-    if (!userId || typeof userId !== 'string') {
-      return c.json({ error: "userId is required and must be a string" }, 422);
-    }
-    
-    const result = await friendService.removeFriend(userId, friendId);
-    return c.json(result, 200);
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return c.json({ error: error.message }, error.statusCode as any);
-    }
-    const message = error instanceof Error ? error.message : "Failed to remove friend";
-    return c.json({ error: message }, 500);
-  }
+// POST /friends/:id/remove
+friendsRoute.post("/:id/remove", async (c) => {
+  const userId = c.get("userId");
+  const friendId = c.req.param("id");
+  const result = await friendService.removeFriend(userId, friendId);
+  return c.json(result, 200);
 });
