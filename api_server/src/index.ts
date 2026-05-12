@@ -6,7 +6,6 @@ import { ApiError } from "./utils/apiError";
 
 const app = new Hono()
   .use("/*", cors())
-  .get("/health", (c) => c.text("Hello World!"))
   .route("/", apiRoutes);
 
 app.onError((err, c) => {
