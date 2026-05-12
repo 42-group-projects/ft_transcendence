@@ -1,31 +1,31 @@
 {
-  "name": "api-server",
-  "version": "1.0.0",
-  "description": "Production Web API server",
-  "main": "src/index.ts",
-  "type": "module",
-  "scripts": {
-    "start": "tsx src/index.ts",
-    "dev": "tsx watch src/index.ts",
-    "dev:compose": "sh -c 'until pnpm run db:migrate; do echo [api-server] waiting for database...; sleep 2; done; pnpm run dev'",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
-  },
-  "dependencies": {
-    "@hono/node-server": "^1.19.5",
-    "@hono/zod-validator": "^0.8.0",
-    "bcryptjs": "^3.0.3",
-    "drizzle-orm": "^0.44.5",
-    "hono": "^4.9.6",
-    "jsonwebtoken": "^9.0.3",
-    "postgres": "^3.4.7",
-    "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^25.5.2",
-    "drizzle-kit": "^0.31.4",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.2"
-  }
+    "name": "api-server",
+    "version": "1.0.0",
+    "description": "Production Web API server",
+    "main": "src/index.ts",
+    "type": "module",
+    "scripts": {
+        "start": "tsx src/index.ts",
+        "dev": "tsx watch src/index.ts",
+        "dev:compose": "sh -c 'until pnpm run db:migrate; do echo [api-server] waiting for database...; sleep 2; done; pnpm run dev'",
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "drizzle-kit migrate"
+    },
+    "dependencies": {
+        "@hono/node-server": "^1.19.5",
+        "@hono/zod-validator": "^0.8.0",
+        "bcryptjs": "^3.0.3",
+        "drizzle-orm": "^0.44.5",
+        "hono": "^4.9.6",
+        "jsonwebtoken": "^9.0.3",
+        "postgres": "^3.4.7",
+        "zod": "^4.4.3"
+    },
+    "devDependencies": {
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/node": "^25.5.2",
+        "drizzle-kit": "^0.31.4",
+        "tsx": "^4.20.6",
+        "typescript": "^5.9.2"
+    }
 }

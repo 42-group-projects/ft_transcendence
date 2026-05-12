@@ -20,45 +20,45 @@
 
 ### 共通エラーコード
 
-| コード | HTTP | 説明 |
-|---|---|---|
-| UNAUTHORIZED | 401 | 認証トークン不正・期限切れ |
-| FORBIDDEN | 403 | 権限なし |
-| NOT_FOUND | 404 | リソースが存在しない |
-| CONFLICT | 409 | 重複・競合 |
-| UNPROCESSABLE | 422 | バリデーションエラー |
-| INTERNAL_ERROR | 500 | サーバーエラー |
+| コード         | HTTP | 説明                       |
+| -------------- | ---- | -------------------------- |
+| UNAUTHORIZED   | 401  | 認証トークン不正・期限切れ |
+| FORBIDDEN      | 403  | 権限なし                   |
+| NOT_FOUND      | 404  | リソースが存在しない       |
+| CONFLICT       | 409  | 重複・競合                 |
+| UNPROCESSABLE  | 422  | バリデーションエラー       |
+| INTERNAL_ERROR | 500  | サーバーエラー             |
 
 ---
 
 ## エンドポイント全体マップ
 
-| Method | Path | 説明 | 認可 |
-|---|---|---|---|
-| POST | /auth/register | ユーザー登録 | Guest |
-| POST | /auth/login | ログイン | Guest |
-| POST | /auth/logout | ログアウト | Player |
-| GET | /auth/oauth/{provider} | OAuth 認証開始 | Guest |
-| GET | /auth/oauth/{provider}/callback | OAuth コールバック | Guest |
-| GET | /users/me | 自分のプロフィール取得 | Player (owner) |
-| PATCH | /users/me | 自分のプロフィール更新 | Player (owner) |
-| GET | /users/{id} | ユーザープロフィール取得 | Player |
-| POST | /friends/requests | フレンドリクエスト送信 | Player |
-| GET | /friends/requests | フレンドリクエスト一覧 | Player |
-| POST | /friends/requests/{id}/accept | リクエスト承諾 | Player (receiver) |
-| POST | /friends/requests/{id}/reject | リクエスト拒否 | Player (receiver) |
-| GET | /friends | フレンドリスト取得 | Player |
-| POST | /friends/{id}/remove | フレンド削除 | Player (当事者) |
-| POST | /rooms | ルーム作成 | Player |
-| GET | /rooms/{id} | ルーム詳細 | Player (参加者) |
-| POST | /rooms/{id}/join | ルーム入室 | Player |
-| POST | /rooms/{id}/ready | 準備完了 | Player (参加者) |
-| POST | /rooms/{id}/cancel | ルームキャンセル | Player (参加者) |
-| POST | /rooms/keyword-match | あいことばマッチング | Player |
-| GET | /games/{id} | ゲームセッション詳細 | Player (参加者) |
-| GET | /rankings | 番付ランキング | Player |
-| GET | /users/{id}/stats | ユーザー統計 | Player |
-| GET | /users/{id}/history | 対戦履歴 | Player |
+| Method | Path                            | 説明                     | 認可              |
+| ------ | ------------------------------- | ------------------------ | ----------------- |
+| POST   | /auth/register                  | ユーザー登録             | Guest             |
+| POST   | /auth/login                     | ログイン                 | Guest             |
+| POST   | /auth/logout                    | ログアウト               | Player            |
+| GET    | /auth/oauth/{provider}          | OAuth 認証開始           | Guest             |
+| GET    | /auth/oauth/{provider}/callback | OAuth コールバック       | Guest             |
+| GET    | /users/me                       | 自分のプロフィール取得   | Player (owner)    |
+| PATCH  | /users/me                       | 自分のプロフィール更新   | Player (owner)    |
+| GET    | /users/{id}                     | ユーザープロフィール取得 | Player            |
+| POST   | /friends/requests               | フレンドリクエスト送信   | Player            |
+| GET    | /friends/requests               | フレンドリクエスト一覧   | Player            |
+| POST   | /friends/requests/{id}/accept   | リクエスト承諾           | Player (receiver) |
+| POST   | /friends/requests/{id}/reject   | リクエスト拒否           | Player (receiver) |
+| GET    | /friends                        | フレンドリスト取得       | Player            |
+| POST   | /friends/{id}/remove            | フレンド削除             | Player (当事者)   |
+| POST   | /rooms                          | ルーム作成               | Player            |
+| GET    | /rooms/{id}                     | ルーム詳細               | Player (参加者)   |
+| POST   | /rooms/{id}/join                | ルーム入室               | Player            |
+| POST   | /rooms/{id}/ready               | 準備完了                 | Player (参加者)   |
+| POST   | /rooms/{id}/cancel              | ルームキャンセル         | Player (参加者)   |
+| POST   | /rooms/keyword-match            | あいことばマッチング     | Player            |
+| GET    | /games/{id}                     | ゲームセッション詳細     | Player (参加者)   |
+| GET    | /rankings                       | 番付ランキング           | Player            |
+| GET    | /users/{id}/stats               | ユーザー統計             | Player            |
+| GET    | /users/{id}/history             | 対戦履歴                 | Player            |
 
 ---
 
@@ -69,21 +69,29 @@
 ユーザー登録。JWT を返却。
 
 **Request**
+
 ```json
 {
-  "email": "player@example.com",       // RFC 5322, max 255
-  "password": "SecureP@ss1",           // 8文字以上, 英大小数字各1以上
-  "nickname": "sumo_fan42"             // 1〜20文字, UQ
+    "email": "player@example.com", // RFC 5322, max 255
+    "password": "SecureP@ss1", // 8文字以上, 英大小数字各1以上
+    "nickname": "sumo_fan42" // 1〜20文字, UQ
 }
 ```
 
 **Response** `201 Created`
+
 ```json
 {
-  "access_token": "eyJ...",
-  "token_type": "bearer",
-  "expires_in": 3600,
-  "user": { "id": "uuid", "email": "...", "nickname": "...", "avatar_url": null, "created_at": "..." }
+    "access_token": "eyJ...",
+    "token_type": "bearer",
+    "expires_in": 3600,
+    "user": {
+        "id": "uuid",
+        "email": "...",
+        "nickname": "...",
+        "avatar_url": null,
+        "created_at": "..."
+    }
 }
 ```
 
@@ -96,6 +104,7 @@
 ログイン。JWT を返却。
 
 **Request**
+
 ```json
 { "email": "player@example.com", "password": "SecureP@ss1" }
 ```
@@ -146,11 +155,16 @@ OAuth コールバック。ユーザー作成/検索して JWT 発行。
 自分のプロフィール取得。
 
 **Response** `200 OK`
+
 ```json
 {
-  "id": "uuid", "email": "...", "nickname": "...",
-  "avatar_url": "...", "created_at": "...", "updated_at": "...",
-  "oauth_providers": ["google"]
+    "id": "uuid",
+    "email": "...",
+    "nickname": "...",
+    "avatar_url": "...",
+    "created_at": "...",
+    "updated_at": "...",
+    "oauth_providers": ["google"]
 }
 ```
 
@@ -163,6 +177,7 @@ OAuth コールバック。ユーザー作成/検索して JWT 発行。
 自分のプロフィール更新。少なくとも1フィールド必要。
 
 **Request**
+
 ```json
 { "nickname": "yokozuna_master", "avatar_url": "https://..." }
 ```
@@ -181,6 +196,7 @@ OAuth コールバック。ユーザー作成/検索して JWT 発行。
 ユーザー公開プロフィール取得。email, oauth_providers は含まない。
 
 **Response** `200 OK`
+
 ```json
 { "id": "uuid", "nickname": "...", "avatar_url": "...", "created_at": "..." }
 ```
@@ -196,6 +212,7 @@ OAuth コールバック。ユーザー作成/検索して JWT 発行。
 フレンドリクエスト送信。
 
 **Request**
+
 ```json
 { "receiver_id": "uuid" }
 ```
@@ -203,8 +220,16 @@ OAuth コールバック。ユーザー作成/検索して JWT 発行。
 **Guard**: 自分自身→`422 SOCIAL_SELF_REQUEST`, 既にフレンド→`409 SOCIAL_ALREADY_FRIENDS`, pending申請あり→`409 SOCIAL_REQUEST_EXISTS`, ユーザー不在→`404 NOT_FOUND`
 
 **Response** `201 Created`
+
 ```json
-{ "id": "uuid", "sender_id": "uuid", "receiver_id": "uuid", "status": "pending", "created_at": "...", "updated_at": "..." }
+{
+    "id": "uuid",
+    "sender_id": "uuid",
+    "receiver_id": "uuid",
+    "status": "pending",
+    "created_at": "...",
+    "updated_at": "..."
+}
 ```
 
 ---
@@ -246,14 +271,21 @@ OAuth コールバック。ユーザー作成/検索して JWT 発行。
 **Query**: `cursor`, `limit`
 
 **Response** `200 OK`
+
 ```json
 {
-  "data": [{
-    "id": "uuid", "user_id": "uuid", "friend_id": "uuid",
-    "status": "accepted", "online_status": "online | in_game | offline",
-    "created_at": "...", "updated_at": "..."
-  }],
-  "meta": { "cursor": "...", "has_more": true }
+    "data": [
+        {
+            "id": "uuid",
+            "user_id": "uuid",
+            "friend_id": "uuid",
+            "status": "accepted",
+            "online_status": "online | in_game | offline",
+            "created_at": "...",
+            "updated_at": "..."
+        }
+    ],
+    "meta": { "cursor": "...", "has_more": true }
 }
 ```
 
@@ -276,23 +308,31 @@ OAuth コールバック。ユーザー作成/検索して JWT 発行。
 ゲームルーム作成。
 
 **Request**
+
 ```json
 {
-  "match_type": "keyword | invite | random | cpu",
-  "keyword": "sumo42",         // keyword時のみ必須 (1-32文字, 英数字・ハイフン)
-  "guest_id": "uuid",          // invite時のみ必須
-  "cpu_level": "easy | medium | hard | oni"  // cpu時のみ必須
+    "match_type": "keyword | invite | random | cpu",
+    "keyword": "sumo42", // keyword時のみ必須 (1-32文字, 英数字・ハイフン)
+    "guest_id": "uuid", // invite時のみ必須
+    "cpu_level": "easy | medium | hard | oni" // cpu時のみ必須
 }
 ```
 
 `match_type=cpu` の場合、status は即座に `playing` へ遷移。
 
 **Response** `201 Created`
+
 ```json
 {
-  "id": "uuid", "match_type": "keyword", "keyword": "sumo42",
-  "host_id": "uuid", "guest_id": null, "cpu_level": null,
-  "status": "waiting", "created_at": "...", "updated_at": "..."
+    "id": "uuid",
+    "match_type": "keyword",
+    "keyword": "sumo42",
+    "host_id": "uuid",
+    "guest_id": null,
+    "cpu_level": null,
+    "status": "waiting",
+    "created_at": "...",
+    "updated_at": "..."
 }
 ```
 
@@ -345,6 +385,7 @@ OAuth コールバック。ユーザー作成/検索して JWT 発行。
 あいことばマッチング。待機中ルームがあれば参加、なければ新規作成。
 
 **Request**
+
 ```json
 { "keyword": "sumo42" }
 ```
@@ -374,15 +415,21 @@ cancelled          cancelled
 ゲームセッション詳細取得。参加者のみ。
 
 **Response** `200 OK`
+
 ```json
 {
-  "id": "uuid", "room_id": "uuid",
-  "player1_id": "uuid", "player2_id": "uuid | null",
-  "is_cpu_game": false, "cpu_level": null,
-  "winner_id": "uuid | null",
-  "status": "playing | paused | finished",
-  "started_at": "...", "finished_at": "... | null",
-  "created_at": "...", "updated_at": "..."
+    "id": "uuid",
+    "room_id": "uuid",
+    "player1_id": "uuid",
+    "player2_id": "uuid | null",
+    "is_cpu_game": false,
+    "cpu_level": null,
+    "winner_id": "uuid | null",
+    "status": "playing | paused | finished",
+    "started_at": "...",
+    "finished_at": "... | null",
+    "created_at": "...",
+    "updated_at": "..."
 }
 ```
 
@@ -396,31 +443,31 @@ cancelled          cancelled
 
 #### Client → Server
 
-| Event | Payload | 説明 |
-|---|---|---|
-| `join` | `{ "session_id": "uuid" }` | ゲームセッションに参加 |
-| `move` | `{ "forward": bool, "backward": bool, "left": bool, "right": bool, "push": bool }` | プレイヤー入力送信 |
-| `reconnect` | `{ "session_id": "uuid" }` | 切断後の再接続 |
+| Event       | Payload                                                                            | 説明                   |
+| ----------- | ---------------------------------------------------------------------------------- | ---------------------- |
+| `join`      | `{ "session_id": "uuid" }`                                                         | ゲームセッションに参加 |
+| `move`      | `{ "forward": bool, "backward": bool, "left": bool, "right": bool, "push": bool }` | プレイヤー入力送信     |
+| `reconnect` | `{ "session_id": "uuid" }`                                                         | 切断後の再接続         |
 
 #### Server → Client
 
-| Event | Payload | 説明 |
-|---|---|---|
-| `countdown` | `{ "count": 3 }` | カウントダウン (3, 2, 1) |
-| `game_state` | `{ "players": [{ "id", "position", "velocity", "rotation" }], "timestamp" }` | ゲーム状態同期 (~60fps) |
-| `result` | `{ "winner_id", "player1_id", "player2_id" }` | 勝敗結果 |
-| `opponent_disconnected` | (なし) | 相手切断 → paused |
-| `opponent_reconnected` | (なし) | 相手再接続 → playing |
-| `session_ended` | (なし) | タイムアウト等で終了 → finished |
+| Event                   | Payload                                                                      | 説明                            |
+| ----------------------- | ---------------------------------------------------------------------------- | ------------------------------- |
+| `countdown`             | `{ "count": 3 }`                                                             | カウントダウン (3, 2, 1)        |
+| `game_state`            | `{ "players": [{ "id", "position", "velocity", "rotation" }], "timestamp" }` | ゲーム状態同期 (~60fps)         |
+| `result`                | `{ "winner_id", "player1_id", "player2_id" }`                                | 勝敗結果                        |
+| `opponent_disconnected` | (なし)                                                                       | 相手切断 → paused               |
+| `opponent_reconnected`  | (なし)                                                                       | 相手再接続 → playing            |
+| `session_ended`         | (なし)                                                                       | タイムアウト等で終了 → finished |
 
 #### WebSocket エラー
 
-| Code | 説明 |
-|---|---|
-| UNAUTHORIZED | 未認証・参加者でない |
-| NOT_FOUND | セッション不在 |
+| Code                    | 説明                               |
+| ----------------------- | ---------------------------------- |
+| UNAUTHORIZED            | 未認証・参加者でない               |
+| NOT_FOUND               | セッション不在                     |
 | GAME_INVALID_TRANSITION | 不正な状態遷移（paused中のmove等） |
-| GAME_SESSION_ENDED | セッション終了済み |
+| GAME_SESSION_ENDED      | セッション終了済み                 |
 
 ---
 
@@ -433,13 +480,21 @@ cancelled          cancelled
 **Query**: `cursor`, `limit`
 
 **Response** `200 OK`
+
 ```json
 {
-  "data": [{
-    "user_id": "uuid", "nickname": "SumoKing", "avatar_url": "...",
-    "wins": 42, "losses": 8, "rating": 1850, "rank": 1
-  }],
-  "meta": { "cursor": "...", "has_more": true }
+    "data": [
+        {
+            "user_id": "uuid",
+            "nickname": "SumoKing",
+            "avatar_url": "...",
+            "wins": 42,
+            "losses": 8,
+            "rating": 1850,
+            "rank": 1
+        }
+    ],
+    "meta": { "cursor": "...", "has_more": true }
 }
 ```
 
@@ -452,12 +507,17 @@ cancelled          cancelled
 ユーザー統計取得。
 
 **Response** `200 OK`
+
 ```json
 {
-  "data": {
-    "user_id": "uuid", "wins": 42, "losses": 8,
-    "win_rate": 0.84, "rating": 1850, "rank": 1
-  }
+    "data": {
+        "user_id": "uuid",
+        "wins": 42,
+        "losses": 8,
+        "win_rate": 0.84,
+        "rating": 1850,
+        "rank": 1
+    }
 }
 ```
 
@@ -472,16 +532,23 @@ cancelled          cancelled
 **Query**: `cursor`, `limit`
 
 **Response** `200 OK`
+
 ```json
 {
-  "data": [{
-    "match_id": "uuid",
-    "opponent": { "user_id": "uuid", "nickname": "...", "avatar_url": "..." },
-    "result": "win | loss",
-    "is_cpu_game": false,
-    "played_at": "2026-03-18T14:30:00Z"
-  }],
-  "meta": { "cursor": "...", "has_more": true }
+    "data": [
+        {
+            "match_id": "uuid",
+            "opponent": {
+                "user_id": "uuid",
+                "nickname": "...",
+                "avatar_url": "..."
+            },
+            "result": "win | loss",
+            "is_cpu_game": false,
+            "played_at": "2026-03-18T14:30:00Z"
+        }
+    ],
+    "meta": { "cursor": "...", "has_more": true }
 }
 ```
 
