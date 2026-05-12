@@ -1,4 +1,9 @@
 {
+    "name": "ft_transcendence",
+    "version": "1.0.0",
+    "scripts": {
+        "check-format": "prettier --check ."
+    },
     "devDependencies": {
         "prettier": "^3.8.3"
     }
