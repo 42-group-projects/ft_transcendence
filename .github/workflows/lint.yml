@@ -1,0 +1,31 @@
+name: Lint and Format Check
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+
+jobs:
+    format-check:
+        runs-on: ubuntu-latest
+
+        steps:
+            # 1. コードのチェックアウト
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            # 2. Node.jsのセットアップ
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+                  # cache: 'npm'
+
+            # 3. 依存関係のインストール
+            - name: Install dependencies
+              run: npm ci
+
+            # 4. Prettierのチェック実行
+            - name: Run Prettier check
+              run: npm run check-format

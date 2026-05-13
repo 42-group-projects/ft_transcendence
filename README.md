@@ -1,6 +1,5 @@
 # ft_transcendence
 
-
 ## File Structure
 
 ```
@@ -23,23 +22,23 @@ ft_transcendence/
     ├── Dockerfile
     ├── package.json
     └── index.js              # Express + Socket.io + physics loop
-    
+
 ```
 
 ---
 
 ## Technologies
 
-| Layer | Technology |
-|---|---|
-| Frontend framework | [Next.js 16](https://nextjs.org/) + React 19 |
-| 3D rendering | [Three.js](https://threejs.org/) via [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) |
-| Physics (client) | [React Three Rapier](https://github.com/pmndrs/react-three-rapier) |
-| Styling | [Tailwind CSS v4](https://tailwindcss.com/) |
-| Real-time comms | [Socket.io](https://socket.io/) (client + server) |
-| Game server | Node.js + Express |
-| Containerisation | Docker + Docker Compose |
-| Package manager | [pnpm](https://pnpm.io/) |
+| Layer              | Technology                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------ |
+| Frontend framework | [Next.js 16](https://nextjs.org/) + React 19                                                     |
+| 3D rendering       | [Three.js](https://threejs.org/) via [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) |
+| Physics (client)   | [React Three Rapier](https://github.com/pmndrs/react-three-rapier)                               |
+| Styling            | [Tailwind CSS v4](https://tailwindcss.com/)                                                      |
+| Real-time comms    | [Socket.io](https://socket.io/) (client + server)                                                |
+| Game server        | Node.js + Express                                                                                |
+| Containerisation   | Docker + Docker Compose                                                                          |
+| Package manager    | [pnpm](https://pnpm.io/)                                                                         |
 
 ---
 
@@ -83,9 +82,9 @@ cd ft_transcendence
 docker compose up --build
 ```
 
-| Service | URL |
-|---|---|
-| Frontend | http://localhost:3000 |
+| Service       | URL                   |
+| ------------- | --------------------- |
+| Frontend      | http://localhost:3000 |
 | Socket server | http://localhost:3001 |
 
 ### Stopping the project
@@ -105,4 +104,3 @@ Source files are mounted as volumes, so most changes hot-reload automatically. I
 ```bash
 docker compose up --build
 ```
-

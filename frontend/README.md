@@ -10,7 +10,6 @@ npm run build
 pnpm run build
 ```
 
-
 ```bash
 npm run dev
 # or
