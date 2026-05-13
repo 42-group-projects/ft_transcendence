@@ -190,14 +190,13 @@ function createRoomService(io, presenceManager) {
             return Promise.resolve();
         }
 
-        if (room.solo === true && winnerId !== player1.userId) {
-            return Promise.resolve();
-        }
+        const persistedWinnerId =
+            room.solo === true && winnerId !== player1.userId ? null : winnerId;
 
         const body = JSON.stringify({
             player1Id: player1.userId,
             player2Id: player2 ? player2.userId : null,
-            winnerId,
+            winnerId: persistedWinnerId,
             isCpuGame: room.solo === true,
             cpuLevel:
                 room.solo === true

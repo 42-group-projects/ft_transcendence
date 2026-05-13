@@ -237,7 +237,7 @@ export const gameSessions = pgTable(
         ),
         check(
             'game_sessions_finished_winner_chk',
-            sql`${table.finishedAt} is null or ${table.winnerId} is not null`,
+            sql`${table.finishedAt} is null or ${table.winnerId} is not null or ${table.isCpuGame} = true`,
         ),
     ],
 );
@@ -255,9 +255,9 @@ export const matchRecords = pgTable(
         player2Id: uuid('player2_id').references(() => users.id, {
             onDelete: 'restrict',
         }),
-        winnerId: uuid('winner_id')
-            .notNull()
-            .references(() => users.id, { onDelete: 'restrict' }),
+        winnerId: uuid('winner_id').references(() => users.id, {
+            onDelete: 'restrict',
+        }),
         isCpuGame: boolean('is_cpu_game').notNull().default(false),
         playedAt: timestamp('played_at', { withTimezone: true }).notNull(),
         createdAt: timestamp('created_at', { withTimezone: true })
