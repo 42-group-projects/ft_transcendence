@@ -2,7 +2,6 @@
 **/node_modules/
 
 # Lockfiles (using pnpm in this repo)
-package-lock.json
 
 # Build output / caches
 **/.next/
@@ -13,6 +12,9 @@ package-lock.json
 
 # Environment files
 .env
+
+#setting
+.vscode/setting.json
 
 # OS / editor
 .DS_Store
