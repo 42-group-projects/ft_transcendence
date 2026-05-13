@@ -1,3 +1,0 @@
-ALTER TABLE "game_sessions" DROP CONSTRAINT "game_sessions_finished_winner_chk";--> statement-breakpoint
-ALTER TABLE "match_records" ALTER COLUMN "winner_id" DROP NOT NULL;--> statement-breakpoint
-ALTER TABLE "game_sessions" ADD CONSTRAINT "game_sessions_finished_winner_chk" CHECK ("game_sessions"."finished_at" is null or "game_sessions"."winner_id" is not null or "game_sessions"."is_cpu_game" = true);
