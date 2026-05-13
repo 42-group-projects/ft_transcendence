@@ -25,7 +25,7 @@ export type MatchRecord = {
     player1_nickname: string;
     player2_id: string | null;
     player2_nickname: string | null;
-    winner_id: string | null;
+    winner_id: string;
     is_cpu_game: boolean;
     played_at: string;
 };

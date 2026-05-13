@@ -46,7 +46,7 @@ function serializeMatches(matches: MatchRow[]) {
         player1_nickname: m.player1Nickname,
         player2_id: m.player2Id ?? null,
         player2_nickname: m.player2Nickname ?? null,
-        winner_id: m.winnerId ?? null,
+        winner_id: m.winnerId,
         is_cpu_game: m.isCpuGame,
         played_at:
             m.playedAt instanceof Date ? m.playedAt.toISOString() : m.playedAt,

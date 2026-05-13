@@ -9,7 +9,7 @@ const PERSISTED_CPU_LEVELS = new Set(['easy', 'medium', 'hard', 'oni']);
 export type MatchResultInput = {
     player1Id: string;
     player2Id?: string | null;
-    winnerId: string | null;
+    winnerId: string;
     isCpuGame: boolean;
     cpuLevel?: string | null;
     startedAt: Date;
@@ -49,17 +49,13 @@ function normalizePlayer2Id(input: MatchResultInput) {
 
 function normalizeWinnerId(input: MatchResultInput, player2Id: string | null) {
     if (input.isCpuGame) {
-        if (input.winnerId === null) {
-            return null;
+        if (input.winnerId !== input.player1Id) {
+            throw new MatchResultValidationError(
+                'CPU winners are not supported by persisted match records',
+            );
         }
 
-        if (input.winnerId === input.player1Id) {
-            return input.player1Id;
-        }
-
-        throw new MatchResultValidationError(
-            'winnerId must be null or player1Id for CPU matches',
-        );
+        return input.player1Id;
     }
 
     if (input.winnerId !== input.player1Id && input.winnerId !== player2Id) {
@@ -210,7 +206,7 @@ export const matchRepository = {
             player1Nickname: string;
             player2Id: string | null;
             player2Nickname: string | null;
-            winnerId: string | null;
+            winnerId: string;
             isCpuGame: boolean;
             playedAt: Date;
         }>;

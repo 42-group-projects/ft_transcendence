@@ -24,7 +24,7 @@ function parseStartedAt(value: unknown) {
  * POST /api/internal/match-result
  *
  * Called by the socket server after a game_finished session ends.
- * Body: { player1Id, player2Id?, winnerId?, isCpuGame, cpuLevel?, startedAt }
+ * Body: { player1Id, player2Id?, winnerId, isCpuGame, cpuLevel?, startedAt }
  */
 internalRoutes.post('/match-result', async (c) => {
     try {
@@ -40,14 +40,10 @@ internalRoutes.post('/match-result', async (c) => {
             startedAt,
         } = body;
 
-        if (typeof player1Id !== 'string' || typeof isCpuGame !== 'boolean') {
-            return c.json({ error: 'UNPROCESSABLE' }, 422);
-        }
-
         if (
-            winnerId !== undefined &&
-            winnerId !== null &&
-            typeof winnerId !== 'string'
+            typeof player1Id !== 'string' ||
+            typeof winnerId !== 'string' ||
+            typeof isCpuGame !== 'boolean'
         ) {
             return c.json({ error: 'UNPROCESSABLE' }, 422);
         }
@@ -73,7 +69,7 @@ internalRoutes.post('/match-result', async (c) => {
             await matchRepository.saveMatchResult(db, {
                 player1Id,
                 player2Id: player2Id ?? null,
-                winnerId: winnerId ?? null,
+                winnerId,
                 isCpuGame,
                 cpuLevel: cpuLevel ?? null,
                 startedAt: parsedStartedAt,
