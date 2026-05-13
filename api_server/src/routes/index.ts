@@ -7,7 +7,6 @@ import { authRoutes } from './auth/index';
 import { usersRoutes } from './users/index';
 import { internalRoutes } from './internal/index';
 import { authMiddleware } from '../middleware/auth';
-import { internalAuthMiddleware } from '../middleware/internalAuth';
 
 const app = new Hono()
     .basePath('/api')
@@ -28,8 +27,6 @@ const app = new Hono()
     .use('/admin', authMiddleware)
     .route('/admin', adminRoutes)
     // Internal — validated by X-Internal-Secret header, no JWT
-    .use('/internal/*', internalAuthMiddleware)
-    .use('/internal', internalAuthMiddleware)
     .route('/internal', internalRoutes)
     .get('/', (c) => {
         return c.text('This is the API root.');

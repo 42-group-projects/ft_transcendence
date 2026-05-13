@@ -1,24 +1,8 @@
 import { Hono } from 'hono';
 import { createDbClient } from '../../repository/dbClient';
-import {
-    MatchResultValidationError,
-    matchRepository,
-} from '../../repository/matchRepository';
+import { matchRepository } from '../../repository/matchRepository';
 
 export const internalRoutes = new Hono();
-
-function parseStartedAt(value: unknown) {
-    if (value === undefined) {
-        return new Date();
-    }
-
-    if (typeof value !== 'string' && typeof value !== 'number') {
-        return null;
-    }
-
-    const startedAt = new Date(value);
-    return Number.isFinite(startedAt.getTime()) ? startedAt : null;
-}
 
 /**
  * POST /api/internal/match-result
@@ -48,22 +32,6 @@ internalRoutes.post('/match-result', async (c) => {
             return c.json({ error: 'UNPROCESSABLE' }, 422);
         }
 
-        if (
-            (player2Id !== undefined && player2Id !== null
-                ? typeof player2Id !== 'string'
-                : false) ||
-            (cpuLevel !== undefined && cpuLevel !== null
-                ? typeof cpuLevel !== 'string'
-                : false)
-        ) {
-            return c.json({ error: 'UNPROCESSABLE' }, 422);
-        }
-
-        const parsedStartedAt = parseStartedAt(startedAt);
-        if (!parsedStartedAt) {
-            return c.json({ error: 'UNPROCESSABLE' }, 422);
-        }
-
         const { db, close } = createDbClient();
         try {
             await matchRepository.saveMatchResult(db, {
@@ -72,16 +40,13 @@ internalRoutes.post('/match-result', async (c) => {
                 winnerId,
                 isCpuGame,
                 cpuLevel: cpuLevel ?? null,
-                startedAt: parsedStartedAt,
+                startedAt: startedAt ? new Date(startedAt) : new Date(),
             });
             return c.json({ ok: true });
         } finally {
             await close();
         }
     } catch (err) {
-        if (err instanceof MatchResultValidationError) {
-            return c.json({ error: 'UNPROCESSABLE' }, 422);
-        }
         console.error('[POST /internal/match-result]', err);
         return c.json({ error: 'INTERNAL_ERROR' }, 500);
     }

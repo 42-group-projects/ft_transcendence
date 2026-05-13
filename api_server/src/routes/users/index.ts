@@ -28,16 +28,6 @@ function toPublicUser(user: Record<string, any>) {
 
 type MatchRow = Awaited<ReturnType<typeof userService.getMatchHistory>>[number];
 
-function parseLimit(rawLimit: string | undefined, fallback: number) {
-    const parsedLimit = Number.parseInt(rawLimit ?? '', 10);
-
-    if (!Number.isFinite(parsedLimit) || parsedLimit < 1) {
-        return fallback;
-    }
-
-    return Math.min(parsedLimit, 100);
-}
-
 function serializeMatches(matches: MatchRow[]) {
     return matches.map((m) => ({
         id: m.id,
@@ -79,7 +69,7 @@ usersRoutes.patch('/me', zValidator('json', updateMeSchema), async (c) => {
 // GET /users/me/matches?limit=20
 usersRoutes.get('/me/matches', async (c) => {
     const userId = c.get('userId') as string;
-    const limit = parseLimit(c.req.query('limit'), 20);
+    const limit = Math.min(Number(c.req.query('limit') ?? 20), 100);
     const matches = await userService.getMatchHistory(userId, limit);
     return c.json({ matches: serializeMatches(matches) });
 });
@@ -93,7 +83,7 @@ usersRoutes.get('/me/stats', async (c) => {
 
 // GET /users/ranking?limit=50 — leaderboard sorted by rating
 usersRoutes.get('/ranking', async (c) => {
-    const limit = parseLimit(c.req.query('limit'), 50);
+    const limit = Math.min(Number(c.req.query('limit') ?? 50), 100);
     const rows = await userService.getRanking(limit);
     return c.json({
         ranking: rows.map((r, i) => ({
@@ -134,7 +124,7 @@ usersRoutes.get('/:id/stats', async (c) => {
 usersRoutes.get('/:id/matches', async (c) => {
     const id = c.req.param('id');
 
-    const limit = parseLimit(c.req.query('limit'), 20);
+    const limit = Math.min(Number(c.req.query('limit') ?? 20), 100);
     const matches = await userService.getMatchHistory(id, limit);
     return c.json({ matches: serializeMatches(matches) });
 });
