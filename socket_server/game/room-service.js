@@ -8,7 +8,7 @@ const {
     DASH_IMPULSE,
     DASH_COOLDOWN_MS,
 } = require('./constants');
-const { API_URL } = require('../config');
+const { API_URL, INTERNAL_SECRET } = require('../config');
 const {
     clamp,
     sanitizeName,
@@ -46,6 +46,23 @@ function createRoomService(io, presenceManager) {
 
     function getSoloDifficultyConfig(difficulty) {
         return SOLO_CPU_DIFFICULTY[difficulty] || SOLO_CPU_DIFFICULTY.medium;
+    }
+
+    function normalizePersistedCpuLevel(difficulty) {
+        if (difficulty === 'dummy') {
+            return 'easy';
+        }
+
+        if (
+            difficulty === 'easy' ||
+            difficulty === 'medium' ||
+            difficulty === 'hard' ||
+            difficulty === 'oni'
+        ) {
+            return difficulty;
+        }
+
+        return 'medium';
     }
 
     function countHumanPlayers(room) {
@@ -168,12 +185,24 @@ function createRoomService(io, presenceManager) {
             return Promise.resolve();
         }
 
+        if (!INTERNAL_SECRET) {
+            console.error('[saveMatchResult] INTERNAL_SECRET is not set');
+            return Promise.resolve();
+        }
+
+        if (room.solo === true && winnerId !== player1.userId) {
+            return Promise.resolve();
+        }
+
         const body = JSON.stringify({
             player1Id: player1.userId,
             player2Id: player2 ? player2.userId : null,
             winnerId,
             isCpuGame: room.solo === true,
-            cpuLevel: room.soloDifficulty ?? null,
+            cpuLevel:
+                room.solo === true
+                    ? normalizePersistedCpuLevel(room.soloDifficulty)
+                    : null,
             startedAt: room.roundStartedAt
                 ? room.roundStartedAt.toISOString()
                 : new Date().toISOString(),
@@ -183,6 +212,7 @@ function createRoomService(io, presenceManager) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-Internal-Secret': INTERNAL_SECRET,
             },
             body,
         }).then((res) => {

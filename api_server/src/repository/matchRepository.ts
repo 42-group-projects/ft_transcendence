@@ -4,15 +4,68 @@ import type { AppDb } from './dbClient';
 
 const RATING_WIN_DELTA = 15;
 const RATING_LOSS_DELTA = 15;
+const PERSISTED_CPU_LEVELS = new Set(['easy', 'medium', 'hard', 'oni']);
 
 export type MatchResultInput = {
     player1Id: string;
     player2Id?: string | null;
     winnerId: string;
     isCpuGame: boolean;
-    cpuLevel?: 'easy' | 'medium' | 'hard' | 'oni' | null;
+    cpuLevel?: string | null;
     startedAt: Date;
 };
+
+export class MatchResultValidationError extends Error {}
+
+function normalizeCpuLevel(input: MatchResultInput) {
+    if (!input.isCpuGame) {
+        return null;
+    }
+
+    if (input.cpuLevel === 'dummy') {
+        return 'easy' as const;
+    }
+
+    if (input.cpuLevel && PERSISTED_CPU_LEVELS.has(input.cpuLevel)) {
+        return input.cpuLevel as 'easy' | 'medium' | 'hard' | 'oni';
+    }
+
+    return 'medium' as const;
+}
+
+function normalizePlayer2Id(input: MatchResultInput) {
+    if (input.isCpuGame) {
+        return null;
+    }
+
+    if (!input.player2Id) {
+        throw new MatchResultValidationError(
+            'player2Id is required for PvP matches',
+        );
+    }
+
+    return input.player2Id;
+}
+
+function normalizeWinnerId(input: MatchResultInput, player2Id: string | null) {
+    if (input.isCpuGame) {
+        if (input.winnerId !== input.player1Id) {
+            throw new MatchResultValidationError(
+                'CPU winners are not supported by persisted match records',
+            );
+        }
+
+        return input.player1Id;
+    }
+
+    if (input.winnerId !== input.player1Id && input.winnerId !== player2Id) {
+        throw new MatchResultValidationError(
+            'winnerId must belong to a player',
+        );
+    }
+
+    return input.winnerId;
+}
 
 export const matchRepository = {
     /**
@@ -23,6 +76,10 @@ export const matchRepository = {
         db: AppDb,
         input: MatchResultInput,
     ): Promise<void> => {
+        const player2Id = normalizePlayer2Id(input);
+        const winnerId = normalizeWinnerId(input, player2Id);
+        const cpuLevel = normalizeCpuLevel(input);
+
         await db.transaction(async (tx) => {
             // 1. Minimal gameRooms row (the in-memory socket room has no DB counterpart)
             const [room] = await tx
@@ -30,8 +87,8 @@ export const matchRepository = {
                 .values({
                     matchType: input.isCpuGame ? 'cpu' : 'random',
                     hostId: input.player1Id,
-                    guestId: input.isCpuGame ? null : (input.player2Id ?? null),
-                    cpuLevel: input.cpuLevel ?? null,
+                    guestId: player2Id,
+                    cpuLevel,
                     status: 'finished',
                 })
                 .returning({ id: gameRooms.id });
@@ -42,12 +99,10 @@ export const matchRepository = {
                 .values({
                     roomId: room.id,
                     player1Id: input.player1Id,
-                    player2Id: input.isCpuGame
-                        ? null
-                        : (input.player2Id ?? null),
+                    player2Id,
                     isCpuGame: input.isCpuGame,
-                    cpuLevel: input.cpuLevel ?? null,
-                    winnerId: input.winnerId,
+                    cpuLevel,
+                    winnerId,
                     status: 'finished',
                     startedAt: input.startedAt,
                     finishedAt: new Date(),
@@ -58,14 +113,14 @@ export const matchRepository = {
             await tx.insert(matchRecords).values({
                 sessionId: session.id,
                 player1Id: input.player1Id,
-                player2Id: input.isCpuGame ? null : (input.player2Id ?? null),
-                winnerId: input.winnerId,
+                player2Id,
+                winnerId,
                 isCpuGame: input.isCpuGame,
                 playedAt: new Date(),
             });
 
             // 4. Increment wins/losses for player1, update rating (PvP only)
-            if (input.winnerId === input.player1Id) {
+            if (winnerId === input.player1Id) {
                 await tx
                     .update(userStats)
                     .set({
@@ -94,8 +149,8 @@ export const matchRepository = {
             }
 
             // 5. Increment wins/losses for player2 (human only)
-            if (!input.isCpuGame && input.player2Id) {
-                if (input.winnerId === input.player2Id) {
+            if (player2Id) {
+                if (winnerId === player2Id) {
                     await tx
                         .update(userStats)
                         .set({
@@ -103,7 +158,7 @@ export const matchRepository = {
                             rating: sql`${userStats.rating} + ${RATING_WIN_DELTA}`,
                             updatedAt: new Date(),
                         })
-                        .where(eq(userStats.userId, input.player2Id));
+                        .where(eq(userStats.userId, player2Id));
                 } else {
                     await tx
                         .update(userStats)
@@ -112,7 +167,7 @@ export const matchRepository = {
                             rating: sql`GREATEST(0, ${userStats.rating} - ${RATING_LOSS_DELTA})`,
                             updatedAt: new Date(),
                         })
-                        .where(eq(userStats.userId, input.player2Id));
+                        .where(eq(userStats.userId, player2Id));
                 }
             }
         });
