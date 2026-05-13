@@ -14,7 +14,7 @@
 .env
 
 #setting
-.vscode/setting.json
+.vscode/settings.json
 
 # OS / editor
 .DS_Store
