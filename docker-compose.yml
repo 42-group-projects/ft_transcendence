@@ -35,6 +35,7 @@ services:
             - NODE_ENV=${NODE_ENV}
             - PORT=${NEXT_PUBLIC_SOCKET_PORT}
             - JWT_SECRET=${JWT_SECRET}
+            - INTERNAL_SECRET=${INTERNAL_SECRET}
             - RECONNECT_GRACE_MS=${RECONNECT_GRACE_MS:-30000}
         volumes:
             - ./socket_server:/app
@@ -54,6 +55,7 @@ services:
             - NODE_ENV=${NODE_ENV}
             - PORT=4001
             - JWT_SECRET=${JWT_SECRET}
+            - INTERNAL_SECRET=${INTERNAL_SECRET}
             - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
         volumes:
             - ./api_server:/app
