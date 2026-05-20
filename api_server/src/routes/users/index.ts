@@ -1,7 +1,11 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { userService } from '../../service/userService';
-import { updateMeSchema, matchesQuerySchema, rankingQuerySchema } from './schemas';
+import {
+    updateMeSchema,
+    matchesQuerySchema,
+    rankingQuerySchema,
+} from './schemas';
 import type { AuthEnv } from '../../middleware/auth';
 
 export const usersRoutes = new Hono<AuthEnv>();

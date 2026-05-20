@@ -215,15 +215,22 @@ function createRoomService(io, presenceManager) {
                 'X-Internal-Secret': INTERNAL_SECRET,
             },
             body,
-        }).then((res) => {
-            if (!res.ok) {
-                return res.text().then((text) => {
-                    console.error(
-                        `[saveMatchResult] API returned ${res.status}: ${text}`,
-                    );
-                });
-            }
-        });
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    return res.text().then((text) => {
+                        console.error(
+                            `[saveMatchResult] API returned ${res.status}: ${text}`,
+                        );
+                    });
+                }
+            })
+            .catch((err) => {
+                console.error(
+                    '[saveMatchResult] Fetch API network error:',
+                    err,
+                );
+            });
     }
 
     const sessionManager = createRoomSessionManager({
