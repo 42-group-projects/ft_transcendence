@@ -1,17 +1,13 @@
-import { timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual, createHash } from 'node:crypto';
 import { createMiddleware } from 'hono/factory';
 
 const INTERNAL_SECRET_HEADER = 'X-Internal-Secret';
 
 function secretsMatch(actual: string, expected: string) {
-    const actualBuffer = Buffer.from(actual);
-    const expectedBuffer = Buffer.from(expected);
+    const actualHash = createHash('sha256').update(actual).digest();
+    const expectedHash = createHash('sha256').update(expected).digest();
 
-    if (actualBuffer.length !== expectedBuffer.length) {
-        return false;
-    }
-
-    return timingSafeEqual(actualBuffer, expectedBuffer);
+    return timingSafeEqual(actualHash, expectedHash);
 }
 
 export const internalAuthMiddleware = createMiddleware(async (c, next) => {
