@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
-import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { userService } from '../../service/userService';
+import { updateMeSchema, matchesQuerySchema, rankingQuerySchema } from './schemas';
 import type { AuthEnv } from '../../middleware/auth';
 
 export const usersRoutes = new Hono<AuthEnv>();
@@ -28,16 +28,6 @@ function toPublicUser(user: Record<string, any>) {
 
 type MatchRow = Awaited<ReturnType<typeof userService.getMatchHistory>>[number];
 
-function parseLimit(rawLimit: string | undefined, fallback: number) {
-    const parsedLimit = Number.parseInt(rawLimit ?? '', 10);
-
-    if (!Number.isFinite(parsedLimit) || parsedLimit < 1) {
-        return fallback;
-    }
-
-    return Math.min(parsedLimit, 100);
-}
-
 function serializeMatches(matches: MatchRow[]) {
     return matches.map((m) => ({
         id: m.id,
@@ -52,15 +42,6 @@ function serializeMatches(matches: MatchRow[]) {
             m.playedAt instanceof Date ? m.playedAt.toISOString() : m.playedAt,
     }));
 }
-
-const updateMeSchema = z
-    .object({
-        nickname: z.string().min(1).max(20).optional(),
-        avatar_url: z.string().optional(),
-    })
-    .refine((d) => d.nickname !== undefined || d.avatar_url !== undefined, {
-        message: 'UNPROCESSABLE',
-    });
 
 // GET /users/me
 usersRoutes.get('/me', async (c) => {
@@ -77,12 +58,16 @@ usersRoutes.patch('/me', zValidator('json', updateMeSchema), async (c) => {
 });
 
 // GET /users/me/matches?limit=20
-usersRoutes.get('/me/matches', async (c) => {
-    const userId = c.get('userId') as string;
-    const limit = parseLimit(c.req.query('limit'), 20);
-    const matches = await userService.getMatchHistory(userId, limit);
-    return c.json({ matches: serializeMatches(matches) });
-});
+usersRoutes.get(
+    '/me/matches',
+    zValidator('query', matchesQuerySchema),
+    async (c) => {
+        const userId = c.get('userId') as string;
+        const { limit } = c.req.valid('query');
+        const matches = await userService.getMatchHistory(userId, limit);
+        return c.json({ matches: serializeMatches(matches) });
+    },
+);
 
 // GET /users/me/stats
 usersRoutes.get('/me/stats', async (c) => {
@@ -92,21 +77,25 @@ usersRoutes.get('/me/stats', async (c) => {
 });
 
 // GET /users/ranking?limit=50 — leaderboard sorted by rating
-usersRoutes.get('/ranking', async (c) => {
-    const limit = parseLimit(c.req.query('limit'), 50);
-    const rows = await userService.getRanking(limit);
-    return c.json({
-        ranking: rows.map((r, i) => ({
-            rank: i + 1,
-            id: r.id,
-            nickname: r.nickname,
-            avatar_url: r.avatarUrl ?? null,
-            wins: Number(r.wins),
-            losses: Number(r.losses),
-            rating: Number(r.rating),
-        })),
-    });
-});
+usersRoutes.get(
+    '/ranking',
+    zValidator('query', rankingQuerySchema),
+    async (c) => {
+        const { limit } = c.req.valid('query');
+        const rows = await userService.getRanking(limit);
+        return c.json({
+            ranking: rows.map((r, i) => ({
+                rank: i + 1,
+                id: r.id,
+                nickname: r.nickname,
+                avatar_url: r.avatarUrl ?? null,
+                wins: Number(r.wins),
+                losses: Number(r.losses),
+                rating: Number(r.rating),
+            })),
+        });
+    },
+);
 
 // GET /users/:id  — public profile, no email exposed
 usersRoutes.get('/:id', async (c) => {
@@ -131,10 +120,13 @@ usersRoutes.get('/:id/stats', async (c) => {
 });
 
 // GET /users/:id/matches?limit=20  — match history for a user
-usersRoutes.get('/:id/matches', async (c) => {
-    const id = c.req.param('id');
-
-    const limit = parseLimit(c.req.query('limit'), 20);
-    const matches = await userService.getMatchHistory(id, limit);
-    return c.json({ matches: serializeMatches(matches) });
-});
+usersRoutes.get(
+    '/:id/matches',
+    zValidator('query', matchesQuerySchema),
+    async (c) => {
+        const id = c.req.param('id');
+        const { limit } = c.req.valid('query');
+        const matches = await userService.getMatchHistory(id, limit);
+        return c.json({ matches: serializeMatches(matches) });
+    },
+);
