@@ -1,6 +1,12 @@
 import { desc, eq, or, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { gameRooms, gameSessions, matchRecords, userStats, users } from '../db/schema';
+import {
+    gameRooms,
+    gameSessions,
+    matchRecords,
+    userStats,
+    users,
+} from '../db/schema';
 import type { AppDb } from './dbClient';
 
 const RATING_WIN_DELTA = 15;
