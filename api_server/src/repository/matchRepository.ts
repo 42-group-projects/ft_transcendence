@@ -1,5 +1,6 @@
-import { eq, sql } from 'drizzle-orm';
-import { gameRooms, gameSessions, matchRecords, userStats } from '../db/schema';
+import { desc, eq, or, sql } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
+import { gameRooms, gameSessions, matchRecords, userStats, users } from '../db/schema';
 import type { AppDb } from './dbClient';
 
 const RATING_WIN_DELTA = 15;
@@ -178,65 +179,50 @@ export const matchRepository = {
      * nicknames so the frontend can render "You vs <opponent>" without extra calls.
      */
     getMatchHistory: async (db: AppDb, userId: string, limit = 20) => {
-        // Raw SQL join to enrich with both player nicknames in one query.
-        const rows = await db.execute(sql`
-			SELECT
-				mr.id,
-				mr.session_id    AS "sessionId",
-				mr.player1_id    AS "player1Id",
-				u1.nickname      AS "player1Nickname",
-				mr.player2_id    AS "player2Id",
-				u2.nickname      AS "player2Nickname",
-				mr.winner_id     AS "winnerId",
-				mr.is_cpu_game   AS "isCpuGame",
-				mr.played_at     AS "playedAt"
-			FROM match_records mr
-			JOIN users u1 ON u1.id = mr.player1_id
-			LEFT JOIN users u2 ON u2.id = mr.player2_id
-			WHERE mr.player1_id = ${userId}
-			   OR mr.player2_id = ${userId}
-			ORDER BY mr.played_at DESC
-			LIMIT ${limit}
-		`);
+        const user1 = alias(users, 'user1');
+        const user2 = alias(users, 'user2');
 
-        return rows as unknown as Array<{
-            id: string;
-            sessionId: string;
-            player1Id: string;
-            player1Nickname: string;
-            player2Id: string | null;
-            player2Nickname: string | null;
-            winnerId: string;
-            isCpuGame: boolean;
-            playedAt: Date;
-        }>;
+        return db
+            .select({
+                id: matchRecords.id,
+                sessionId: matchRecords.sessionId,
+                player1Id: matchRecords.player1Id,
+                player1Nickname: user1.nickname,
+                player2Id: matchRecords.player2Id,
+                player2Nickname: user2.nickname,
+                winnerId: matchRecords.winnerId,
+                isCpuGame: matchRecords.isCpuGame,
+                playedAt: matchRecords.playedAt,
+            })
+            .from(matchRecords)
+            .innerJoin(user1, eq(user1.id, matchRecords.player1Id))
+            .leftJoin(user2, eq(user2.id, matchRecords.player2Id))
+            .where(
+                or(
+                    eq(matchRecords.player1Id, userId),
+                    eq(matchRecords.player2Id, userId),
+                ),
+            )
+            .orderBy(desc(matchRecords.playedAt))
+            .limit(limit);
     },
 
     /**
      * Top-N users ordered by rating descending — used for the leaderboard.
      */
     getRanking: async (db: AppDb, limit = 50) => {
-        const rows = await db.execute(sql`
-			SELECT
-				u.id,
-				u.nickname,
-				u.avatar_url   AS "avatarUrl",
-				s.wins,
-				s.losses,
-				s.rating
-			FROM user_stats s
-			JOIN users u ON u.id = s.user_id
-			ORDER BY s.rating DESC, s.wins DESC
-			LIMIT ${limit}
-		`);
-
-        return rows as unknown as Array<{
-            id: string;
-            nickname: string;
-            avatarUrl: string | null;
-            wins: number;
-            losses: number;
-            rating: number;
-        }>;
+        return db
+            .select({
+                id: users.id,
+                nickname: users.nickname,
+                avatarUrl: users.avatarUrl,
+                wins: userStats.wins,
+                losses: userStats.losses,
+                rating: userStats.rating,
+            })
+            .from(userStats)
+            .innerJoin(users, eq(users.id, userStats.userId))
+            .orderBy(desc(userStats.rating), desc(userStats.wins))
+            .limit(limit);
     },
 };

@@ -6,7 +6,7 @@ const INTERNAL_SECRET_HEADER = 'X-Internal-Secret';
 function secretsMatch(actual: string, expected: string) {
     const actualBuffer = Buffer.from(actual);
     const expectedBuffer = Buffer.from(expected);
-
+    
     if (actualBuffer.length !== expectedBuffer.length) {
         return false;
     }
