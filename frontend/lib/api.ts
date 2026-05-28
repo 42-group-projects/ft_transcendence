@@ -18,6 +18,28 @@ export type UserStats = {
     rating: number;
 };
 
+export type MatchRecord = {
+    id: string;
+    session_id: string;
+    player1_id: string;
+    player1_nickname: string;
+    player2_id: string | null;
+    player2_nickname: string | null;
+    winner_id: string;
+    is_cpu_game: boolean;
+    played_at: string;
+};
+
+export type RankingEntry = {
+    rank: number;
+    id: string;
+    nickname: string;
+    avatar_url: string | null;
+    wins: number;
+    losses: number;
+    rating: number;
+};
+
 export type AuthResponse = {
     access_token: string;
     user: User;
@@ -179,4 +201,39 @@ export async function apiRemoveFriend(friendId: string) {
         method: 'POST',
         body: JSON.stringify({}),
     });
+}
+
+// ── Match history / ranking endpoints ────────────────────────────────────
+
+export async function apiGetMyMatches(
+    limit = 20,
+): Promise<{ matches: MatchRecord[] }> {
+    return apiFetch<{ matches: MatchRecord[] }>(
+        `/users/me/matches?limit=${limit}`,
+    );
+}
+
+export async function apiGetUserMatches(
+    userId: string,
+    limit = 20,
+): Promise<{ matches: MatchRecord[] }> {
+    return apiFetch<{ matches: MatchRecord[] }>(
+        `/users/${userId}/matches?limit=${limit}`,
+    );
+}
+
+export async function apiGetRanking(
+    limit = 50,
+): Promise<{ ranking: RankingEntry[] }> {
+    return apiFetch<{ ranking: RankingEntry[] }>(
+        `/users/ranking?limit=${limit}`,
+    );
+}
+
+export async function apiGetUserStats(
+    userId: string,
+): Promise<{ data: UserStats & { win_rate: number } }> {
+    return apiFetch<{ data: UserStats & { win_rate: number } }>(
+        `/users/${userId}/stats`,
+    );
 }

@@ -8,11 +8,13 @@ const {
     DASH_IMPULSE,
     DASH_COOLDOWN_MS,
 } = require('./constants');
+const { API_URL, INTERNAL_SECRET } = require('../config');
 const {
     clamp,
     sanitizeName,
     makePlayer,
     makeCPUball,
+
     makeRoom,
     placePlayerAtSpawnSlot,
     serializePlayers,
@@ -44,6 +46,23 @@ function createRoomService(io, presenceManager) {
 
     function getSoloDifficultyConfig(difficulty) {
         return SOLO_CPU_DIFFICULTY[difficulty] || SOLO_CPU_DIFFICULTY.medium;
+    }
+
+    function normalizePersistedCpuLevel(difficulty) {
+        if (difficulty === 'dummy') {
+            return 'easy';
+        }
+
+        if (
+            difficulty === 'easy' ||
+            difficulty === 'medium' ||
+            difficulty === 'hard' ||
+            difficulty === 'oni'
+        ) {
+            return difficulty;
+        }
+
+        return 'medium';
     }
 
     function countHumanPlayers(room) {
@@ -157,6 +176,63 @@ function createRoomService(io, presenceManager) {
         return { room, player, removedRoom: false };
     }
 
+    function saveMatchResult(room, winnerId) {
+        const humanPlayers = [...room.players.values()].filter((p) => !p.isCpu);
+        const player1 = humanPlayers[0];
+        const player2 = humanPlayers[1] ?? null;
+
+        if (!player1) {
+            return Promise.resolve();
+        }
+
+        if (!INTERNAL_SECRET) {
+            console.error('[saveMatchResult] INTERNAL_SECRET is not set');
+            return Promise.resolve();
+        }
+
+        if (room.solo === true && winnerId !== player1.userId) {
+            return Promise.resolve();
+        }
+
+        const body = JSON.stringify({
+            player1Id: player1.userId,
+            player2Id: player2 ? player2.userId : null,
+            winnerId,
+            isCpuGame: room.solo === true,
+            cpuLevel:
+                room.solo === true
+                    ? normalizePersistedCpuLevel(room.soloDifficulty)
+                    : null,
+            startedAt: room.roundStartedAt
+                ? room.roundStartedAt.toISOString()
+                : new Date().toISOString(),
+        });
+
+        return fetch(`${API_URL}/api/internal/match-result`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Internal-Secret': INTERNAL_SECRET,
+            },
+            body,
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    return res.text().then((text) => {
+                        console.error(
+                            `[saveMatchResult] API returned ${res.status}: ${text}`,
+                        );
+                    });
+                }
+            })
+            .catch((err) => {
+                console.error(
+                    '[saveMatchResult] Fetch API network error:',
+                    err,
+                );
+            });
+    }
+
     const sessionManager = createRoomSessionManager({
         io,
         rooms,
@@ -167,6 +243,7 @@ function createRoomService(io, presenceManager) {
         hasDisconnectedHuman,
         handleLeave,
         presenceManager,
+        saveMatchResult,
     });
 
     const roundManager = createRoomRoundManager({

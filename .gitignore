@@ -13,7 +13,11 @@
 # Environment files
 .env
 
+#setting
+.vscode/settings.json
+
 # OS / editor
 .DS_Store
 Thumbs.db
 
+.vscode

@@ -69,6 +69,7 @@ NEXT_PUBLIC_SOCKET_PORT=*****
 NEXT_PUBLIC_SOCKET_URL=*********
 NEXT_PUBLIC_API_URL=*************
 JWT_SECRET=******
+INTERNAL_SECRET=******
 ```
 
 ### Running the project
