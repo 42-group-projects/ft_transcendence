@@ -17,8 +17,6 @@ import { CustomizationPanel } from '../components/CustomizationPanel';
 import { FpsCounter } from '../utils/FpsCounter';
 import { useCustomization } from '../hooks/useCustomization';
 import { usePresenceSocket } from '@/app/components/PresenceProvider';
-import { apiGetFriends, apiGetMe } from '@/lib/api';
-import { usePresence } from '@/app/lobby/hooks/usePresence';
 
 export default function GamePage() {
     const [name, setName] = useState('Player');
