@@ -114,6 +114,11 @@ function createRoomService(io, presenceManager) {
             clearInterval(room.interval);
         }
 
+        if (room.waitTimer) {
+            clearTimeout(room.waitTimer);
+            room.waitTimer = null;
+        }
+
         sessionManager.clearAllReconnectTimers(room);
 
         for (const player of room.players.values()) {
@@ -261,8 +266,36 @@ function createRoomService(io, presenceManager) {
 
     function createRoom(password) {
         const room = makeRoom(password);
+        room.waitTimer = null;
         rooms.set(room.id, room);
         startRoomLoop(room);
+
+        // If a second player hasn't joined within 30 s, close the room.
+        room.waitTimer = setTimeout(() => {
+            if (!rooms.has(room.id)) return;
+            if (countHumanPlayers(room) < 2 && !room.roundInProgress) {
+                // Reset presence + socket state before destroying the room,
+                // mirroring what the normal leaveRoom handler does.
+                for (const player of room.players.values()) {
+                    if (player.isCpu || !player.socketId) continue;
+                    const playerSocket = io.sockets.sockets.get(player.socketId);
+                    if (playerSocket) {
+                        playerSocket.emit('roomTimeout', {
+                            message: 'Opponent did not join in time.',
+                        });
+                        playerSocket.leave(room.id);
+                        playerSocket.data.roomId = null;
+                    }
+                    presenceManager.markUserOnline(player.userId);
+                    io.to(`presence_${player.userId}`).emit('user_status_changed', {
+                        userId: player.userId,
+                        status: 'online',
+                    });
+                }
+                removeRoom(room.id);
+            }
+        }, 10000); // 30 seconds
+
         return room;
     }
 
@@ -298,6 +331,12 @@ function createRoomService(io, presenceManager) {
         room.players.set(userId, player);
         room.playerBySocketId.set(socketId, userId);
         userSessions.set(userId, { roomId: room.id });
+
+        // Cancel the wait timer once a second human player has joined.
+        if (countHumanPlayers(room) >= 2 && room.waitTimer) {
+            clearTimeout(room.waitTimer);
+            room.waitTimer = null;
+        }
 
         return player;
     }

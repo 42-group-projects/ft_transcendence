@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     apiGetFriends,
     apiGetFriendRequests,
@@ -122,6 +123,7 @@ function FloatingChatWindow({
 // ── Sidebar ───────────────────────────────────────────────────────────────
 
 export function FriendsSidebar() {
+    const router = useRouter();
     const [mobileOpen, setMobileOpen] = useState(false);
 
     // Data state
@@ -226,6 +228,11 @@ export function FriendsSidebar() {
             setMessage(error.message || '拒否に失敗しました');
             setTimeout(() => setMessage(''), 3000);
         }
+    };
+
+    const handleChallenge = (friendId: string) => {
+        const pw = Math.random().toString(36).slice(2, 10);
+        router.push(`/game/multiplayer?challenge=${encodeURIComponent(friendId)}&pw=${pw}`);
     };
 
     const handleRemove = async (friendId: string) => {
@@ -352,6 +359,15 @@ export function FriendsSidebar() {
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
+                                            {/* Challenge button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleChallenge(friend.userId)}
+                                                disabled={status === 'offline'}
+                                                className="rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-orange-400 hover:bg-orange-500/20 hover:text-orange-300 disabled:hover:bg-transparent"
+                                            >
+                                                Challenge
+                                            </button>
                                             {/* Chat button */}
                                             <button
                                                 type="button"

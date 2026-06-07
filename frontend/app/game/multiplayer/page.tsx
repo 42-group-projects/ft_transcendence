@@ -85,6 +85,28 @@ export default function GamePage() {
         joinRoom({ roomId: inviteRoomId, password: invitePassword, name });
     }, [connected, joinedRoomId, searchParams, name, joinRoom]);
 
+    // Auto-create room when arriving from a challenge link (?challenge=userId&pw=password)
+    const challengeFiredRef = useRef(false);
+    useEffect(() => {
+        if (challengeFiredRef.current || !connected || joinedRoomId) return;
+        const challengeTarget = searchParams.get('challenge');
+        const challengePw = searchParams.get('pw');
+        if (!challengeTarget || !challengePw) return;
+        challengeFiredRef.current = true;
+        createRoom({ name, password: challengePw });
+    }, [connected, joinedRoomId, searchParams, name, createRoom]);
+
+    // Once the room exists (created via challenge), send the invite
+    const challengeInviteSentRef = useRef(false);
+    useEffect(() => {
+        if (challengeInviteSentRef.current || !joinedRoomId || !socket) return;
+        const challengeTarget = searchParams.get('challenge');
+        const challengePw = searchParams.get('pw');
+        if (!challengeTarget || !challengePw) return;
+        challengeInviteSentRef.current = true;
+        socket.emit('sendRoomInvite', { toUserId: challengeTarget, roomId: joinedRoomId, password: challengePw });
+    }, [joinedRoomId, socket, searchParams]);
+
     const handleSendInvite = (toUserId: string) => {
         if (!socket || !joinedRoomId || !password) return;
         socket.emit('sendRoomInvite', { toUserId, roomId: joinedRoomId, password });
@@ -109,60 +131,9 @@ export default function GamePage() {
             <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">
-                        Multiplayer Prototype
+                        Multiplayer Room
                     </h1>
                     <div className="flex items-center gap-2">
-                        {/* Invite a friend — only shown once you've created/joined a room */}
-                        {joinedRoomId && friends.length > 0 && (
-                            <div className="relative">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowInviteMenu((v) => !v)}
-                                    className="rounded-md border border-orange-600/50 bg-orange-500/10 px-3 py-1.5 text-xs font-medium text-orange-300 transition hover:bg-orange-500/20"
-                                >
-                                    Invite Friend
-                                </button>
-                                {inviteSentTo && (
-                                    <p className="absolute right-0 top-8 whitespace-nowrap text-[10px] text-emerald-400">
-                                        Invite sent!
-                                    </p>
-                                )}
-                                {showInviteMenu && (
-                                    <div className="absolute right-0 top-8 z-50 min-w-[160px] rounded-lg border border-neutral-700 bg-neutral-900 py-1 shadow-xl">
-                                        {friends
-                                            .filter((f) => {
-                                                const s = onlineStatuses[f.userId] || 'offline';
-                                                return s === 'online' || s === 'in_game';
-                                            })
-                                            .map((f) => (
-                                                <button
-                                                    key={f.userId}
-                                                    type="button"
-                                                    onClick={() => handleSendInvite(f.userId)}
-                                                    className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-neutral-200 hover:bg-neutral-800 transition"
-                                                >
-                                                    <span
-                                                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                                                            onlineStatuses[f.userId] === 'in_game'
-                                                                ? 'bg-blue-400'
-                                                                : 'bg-emerald-400'
-                                                        }`}
-                                                    />
-                                                    {f.userId.substring(0, 8)}…
-                                                </button>
-                                            ))}
-                                        {friends.filter((f) => {
-                                            const s = onlineStatuses[f.userId] || 'offline';
-                                            return s === 'online' || s === 'in_game';
-                                        }).length === 0 && (
-                                            <p className="px-3 py-2 text-[10px] text-neutral-500">
-                                                No friends online.
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
                         <Link
                             href="/lobby"
                             className="rounded-md border border-neutral-700 px-3 py-1.5 text-xs font-medium text-neutral-200 transition hover:bg-neutral-900"
@@ -195,6 +166,18 @@ export default function GamePage() {
                     onJoinRoom={handleJoinRoom}
                     onLeaveRoom={leaveRoom}
                 />
+
+                {sessionEndedReason === 'room_timeout' && (
+                    <div className="flex items-center justify-between rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+                        <span> Return to lobby?</span>
+                        <Link
+                            href="/lobby"
+                            className="ml-4 shrink-0 rounded border border-amber-500/40 px-3 py-1 text-xs font-medium text-amber-300 transition hover:bg-amber-500/20"
+                        >
+                            Back to Lobby
+                        </Link>
+                    </div>
+                )}
 
                 <div className="relative h-[72vh] overflow-hidden rounded-lg border border-neutral-700">
                     <Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
