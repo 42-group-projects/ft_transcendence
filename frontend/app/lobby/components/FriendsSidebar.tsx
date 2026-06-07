@@ -336,7 +336,6 @@ export function FriendsSidebar() {
                             if (status === 'online') statusColor = 'bg-emerald-400';
                             if (status === 'in_game') statusColor = 'bg-blue-400';
 
-                            const isOfflineWarning = offlineUserId === friend.userId;
                             const unread = unreadCounts[friend.userId] ?? 0;
                             const isOpen = openChatIds.includes(friend.userId);
 
