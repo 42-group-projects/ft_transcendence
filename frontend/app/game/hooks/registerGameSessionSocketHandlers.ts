@@ -137,6 +137,7 @@ export function registerGameSessionSocketHandlers({
 
     const onRoomTimeout = ({ message }: { message: string }) => {
         setSessionEndedReason('room_timeout');
+        setIsPaused(false);
         setJoinedRoomId(null);
         setLocalPlayerId(null);
         setPlayers([]);
