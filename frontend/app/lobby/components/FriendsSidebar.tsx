@@ -147,14 +147,24 @@ export function FriendsSidebar() {
     const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
     const prevInboundLengths = useRef<Record<string, number>>({});
     useEffect(() => {
-        for (const [userId, msgs] of Object.entries(threads)) {
-            const inboundLen = msgs.filter((m) => m.direction === 'in').length;
-            const prev = prevInboundLengths.current[userId] ?? 0;
-            if (inboundLen > prev && !openChatIds.includes(userId)) {
-                setUnreadCounts((c) => ({ ...c, [userId]: (c[userId] ?? 0) + (inboundLen - prev) }));
+        setUnreadCounts((current) => {
+            const next = { ...current };
+
+            for (const [userId, msgs] of Object.entries(threads)) {
+                let inboundLen = 0;
+                for (const msg of msgs) {
+                    if (msg.direction === 'in') inboundLen += 1;
+                }
+
+                const prev = prevInboundLengths.current[userId] ?? 0;
+                if (inboundLen > prev && !openChatIds.includes(userId)) {
+                    next[userId] = (next[userId] ?? 0) + (inboundLen - prev);
+                }
+                prevInboundLengths.current[userId] = inboundLen;
             }
-            prevInboundLengths.current[userId] = inboundLen;
-        }
+
+            return next;
+        });
     }, [threads, openChatIds]);
 
     const fetchData = async () => {
