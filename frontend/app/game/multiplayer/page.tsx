@@ -88,13 +88,6 @@ export default function GamePage() {
         socket.emit('sendRoomInvite', { toUserId: challengeTarget, roomId: joinedRoomId, password: challengePw });
     }, [joinedRoomId, socket, searchParams]);
 
-    const handleSendInvite = (toUserId: string) => {
-        if (!socket || !joinedRoomId || !password) return;
-        socket.emit('sendRoomInvite', { toUserId, roomId: joinedRoomId, password });
-        setInviteSentTo(toUserId);
-        setTimeout(() => setInviteSentTo(null), 3000);
-        setShowInviteMenu(false);
-    };
 
     const handleCreateRoom = () => {
         createRoom({ name, password });
