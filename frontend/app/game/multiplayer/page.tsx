@@ -30,23 +30,6 @@ export default function GamePage() {
 
     // Invite-a-friend state
     const socket = usePresenceSocket();
-    const [myId, setMyId] = useState<string | null>(null);
-    const [friends, setFriends] = useState<any[]>([]);
-    const [showInviteMenu, setShowInviteMenu] = useState(false);
-    const [inviteSentTo, setInviteSentTo] = useState<string | null>(null);
-    const friendIds = friends.map((f: any) => f.userId);
-    const onlineStatuses = usePresence(myId || '', friendIds);
-
-    useEffect(() => {
-        apiGetMe()
-            .then(({ user }) => {
-                if (!user) return undefined;
-                setMyId(user.id);
-                return apiGetFriends();
-            })
-            .then((data) => { if (data) setFriends(data); })
-            .catch(() => {});
-    }, []);
     const {
         socketRef,
         connected,
