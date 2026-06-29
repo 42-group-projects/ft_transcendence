@@ -279,7 +279,8 @@ function registerSocketHandlers(io, roomService) {
 
         // ── Direct messages ────────────────────────────────────────────────────
         socket.on('sendDm', ({ toUserId, text }) => {
-            if (typeof toUserId !== 'string' || typeof text !== 'string') return;
+            if (typeof toUserId !== 'string' || typeof text !== 'string')
+                return;
             const trimmed = text.trim().slice(0, 500);
             if (!trimmed) return;
 

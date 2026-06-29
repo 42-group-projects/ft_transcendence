@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 
-# Source is bind-mounted in dev; this COPY is a fallback for production builds
+# Source is bind-moupnted in dev; this COPY is a fallback for production builds
 COPY . .
 
 EXPOSE 3001

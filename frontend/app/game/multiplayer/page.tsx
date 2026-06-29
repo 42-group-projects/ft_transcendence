@@ -44,7 +44,9 @@ export default function GamePage() {
                 setMyId(user.id);
                 return apiGetFriends();
             })
-            .then((data) => { if (data) setFriends(data); })
+            .then((data) => {
+                if (data) setFriends(data);
+            })
             .catch(() => {});
     }, []);
     const {
@@ -104,12 +106,20 @@ export default function GamePage() {
         const challengePw = searchParams.get('pw');
         if (!challengeTarget || !challengePw) return;
         challengeInviteSentRef.current = true;
-        socket.emit('sendRoomInvite', { toUserId: challengeTarget, roomId: joinedRoomId, password: challengePw });
+        socket.emit('sendRoomInvite', {
+            toUserId: challengeTarget,
+            roomId: joinedRoomId,
+            password: challengePw,
+        });
     }, [joinedRoomId, socket, searchParams]);
 
     const handleSendInvite = (toUserId: string) => {
         if (!socket || !joinedRoomId || !password) return;
-        socket.emit('sendRoomInvite', { toUserId, roomId: joinedRoomId, password });
+        socket.emit('sendRoomInvite', {
+            toUserId,
+            roomId: joinedRoomId,
+            password,
+        });
         setInviteSentTo(toUserId);
         setTimeout(() => setInviteSentTo(null), 3000);
         setShowInviteMenu(false);
@@ -130,9 +140,7 @@ export default function GamePage() {
         <main className="min-h-screen bg-neutral-950 text-neutral-100">
             <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-semibold">
-                        Multiplayer Room
-                    </h1>
+                    <h1 className="text-2xl font-semibold">Multiplayer Room</h1>
                     <div className="flex items-center gap-2">
                         <Link
                             href="/lobby"

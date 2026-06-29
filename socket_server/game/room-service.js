@@ -278,7 +278,9 @@ function createRoomService(io, presenceManager) {
                 // mirroring what the normal leaveRoom handler does.
                 for (const player of room.players.values()) {
                     if (player.isCpu || !player.socketId) continue;
-                    const playerSocket = io.sockets.sockets.get(player.socketId);
+                    const playerSocket = io.sockets.sockets.get(
+                        player.socketId,
+                    );
                     if (playerSocket) {
                         playerSocket.emit('roomTimeout', {
                             message: 'Opponent did not join in time.',
@@ -287,10 +289,13 @@ function createRoomService(io, presenceManager) {
                         playerSocket.data.roomId = null;
                     }
                     presenceManager.markUserOnline(player.userId);
-                    io.to(`presence_${player.userId}`).emit('user_status_changed', {
-                        userId: player.userId,
-                        status: 'online',
-                    });
+                    io.to(`presence_${player.userId}`).emit(
+                        'user_status_changed',
+                        {
+                            userId: player.userId,
+                            status: 'online',
+                        },
+                    );
                 }
                 removeRoom(room.id);
             }

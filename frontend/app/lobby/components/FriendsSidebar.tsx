@@ -58,8 +58,19 @@ function FloatingChatWindow({
                     className="ml-2 shrink-0 rounded p-0.5 text-neutral-500 transition hover:bg-neutral-700 hover:text-neutral-200"
                     aria-label="Close chat"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
                 </button>
             </div>
@@ -144,14 +155,19 @@ export function FriendsSidebar() {
     const { threads, offlineUserId, sendDm } = useDmChat();
 
     // Unread badge — count inbound messages for windows that are not open
-    const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+    const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>(
+        {},
+    );
     const prevInboundLengths = useRef<Record<string, number>>({});
     useEffect(() => {
         for (const [userId, msgs] of Object.entries(threads)) {
             const inboundLen = msgs.filter((m) => m.direction === 'in').length;
             const prev = prevInboundLengths.current[userId] ?? 0;
             if (inboundLen > prev && !openChatIds.includes(userId)) {
-                setUnreadCounts((c) => ({ ...c, [userId]: (c[userId] ?? 0) + (inboundLen - prev) }));
+                setUnreadCounts((c) => ({
+                    ...c,
+                    [userId]: (c[userId] ?? 0) + (inboundLen - prev),
+                }));
             }
             prevInboundLengths.current[userId] = inboundLen;
         }
@@ -188,7 +204,9 @@ export function FriendsSidebar() {
     }, [friends, onlineStatuses]);
 
     const openChat = (userId: string) => {
-        setOpenChatIds((prev) => prev.includes(userId) ? prev : [...prev, userId]);
+        setOpenChatIds((prev) =>
+            prev.includes(userId) ? prev : [...prev, userId],
+        );
         setUnreadCounts((c) => ({ ...c, [userId]: 0 }));
     };
 
@@ -232,7 +250,9 @@ export function FriendsSidebar() {
 
     const handleChallenge = (friendId: string) => {
         const pw = Math.random().toString(36).slice(2, 10);
-        router.push(`/game/multiplayer?challenge=${encodeURIComponent(friendId)}&pw=${pw}`);
+        router.push(
+            `/game/multiplayer?challenge=${encodeURIComponent(friendId)}&pw=${pw}`,
+        );
     };
 
     const handleRemove = async (friendId: string) => {
@@ -333,8 +353,10 @@ export function FriendsSidebar() {
                                 friend.onlineStatus ||
                                 'offline';
                             let statusColor = 'bg-neutral-600';
-                            if (status === 'online') statusColor = 'bg-emerald-400';
-                            if (status === 'in_game') statusColor = 'bg-blue-400';
+                            if (status === 'online')
+                                statusColor = 'bg-emerald-400';
+                            if (status === 'in_game')
+                                statusColor = 'bg-blue-400';
 
                             const unread = unreadCounts[friend.userId] ?? 0;
                             const isOpen = openChatIds.includes(friend.userId);
@@ -353,7 +375,9 @@ export function FriendsSidebar() {
                                                 {friend.userId.substring(0, 8)}…
                                             </span>
                                             <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
-                                                <span className={`h-1.5 w-1.5 rounded-full ${statusColor}`} />
+                                                <span
+                                                    className={`h-1.5 w-1.5 rounded-full ${statusColor}`}
+                                                />
                                                 {status.replace('_', ' ')}
                                             </span>
                                         </div>
@@ -361,7 +385,11 @@ export function FriendsSidebar() {
                                             {/* Challenge button */}
                                             <button
                                                 type="button"
-                                                onClick={() => handleChallenge(friend.userId)}
+                                                onClick={() =>
+                                                    handleChallenge(
+                                                        friend.userId,
+                                                    )
+                                                }
                                                 disabled={status === 'offline'}
                                                 className="rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-orange-400 hover:bg-orange-500/20 hover:text-orange-300 disabled:hover:bg-transparent"
                                             >
@@ -372,26 +400,31 @@ export function FriendsSidebar() {
                                                 type="button"
                                                 onClick={() =>
                                                     isOpen
-                                                        ? closeChat(friend.userId)
-                                                        : openChat(friend.userId)
+                                                        ? closeChat(
+                                                              friend.userId,
+                                                          )
+                                                        : openChat(
+                                                              friend.userId,
+                                                          )
                                                 }
-                                                className={`relative rounded px-2 py-1 text-[10px] font-medium transition ${
-                                                    isOpen
-                                                        ? 'bg-sky-500/20 text-sky-300'
-                                                        : 'text-sky-400 hover:bg-sky-500/20 hover:text-sky-300'
-                                                }`}
+                                                disabled={status === 'offline'}
+                                                className="rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-sky-300 hover:bg-orange-500/20 hover:bg-sky-900 disabled:hover:bg-transparent"
                                             >
                                                 Chat
                                                 {unread > 0 && !isOpen && (
                                                     <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-orange-500 text-[8px] font-bold text-white">
-                                                        {unread > 9 ? '9+' : unread}
+                                                        {unread > 9
+                                                            ? '9+'
+                                                            : unread}
                                                     </span>
                                                 )}
                                             </button>
                                             {/* Remove button */}
                                             <button
                                                 type="button"
-                                                onClick={() => handleRemove(friend.userId)}
+                                                onClick={() =>
+                                                    handleRemove(friend.userId)
+                                                }
                                                 className="rounded px-2 py-1 text-[10px] font-medium text-rose-400 transition hover:bg-rose-500/20 hover:text-rose-300"
                                             >
                                                 Remove
@@ -439,7 +472,10 @@ export function FriendsSidebar() {
             {openChatIds.length > 0 && (
                 <div className="pointer-events-none fixed bottom-0 right-0 z-50 flex max-w-full flex-row-reverse items-end gap-1 overflow-hidden">
                     {openChatIds.map((userId) => (
-                        <div key={userId} className="pointer-events-auto min-w-20 max-w-64 flex-1">
+                        <div
+                            key={userId}
+                            className="pointer-events-auto min-w-20 max-w-64 flex-1"
+                        >
                             <FloatingChatWindow
                                 userId={userId}
                                 thread={threads[userId] ?? []}
