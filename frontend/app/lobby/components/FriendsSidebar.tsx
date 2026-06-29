@@ -160,24 +160,26 @@ export function FriendsSidebar() {
     );
     const prevInboundLengths = useRef<Record<string, number>>({});
     useEffect(() => {
-        setUnreadCounts((current) => {
-            const next = { ...current };
+        const deltas: Record<string, number> = {};
 
-            for (const [userId, msgs] of Object.entries(threads)) {
-                let inboundLen = 0;
-                for (const msg of msgs) {
-                    if (msg.direction === 'in') inboundLen += 1;
-                }
-
-                const prev = prevInboundLengths.current[userId] ?? 0;
-                if (inboundLen > prev && !openChatIds.includes(userId)) {
-                    next[userId] = (next[userId] ?? 0) + (inboundLen - prev);
-                }
-                prevInboundLengths.current[userId] = inboundLen;
+        for (const [userId, msgs] of Object.entries(threads)) {
+            const inboundLen = msgs.filter((m) => m.direction === 'in').length;
+            const prev = prevInboundLengths.current[userId] ?? 0;
+            if (inboundLen > prev && !openChatIds.includes(userId)) {
+                deltas[userId] = inboundLen - prev;
             }
+            prevInboundLengths.current[userId] = inboundLen;
+        }
 
-            return next;
-        });
+        if (Object.keys(deltas).length > 0) {
+            setUnreadCounts((current) => {
+                const next = { ...current };
+                for (const [userId, delta] of Object.entries(deltas)) {
+                    next[userId] = (next[userId] ?? 0) + delta;
+                }
+                return next;
+            });
+        }
     }, [threads, openChatIds]);
 
     const fetchData = async () => {
@@ -415,7 +417,7 @@ export function FriendsSidebar() {
                                                           )
                                                 }
                                                 disabled={status === 'offline'}
-                                                className="rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-sky-300 hover:bg-orange-500/20 hover:bg-sky-900 disabled:hover:bg-transparent"
+                                                className="relative rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-sky-300 hover:bg-orange-500/20 hover:bg-sky-900 disabled:hover:bg-transparent"
                                             >
                                                 Chat
                                                 {unread > 0 && !isOpen && (
