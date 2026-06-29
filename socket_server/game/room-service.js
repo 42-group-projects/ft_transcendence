@@ -190,7 +190,7 @@ function createRoomService(io, presenceManager) {
             return Promise.resolve();
         }
 
-        if (room.solo === true && winnerId !== player1.userId) {
+        if (room.solo === true) {
             return Promise.resolve();
         }
 
