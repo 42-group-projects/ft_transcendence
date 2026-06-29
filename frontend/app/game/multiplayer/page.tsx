@@ -17,8 +17,6 @@ import { CustomizationPanel } from '../components/CustomizationPanel';
 import { FpsCounter } from '../utils/FpsCounter';
 import { useCustomization } from '../hooks/useCustomization';
 import { usePresenceSocket } from '@/app/components/PresenceProvider';
-import { apiGetFriends, apiGetMe } from '@/lib/api';
-import { usePresence } from '@/app/lobby/hooks/usePresence';
 
 export default function GamePage() {
     const [name, setName] = useState('Player');
@@ -30,6 +28,7 @@ export default function GamePage() {
 
     // Invite-a-friend state
     const socket = usePresenceSocket();
+<<<<<<< HEAD
     const [myId, setMyId] = useState<string | null>(null);
     const [friends, setFriends] = useState<any[]>([]);
     const [showInviteMenu, setShowInviteMenu] = useState(false);
@@ -49,6 +48,8 @@ export default function GamePage() {
             })
             .catch(() => {});
     }, []);
+=======
+>>>>>>> 899616e6da3115e76108472376c4bca68aa5769f
     const {
         socketRef,
         connected,
@@ -113,17 +114,6 @@ export default function GamePage() {
         });
     }, [joinedRoomId, socket, searchParams]);
 
-    const handleSendInvite = (toUserId: string) => {
-        if (!socket || !joinedRoomId || !password) return;
-        socket.emit('sendRoomInvite', {
-            toUserId,
-            roomId: joinedRoomId,
-            password,
-        });
-        setInviteSentTo(toUserId);
-        setTimeout(() => setInviteSentTo(null), 3000);
-        setShowInviteMenu(false);
-    };
 
     const handleCreateRoom = () => {
         createRoom({ name, password });

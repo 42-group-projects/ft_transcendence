@@ -40,15 +40,19 @@ export function useDmChat() {
             }));
         };
 
+        let offlineTimer = null as ReturnType<typeof setTimeout> | null;
+
         const onFailed = ({ toUserId }: { toUserId: string }) => {
             setOfflineUserId(toUserId);
-            setTimeout(() => setOfflineUserId(null), 3000);
+            if (offlineTimer) clearTimeout(offlineTimer);
+            offlineTimer = setTimeout(() => setOfflineUserId(null), 3000);
         };
 
         socket.on('receiveDm', onReceive);
         socket.on('dmFailed', onFailed);
 
         return () => {
+            if (offlineTimer) clearTimeout(offlineTimer);
             socket.off('receiveDm', onReceive);
             socket.off('dmFailed', onFailed);
         };

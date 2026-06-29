@@ -299,7 +299,7 @@ function createRoomService(io, presenceManager) {
                 }
                 removeRoom(room.id);
             }
-        }, 10000); // 30 seconds
+        }, 30000); // 30 seconds
 
         return room;
     }
