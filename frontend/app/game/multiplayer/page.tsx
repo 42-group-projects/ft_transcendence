@@ -28,28 +28,6 @@ export default function GamePage() {
 
     // Invite-a-friend state
     const socket = usePresenceSocket();
-<<<<<<< HEAD
-    const [myId, setMyId] = useState<string | null>(null);
-    const [friends, setFriends] = useState<any[]>([]);
-    const [showInviteMenu, setShowInviteMenu] = useState(false);
-    const [inviteSentTo, setInviteSentTo] = useState<string | null>(null);
-    const friendIds = friends.map((f: any) => f.userId);
-    const onlineStatuses = usePresence(myId || '', friendIds);
-
-    useEffect(() => {
-        apiGetMe()
-            .then(({ user }) => {
-                if (!user) return undefined;
-                setMyId(user.id);
-                return apiGetFriends();
-            })
-            .then((data) => {
-                if (data) setFriends(data);
-            })
-            .catch(() => {});
-    }, []);
-=======
->>>>>>> 899616e6da3115e76108472376c4bca68aa5769f
     const {
         socketRef,
         connected,
@@ -113,7 +91,6 @@ export default function GamePage() {
             password: challengePw,
         });
     }, [joinedRoomId, socket, searchParams]);
-
 
     const handleCreateRoom = () => {
         createRoom({ name, password });
