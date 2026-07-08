@@ -205,7 +205,9 @@ export function FriendsSidebar() {
                                             className="text-sm text-neutral-100 truncate"
                                             title={friend.userId}
                                         >
-                                            {friend.nickname || friend.userId.substring(0, 8) + '...'}
+                                            {friend.nickname ||
+                                                friend.userId.substring(0, 8) +
+                                                    '...'}
                                         </span>
                                         <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
                                             <span
