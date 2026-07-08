@@ -135,6 +135,16 @@ export function registerGameSessionSocketHandlers({
     const onResult = ({ message }: { message: string }) =>
         setRoundResultMessage(message);
 
+    const onRoomTimeout = ({ message }: { message: string }) => {
+        setSessionEndedReason('room_timeout');
+        setIsPaused(false);
+        setJoinedRoomId(null);
+        setLocalPlayerId(null);
+        setPlayers([]);
+        setCountdown(null);
+        setSystemMessage(message);
+    };
+
     socket.on('connect', onConnect);
     socket.on('gameConstants', onGameConstants);
     socket.on('disconnect', onDisconnect);
@@ -152,6 +162,7 @@ export function registerGameSessionSocketHandlers({
     socket.on('roundStarted', onRoundStarted);
     socket.on('result', onResult);
     socket.on('roundResult', onResult);
+    socket.on('roomTimeout', onRoomTimeout);
 
     // Returns a cleanup function that removes only these handlers,
     // leaving other listeners (e.g. presence) untouched.
@@ -173,5 +184,6 @@ export function registerGameSessionSocketHandlers({
         socket.off('roundStarted', onRoundStarted);
         socket.off('result', onResult);
         socket.off('roundResult', onResult);
+        socket.off('roomTimeout', onRoomTimeout);
     };
 }
