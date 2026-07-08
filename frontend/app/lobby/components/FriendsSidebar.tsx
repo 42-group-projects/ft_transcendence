@@ -375,24 +375,26 @@ export function FriendsSidebar() {
                                     key={friend.userId}
                                     className="group rounded-lg border border-neutral-800 bg-neutral-900/80 transition hover:border-neutral-700"
                                 >
-                                <div className="flex items-center justify-between px-3 py-2">
-                                    <div className="flex flex-col truncate pr-2">
-                                        <span
-                                            className="text-sm text-neutral-100 truncate"
-                                            title={friend.userId}
-                                        >
-                                            {friend.nickname ||
-                                                friend.userId.substring(0, 8) +
-                                                    '...'}
-                                        </span>
-                                        <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
-                                            <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
-                                                <span
-                                                    className={`h-1.5 w-1.5 rounded-full ${statusColor}`}
-                                                />
-                                                {status.replace('_', ' ')}
+                                    <div className="flex items-center justify-between px-3 py-2">
+                                        <div className="flex flex-col truncate pr-2">
+                                            <span
+                                                className="text-sm text-neutral-100 truncate"
+                                                title={friend.userId}
+                                            >
+                                                {friend.nickname ||
+                                                    friend.userId.substring(
+                                                        0,
+                                                        8,
+                                                    ) + '...'}
                                             </span>
-                                        </span>
+                                            <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
+                                                <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
+                                                    <span
+                                                        className={`h-1.5 w-1.5 rounded-full ${statusColor}`}
+                                                    />
+                                                    {status.replace('_', ' ')}
+                                                </span>
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
                                             {/* Challenge button */}
