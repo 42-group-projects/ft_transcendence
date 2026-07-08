@@ -19,7 +19,7 @@ export function FriendsSidebar() {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [friends, setFriends] = useState<any[]>([]);
     const [requests, setRequests] = useState<any[]>([]);
-    const [targetId, setTargetId] = useState('');
+    const [targetNickname, setTargetNickname] = useState('');
     const [message, setMessage] = useState('');
 
     // リアルタイムプレゼンス
@@ -59,11 +59,11 @@ export function FriendsSidebar() {
 
     // アクションハンドラ
     const handleSendRequest = async () => {
-        if (!currentUserId || !targetId) return;
+        if (!currentUserId || !targetNickname) return;
         try {
-            await apiSendFriendRequest(targetId);
+            await apiSendFriendRequest(targetNickname);
             setMessage('申請を送信しました');
-            setTargetId('');
+            setTargetNickname('');
         } catch (error: any) {
             setMessage(error.message || 'エラーが発生しました');
         }
@@ -122,9 +122,9 @@ export function FriendsSidebar() {
                 <div className="space-y-2">
                     <input
                         type="text"
-                        value={targetId}
-                        onChange={(e) => setTargetId(e.target.value)}
-                        placeholder="Add friend by ID..."
+                        value={targetNickname}
+                        onChange={(e) => setTargetNickname(e.target.value)}
+                        placeholder="Add friend by nickname..."
                         className="w-full rounded-lg border border-neutral-700 bg-neutral-900/80 px-3 py-1.5 text-xs text-neutral-200 outline-none focus:border-emerald-500 transition"
                     />
                     <button
@@ -205,7 +205,7 @@ export function FriendsSidebar() {
                                             className="text-sm text-neutral-100 truncate"
                                             title={friend.userId}
                                         >
-                                            {friend.userId.substring(0, 8)}...
+                                            {friend.nickname || friend.userId.substring(0, 8) + '...'}
                                         </span>
                                         <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
                                             <span

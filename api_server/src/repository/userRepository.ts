@@ -27,6 +27,14 @@ export const userRepository = {
         return result[0] ?? null;
     },
 
+    findByNickname: async (db: AppDb, nickname: string) => {
+        const result = await db
+            .select()
+            .from(users)
+            .where(eq(users.nickname, nickname));
+        return result[0] ?? null;
+    },
+
     emailExists: async (db: AppDb, email: string): Promise<boolean> => {
         const result = await db
             .select({ id: users.id })
