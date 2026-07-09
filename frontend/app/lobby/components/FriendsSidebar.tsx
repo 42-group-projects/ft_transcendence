@@ -9,6 +9,8 @@ import {
     apiRejectFriendRequest,
     apiRemoveFriend,
     apiGetMe,
+    apiSearchUsers,
+    getAvatarUrl,
 } from '@/lib/api';
 import { usePresence } from '../hooks/usePresence';
 
@@ -19,7 +21,8 @@ export function FriendsSidebar() {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [friends, setFriends] = useState<any[]>([]);
     const [requests, setRequests] = useState<any[]>([]);
-    const [targetId, setTargetId] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
     const [message, setMessage] = useState('');
 
     // リアルタイムプレゼンス
@@ -29,7 +32,6 @@ export function FriendsSidebar() {
     // 初期化：自分の情報を取得し、その後フレンド情報を取得
     const fetchData = async () => {
         try {
-            // モックサーバーから「自分のダミー情報」を受け取る
             const { user } = await apiGetMe();
             const myId = user?.id;
 
@@ -51,6 +53,23 @@ export function FriendsSidebar() {
         fetchData();
     }, []);
 
+    // リアルタイムニックネーム検索デバウンス
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setSearchResults([]);
+            return;
+        }
+        const delayDebounce = setTimeout(async () => {
+            try {
+                const res = await apiSearchUsers(searchQuery);
+                setSearchResults(res.users || []);
+            } catch (err) {
+                console.error('Search failed:', err);
+            }
+        }, 300);
+        return () => clearTimeout(delayDebounce);
+    }, [searchQuery]);
+
     const onlineCount = useMemo(() => {
         return friends.filter(
             (f) => (onlineStatuses[f.userId] || f.onlineStatus) === 'online',
@@ -58,12 +77,13 @@ export function FriendsSidebar() {
     }, [friends, onlineStatuses]);
 
     // アクションハンドラ
-    const handleSendRequest = async () => {
-        if (!currentUserId || !targetId) return;
+    const handleSendRequest = async (receiverId: string) => {
+        if (!currentUserId || !receiverId) return;
         try {
-            await apiSendFriendRequest(targetId);
-            setMessage('申請を送信しました');
-            setTargetId('');
+            await apiSendFriendRequest(receiverId);
+            setMessage('フレンド申請を送信しました');
+            setSearchQuery('');
+            setSearchResults([]);
         } catch (error: any) {
             setMessage(error.message || 'エラーが発生しました');
         }
@@ -77,7 +97,7 @@ export function FriendsSidebar() {
             fetchData(); // 成功したらリストを更新
         } catch (error: any) {
             setMessage(error.message || '承認に失敗しました');
-            setTimeout(() => setMessage(''), 3000); // 3秒後にメッセージを消す
+            setTimeout(() => setMessage(''), 3000);
         }
     };
 
@@ -118,21 +138,43 @@ export function FriendsSidebar() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-5">
-                {/* フレンド追加フォーム */}
-                <div className="space-y-2">
+                {/* フレンド検索・追加フォーム */}
+                <div className="relative space-y-2">
                     <input
                         type="text"
-                        value={targetId}
-                        onChange={(e) => setTargetId(e.target.value)}
-                        placeholder="Add friend by ID..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search nickname to add..."
                         className="w-full rounded-lg border border-neutral-700 bg-neutral-900/80 px-3 py-1.5 text-xs text-neutral-200 outline-none focus:border-emerald-500 transition"
                     />
-                    <button
-                        onClick={handleSendRequest}
-                        className="w-full rounded-lg bg-emerald-600/80 hover:bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white transition"
-                    >
-                        Send Request
-                    </button>
+                    {searchResults.length > 0 && (
+                        <ul className="absolute left-0 right-0 z-40 mt-1 max-h-48 overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-950 p-1 shadow-xl">
+                            {searchResults.map((user) => (
+                                <li
+                                    key={user.id}
+                                    className="flex items-center justify-between rounded-md p-1.5 hover:bg-neutral-900 transition"
+                                >
+                                    <div className="flex items-center gap-2 truncate pr-2">
+                                        <img
+                                            src={getAvatarUrl(user.avatar_url)}
+                                            alt={user.nickname}
+                                            className="h-6 w-6 rounded-full border border-neutral-800 object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = '/api/uploads/default-avatar.svg';
+                                            }}
+                                        />
+                                        <span className="text-xs text-neutral-200 truncate">{user.nickname}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => handleSendRequest(user.id)}
+                                        className="rounded bg-emerald-600/80 hover:bg-emerald-500 px-2 py-1 text-[10px] font-semibold text-white transition"
+                                    >
+                                        Add
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                     {message && (
                         <p className="text-[10px] text-amber-400">{message}</p>
                     )}
@@ -150,9 +192,19 @@ export function FriendsSidebar() {
                                     key={req.id}
                                     className="rounded-lg border border-neutral-800 bg-neutral-900/80 p-2"
                                 >
-                                    <span className="block text-xs text-neutral-200 mb-2 truncate">
-                                        {req.senderNickname || req.senderId}
-                                    </span>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <img
+                                            src={getAvatarUrl(req.senderAvatar)}
+                                            alt={req.senderNickname || 'User'}
+                                            className="h-6 w-6 rounded-full border border-neutral-700 object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = '/api/uploads/default-avatar.svg';
+                                            }}
+                                        />
+                                        <span className="text-xs font-medium text-neutral-200 truncate">
+                                            {req.senderNickname || req.senderId.substring(0, 8)}
+                                        </span>
+                                    </div>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handleAccept(req.id)}
@@ -195,24 +247,36 @@ export function FriendsSidebar() {
                             if (status === 'in_game')
                                 statusColor = 'bg-blue-400';
 
+                            const avatarUrl = getAvatarUrl(friend.avatarUrl || friend.avatar_url);
+
                             return (
                                 <li
                                     key={friend.userId}
                                     className="group flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900/80 px-3 py-2 transition hover:border-neutral-700"
                                 >
-                                    <div className="flex flex-col truncate pr-2">
-                                        <span
-                                            className="text-sm text-neutral-100 truncate"
-                                            title={friend.userId}
-                                        >
-                                            {friend.userId.substring(0, 8)}...
-                                        </span>
-                                        <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
+                                    <div className="flex items-center gap-2 truncate pr-2">
+                                        <img
+                                            src={avatarUrl}
+                                            alt={friend.nickname || 'Friend'}
+                                            className="h-8 w-8 rounded-full border border-neutral-700 object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = '/api/uploads/default-avatar.svg';
+                                            }}
+                                        />
+                                        <div className="flex flex-col truncate">
                                             <span
-                                                className={`h-1.5 w-1.5 rounded-full ${statusColor}`}
-                                            />
-                                            {status.replace('_', ' ')}
-                                        </span>
+                                                className="text-sm font-medium text-neutral-100 truncate"
+                                                title={friend.nickname || friend.userId}
+                                            >
+                                                {friend.nickname || friend.userId.substring(0, 8)}
+                                            </span>
+                                            <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
+                                                <span
+                                                    className={`h-1.5 w-1.5 rounded-full ${statusColor}`}
+                                                />
+                                                {status.replace('_', ' ')}
+                                            </span>
+                                        </div>
                                     </div>
                                     <button
                                         onClick={() =>

@@ -180,3 +180,63 @@ export async function apiRemoveFriend(friendId: string) {
         body: JSON.stringify({}),
     });
 }
+
+// ユーザー検索
+export async function apiSearchUsers(nickname: string): Promise<{ users: any[] }> {
+    return apiFetch<{ users: any[] }>(`/users/search?nickname=${encodeURIComponent(nickname)}`);
+}
+
+// プロフィール更新 (ニックネーム)
+export async function apiUpdateProfile(nickname: string): Promise<{ user: User }> {
+    return apiFetch<{ user: User }>('/users/me', {
+        method: 'PATCH',
+        body: JSON.stringify({ nickname }),
+    });
+}
+
+// アバターアップロード (File)
+export async function apiUploadAvatar(file: File): Promise<{ user: User }> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const token = getToken();
+    const headers: Record<string, string> = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const cleanBaseUrl = API_BASE.replace(/\/$/, '');
+    const url = `${cleanBaseUrl}/users/me/avatar`;
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+    });
+
+    const text = await res.text();
+    let data;
+    try {
+        data = text ? JSON.parse(text) : {};
+    } catch {
+        throw new Error('Invalid response format');
+    }
+
+    if (!res.ok) {
+        throw new Error(data.error ?? 'Failed to upload avatar');
+    }
+
+    return data as { user: User };
+}
+
+// アバターURLの解決 (相対パスの場合にAPIベースURLを付与)
+export function getAvatarUrl(url: string | null | undefined): string {
+    if (!url) {
+        return '/api/uploads/default-avatar.svg';
+    }
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+        return url;
+    }
+    const apiBase = API_BASE.replace(/\/api$/, '');
+    return `${apiBase}${url}`;
+}

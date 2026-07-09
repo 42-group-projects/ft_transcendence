@@ -17,3 +17,5 @@
 .DS_Store
 Thumbs.db
 
+# User uploads
+api_server/uploads/
