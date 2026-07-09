@@ -67,10 +67,9 @@ SumoVerse is a browser-based 3D real-time multiplayer fighting game inspired by 
     API_PORT=4001
     NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
     NEXT_PUBLIC_API_URL=http://localhost:4001/api
-    JWT_SECRET=<your-jwt-secret>
-    INTERNAL_SECRET=<your-internal-secret>
-    RECONNECT_GRACE_MS=30000
     ```
+
+    See `.env.example` for additional required variables.
 
 4. Build and start all services with a single command:
 
