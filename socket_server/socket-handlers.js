@@ -17,6 +17,10 @@ function registerSocketHandlers(io, roomService) {
                 userId,
                 status: 'online',
             });
+
+            // Join personal DM room so targeted messages can be delivered without
+            // tracking socketIds manually — emit to `dm_${userId}` to reach this user.
+            socket.join(`dm_${userId}`);
         }
 
         // フロントエンドが指定したフレンドたちの今の状態を教えて、と聞いてきた時の処理
@@ -271,6 +275,50 @@ function registerSocketHandlers(io, roomService) {
                 roomService.broadcastRoomState(result.room);
                 roomService.notifyWaitingForOpponent(result.room);
             }
+        });
+
+        // ── Direct messages ────────────────────────────────────────────────────
+        socket.on('sendDm', ({ toUserId, text }) => {
+            if (typeof toUserId !== 'string' || typeof text !== 'string')
+                return;
+            const trimmed = text.trim().slice(0, 500);
+            if (!trimmed) return;
+
+            const targetRoom = io.sockets.adapter.rooms.get(`dm_${toUserId}`);
+            if (!targetRoom || targetRoom.size === 0) {
+                socket.emit('dmFailed', { toUserId, reason: 'user_offline' });
+                return;
+            }
+
+            io.to(`dm_${toUserId}`).emit('receiveDm', {
+                fromUserId: userId,
+                text: trimmed,
+                timestamp: Date.now(),
+            });
+        });
+
+        // ── Room invites ───────────────────────────────────────────────────────
+        socket.on('sendRoomInvite', ({ toUserId, roomId, password }) => {
+            if (
+                typeof toUserId !== 'string' ||
+                typeof roomId !== 'string' ||
+                typeof password !== 'string'
+            ) {
+                return;
+            }
+
+            const targetRoom = io.sockets.adapter.rooms.get(`dm_${toUserId}`);
+            if (!targetRoom || targetRoom.size === 0) {
+                socket.emit('dmFailed', { toUserId, reason: 'user_offline' });
+                return;
+            }
+
+            io.to(`dm_${toUserId}`).emit('receiveRoomInvite', {
+                fromUserId: userId,
+                roomId,
+                password,
+                timestamp: Date.now(),
+            });
         });
 
         socket.on('disconnect', () => {
