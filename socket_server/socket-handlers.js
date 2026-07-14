@@ -298,29 +298,40 @@ function registerSocketHandlers(io, roomService) {
         });
 
         // ── Room invites ───────────────────────────────────────────────────────
-        socket.on('sendRoomInvite', ({ toUserId, roomId, password, fromNickname }) => {
-            if (
-                typeof toUserId !== 'string' ||
-                typeof roomId !== 'string' ||
-                typeof password !== 'string'
-            ) {
-                return;
-            }
+        socket.on(
+            'sendRoomInvite',
+            ({ toUserId, roomId, password, fromNickname }) => {
+                if (
+                    typeof toUserId !== 'string' ||
+                    typeof roomId !== 'string' ||
+                    typeof password !== 'string'
+                ) {
+                    return;
+                }
 
-            const targetRoom = io.sockets.adapter.rooms.get(`dm_${toUserId}`);
-            if (!targetRoom || targetRoom.size === 0) {
-                socket.emit('dmFailed', { toUserId, reason: 'user_offline' });
-                return;
-            }
+                const targetRoom = io.sockets.adapter.rooms.get(
+                    `dm_${toUserId}`,
+                );
+                if (!targetRoom || targetRoom.size === 0) {
+                    socket.emit('dmFailed', {
+                        toUserId,
+                        reason: 'user_offline',
+                    });
+                    return;
+                }
 
-            io.to(`dm_${toUserId}`).emit('receiveRoomInvite', {
-                fromUserId: userId,
-                fromNickname: typeof fromNickname === 'string' ? fromNickname : undefined,
-                roomId,
-                password,
-                timestamp: Date.now(),
-            });
-        });
+                io.to(`dm_${toUserId}`).emit('receiveRoomInvite', {
+                    fromUserId: userId,
+                    fromNickname:
+                        typeof fromNickname === 'string'
+                            ? fromNickname
+                            : undefined,
+                    roomId,
+                    password,
+                    timestamp: Date.now(),
+                });
+            },
+        );
 
         socket.on('disconnect', () => {
             // 切断されたら「オフライン」として登録し、全員に通知
