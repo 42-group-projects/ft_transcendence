@@ -18,12 +18,14 @@ import { useDmChat, type DmMessage } from '../hooks/useDmChat';
 
 function FloatingChatWindow({
     userId,
+    displayName,
     thread,
     isOfflineWarning,
     onClose,
     onSend,
 }: {
     userId: string;
+    displayName: string;
     thread: DmMessage[];
     isOfflineWarning: boolean;
     onClose: () => void;
@@ -48,9 +50,9 @@ function FloatingChatWindow({
             <div className="flex items-center justify-between border-b border-neutral-700/80 bg-neutral-900/90 px-3 py-2">
                 <span
                     className="truncate text-xs font-semibold text-neutral-200"
-                    title={userId}
+                    title={displayName}
                 >
-                    {userId.substring(0, 10)}…
+                    {displayName}
                 </span>
                 <button
                     type="button"
@@ -141,7 +143,7 @@ export function FriendsSidebar() {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [friends, setFriends] = useState<any[]>([]);
     const [requests, setRequests] = useState<any[]>([]);
-    const [targetId, setTargetId] = useState('');
+    const [targetNickname, setTargetNickname] = useState('');
     const [message, setMessage] = useState('');
 
     // Open floating chat windows (ordered: first opened = leftmost)
@@ -224,11 +226,11 @@ export function FriendsSidebar() {
     };
 
     const handleSendRequest = async () => {
-        if (!currentUserId || !targetId) return;
+        if (!currentUserId || !targetNickname) return;
         try {
-            await apiSendFriendRequest(targetId);
+            await apiSendFriendRequest(targetNickname);
             setMessage('申請を送信しました');
-            setTargetId('');
+            setTargetNickname('');
         } catch (error: any) {
             setMessage(error.message || 'エラーが発生しました');
         }
@@ -294,9 +296,9 @@ export function FriendsSidebar() {
                 <div className="space-y-2">
                     <input
                         type="text"
-                        value={targetId}
-                        onChange={(e) => setTargetId(e.target.value)}
-                        placeholder="Add friend by ID..."
+                        value={targetNickname}
+                        onChange={(e) => setTargetNickname(e.target.value)}
+                        placeholder="Add friend by nickname..."
                         className="w-full rounded-lg border border-neutral-700 bg-neutral-900/80 px-3 py-1.5 text-xs text-neutral-200 outline-none focus:border-emerald-500 transition"
                     />
                     <button
@@ -379,9 +381,16 @@ export function FriendsSidebar() {
                                         <div className="flex flex-col truncate pr-2">
                                             <span
                                                 className="text-sm text-neutral-100 truncate"
-                                                title={friend.userId}
+                                                title={
+                                                    friend.nickname ||
+                                                    friend.userId
+                                                }
                                             >
-                                                {friend.userId.substring(0, 8)}…
+                                                {friend.nickname ||
+                                                    friend.userId.substring(
+                                                        0,
+                                                        8,
+                                                    ) + '…'}
                                             </span>
                                             <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
                                                 <span
@@ -480,20 +489,26 @@ export function FriendsSidebar() {
             {/* --- Floating chat windows (Facebook-style) --- */}
             {openChatIds.length > 0 && (
                 <div className="pointer-events-none fixed bottom-0 right-0 z-50 flex max-w-full flex-row-reverse items-end gap-1 overflow-hidden">
-                    {openChatIds.map((userId) => (
-                        <div
-                            key={userId}
-                            className="pointer-events-auto min-w-20 max-w-64 flex-1"
-                        >
-                            <FloatingChatWindow
-                                userId={userId}
-                                thread={threads[userId] ?? []}
-                                isOfflineWarning={offlineUserId === userId}
-                                onClose={() => closeChat(userId)}
-                                onSend={(text) => sendDm(userId, text)}
-                            />
-                        </div>
-                    ))}
+                    {openChatIds.map((userId) => {
+                        const friend = friends.find((f) => f.userId === userId);
+                        const name =
+                            friend?.nickname || userId.substring(0, 8) + '…';
+                        return (
+                            <div
+                                key={userId}
+                                className="pointer-events-auto min-w-20 max-w-64 flex-1"
+                            >
+                                <FloatingChatWindow
+                                    userId={userId}
+                                    displayName={name}
+                                    thread={threads[userId] ?? []}
+                                    isOfflineWarning={offlineUserId === userId}
+                                    onClose={() => closeChat(userId)}
+                                    onSend={(text) => sendDm(userId, text)}
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </>

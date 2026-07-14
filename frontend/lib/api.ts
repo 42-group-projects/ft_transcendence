@@ -171,11 +171,11 @@ export async function apiGetFriendRequests(): Promise<any[]> {
     return apiFetch<any[]>('/friends/requests');
 }
 
-// フレンド申請を送信 (senderId は JWT から取得 — 呼び出し元は receiverId のみ渡す)
-export async function apiSendFriendRequest(receiverId: string) {
+// フレンド申請を送信 (senderId は JWT から取得 — ニックネームで検索)
+export async function apiSendFriendRequest(nickname: string) {
     return apiFetch('/friends/requests', {
         method: 'POST',
-        body: JSON.stringify({ receiver_id: receiverId }),
+        body: JSON.stringify({ nickname }),
     });
 }
 

@@ -6,6 +6,7 @@ import { usePresenceSocket } from './PresenceProvider';
 
 type PendingInvite = {
     fromUserId: string;
+    fromNickname?: string;
     roomId: string;
     password: string;
 };
@@ -45,7 +46,8 @@ export function InviteToast() {
             <p className="font-medium">
                 Match invite from{' '}
                 <span className="text-orange-400">
-                    {invite.fromUserId.substring(0, 8)}…
+                    {invite.fromNickname ||
+                        invite.fromUserId.substring(0, 8) + '…'}
                 </span>
             </p>
             <div className="flex gap-2">

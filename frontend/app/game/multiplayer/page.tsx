@@ -17,6 +17,7 @@ import { CustomizationPanel } from '../components/CustomizationPanel';
 import { FpsCounter } from '../utils/FpsCounter';
 import { useCustomization } from '../hooks/useCustomization';
 import { usePresenceSocket } from '@/app/components/PresenceProvider';
+import { apiGetMe } from '@/lib/api';
 
 export default function GamePage() {
     const [name, setName] = useState('Player');
@@ -27,7 +28,16 @@ export default function GamePage() {
     const autoJoinFiredRef = useRef(false);
 
     // Invite-a-friend state
+    const [myNickname, setMyNickname] = useState<string | undefined>();
     const socket = usePresenceSocket();
+
+    useEffect(() => {
+        apiGetMe()
+            .then(({ user }) => {
+                if (user?.nickname) setMyNickname(user.nickname);
+            })
+            .catch(() => {});
+    }, []);
     const {
         socketRef,
         connected,
@@ -89,8 +99,9 @@ export default function GamePage() {
             toUserId: challengeTarget,
             roomId: joinedRoomId,
             password: challengePw,
+            fromNickname: myNickname,
         });
-    }, [joinedRoomId, socket, searchParams]);
+    }, [joinedRoomId, socket, searchParams, myNickname]);
 
     const handleCreateRoom = () => {
         createRoom({ name, password });
