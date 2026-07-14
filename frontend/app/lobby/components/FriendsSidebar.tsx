@@ -18,12 +18,14 @@ import { useDmChat, type DmMessage } from '../hooks/useDmChat';
 
 function FloatingChatWindow({
     userId,
+    displayName,
     thread,
     isOfflineWarning,
     onClose,
     onSend,
 }: {
     userId: string;
+    displayName: string;
     thread: DmMessage[];
     isOfflineWarning: boolean;
     onClose: () => void;
@@ -48,9 +50,9 @@ function FloatingChatWindow({
             <div className="flex items-center justify-between border-b border-neutral-700/80 bg-neutral-900/90 px-3 py-2">
                 <span
                     className="truncate text-xs font-semibold text-neutral-200"
-                    title={userId}
+                    title={displayName}
                 >
-                    {userId.substring(0, 10)}…
+                    {displayName}
                 </span>
                 <button
                     type="button"
@@ -487,20 +489,26 @@ export function FriendsSidebar() {
             {/* --- Floating chat windows (Facebook-style) --- */}
             {openChatIds.length > 0 && (
                 <div className="pointer-events-none fixed bottom-0 right-0 z-50 flex max-w-full flex-row-reverse items-end gap-1 overflow-hidden">
-                    {openChatIds.map((userId) => (
-                        <div
-                            key={userId}
-                            className="pointer-events-auto min-w-20 max-w-64 flex-1"
-                        >
-                            <FloatingChatWindow
-                                userId={userId}
-                                thread={threads[userId] ?? []}
-                                isOfflineWarning={offlineUserId === userId}
-                                onClose={() => closeChat(userId)}
-                                onSend={(text) => sendDm(userId, text)}
-                            />
-                        </div>
-                    ))}
+                    {openChatIds.map((userId) => {
+                        const friend = friends.find((f) => f.userId === userId);
+                        const name =
+                            friend?.nickname || userId.substring(0, 8) + '…';
+                        return (
+                            <div
+                                key={userId}
+                                className="pointer-events-auto min-w-20 max-w-64 flex-1"
+                            >
+                                <FloatingChatWindow
+                                    userId={userId}
+                                    displayName={name}
+                                    thread={threads[userId] ?? []}
+                                    isOfflineWarning={offlineUserId === userId}
+                                    onClose={() => closeChat(userId)}
+                                    onSend={(text) => sendDm(userId, text)}
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </>

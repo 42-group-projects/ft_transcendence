@@ -298,7 +298,7 @@ function registerSocketHandlers(io, roomService) {
         });
 
         // ── Room invites ───────────────────────────────────────────────────────
-        socket.on('sendRoomInvite', ({ toUserId, roomId, password }) => {
+        socket.on('sendRoomInvite', ({ toUserId, roomId, password, fromNickname }) => {
             if (
                 typeof toUserId !== 'string' ||
                 typeof roomId !== 'string' ||
@@ -315,6 +315,7 @@ function registerSocketHandlers(io, roomService) {
 
             io.to(`dm_${toUserId}`).emit('receiveRoomInvite', {
                 fromUserId: userId,
+                fromNickname: typeof fromNickname === 'string' ? fromNickname : undefined,
                 roomId,
                 password,
                 timestamp: Date.now(),
