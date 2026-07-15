@@ -33,10 +33,11 @@ services:
             - '${NEXT_PUBLIC_SOCKET_PORT}:${NEXT_PUBLIC_SOCKET_PORT}'
         environment:
             - NODE_ENV=${NODE_ENV}
-            - PORT=${NEXT_PUBLIC_SOCKET_PORT}
+            - NEXT_PUBLIC_SOCKET_PORT=${NEXT_PUBLIC_SOCKET_PORT}
             - JWT_SECRET=${JWT_SECRET}
             - INTERNAL_SECRET=${INTERNAL_SECRET}
             - RECONNECT_GRACE_MS=${RECONNECT_GRACE_MS:-30000}
+            - API_URL=${API_URL}
         volumes:
             - ./socket_server:/app
             - /app/node_modules
@@ -53,7 +54,7 @@ services:
             - '${API_PORT:-4001}:4001'
         environment:
             - NODE_ENV=${NODE_ENV}
-            - PORT=4001
+            - API_PORT=${API_PORT}
             - JWT_SECRET=${JWT_SECRET}
             - INTERNAL_SECRET=${INTERNAL_SECRET}
             - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
