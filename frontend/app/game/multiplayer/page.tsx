@@ -7,6 +7,7 @@ import { Canvas } from '@react-three/fiber';
 
 import { GameResultOverlay } from '@/app/game/components/GameResultOverlay';
 import { CountdownOverlay } from '@/app/game/components/CountdownOverlay';
+import DashCooldownIndicator from '../components/DashCooldownIndicator';
 import { GameLobbyControls } from '../components/GameLobbyControls';
 import { WorldScene } from '../components/WorldScene';
 import { useGameSession } from '../hooks/useGameSession';
@@ -172,13 +173,15 @@ export default function GamePage() {
                             players={players}
                             localPlayerId={localPlayerId}
                             gameConstants={gameConstants}
-                            dashCooldownMs={dashCooldownMs}
-                            dashCooldownTotalMs={dashCooldownTotalMs}
                             mawashiColor={mawashiColor}
                             dohyoTheme={dohyoTheme}
                         />
                     </Canvas>
                     <FrameRateDisplay fps={fps} />
+                    <DashCooldownIndicator
+                        dashCooldownMs={dashCooldownMs}
+                        dashCooldownTotalMs={dashCooldownTotalMs}
+                    />
                     {countdown && countdown > 0 ? (
                         <CountdownOverlay seconds={countdown} />
                     ) : null}

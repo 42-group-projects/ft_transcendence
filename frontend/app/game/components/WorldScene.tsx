@@ -10,7 +10,6 @@ import {
 } from '../constants';
 import type { GameConstants, PlayerState } from '../types';
 import { DOHYO_THEMES, type DohyoTheme } from '../hooks/useCustomization';
-import DashCooldownIndicator from './DashCooldownIndicator';
 
 const PLATE_THICKNESS = 0.5;
 const SPAWN_LINE_LENGTH = 3.6;
@@ -55,8 +54,6 @@ function FollowCamera({ target, heading }: FollowCameraProps) {
 type WorldSceneProps = {
     players: PlayerState[];
     localPlayerId: string | null;
-    dashCooldownMs?: number;
-    dashCooldownTotalMs?: number;
     gameConstants?: GameConstants | null;
     mawashiColor?: string;
     dohyoTheme?: DohyoTheme;
@@ -65,8 +62,6 @@ type WorldSceneProps = {
 export function WorldScene({
     players,
     localPlayerId,
-    dashCooldownMs,
-    dashCooldownTotalMs,
     gameConstants,
     mawashiColor = '#3b82f6',
     dohyoTheme = 'default',
@@ -160,13 +155,6 @@ export function WorldScene({
                                 color={isSelf ? mawashiColor : '#f97316'}
                             />
                         </mesh>
-                        {isSelf ? (
-                            <DashCooldownIndicator
-                                dashCooldownMs={dashCooldownMs}
-                                dashCooldownTotalMs={dashCooldownTotalMs}
-                                offsetY={PLAYER_RADIUS + 0.5}
-                            />
-                        ) : null}
                     </group>
                 );
             })}
