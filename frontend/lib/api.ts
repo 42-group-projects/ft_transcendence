@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4001/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL!;
 
 // ── Types (mirrors the mock store / schema) ────────────────────────────────
 
@@ -13,6 +13,28 @@ export type User = {
 
 export type UserStats = {
     user_id: string;
+    wins: number;
+    losses: number;
+    rating: number;
+};
+
+export type MatchRecord = {
+    id: string;
+    session_id: string;
+    player1_id: string;
+    player1_nickname: string;
+    player2_id: string | null;
+    player2_nickname: string | null;
+    winner_id: string;
+    is_cpu_game: boolean;
+    played_at: string;
+};
+
+export type RankingEntry = {
+    rank: number;
+    id: string;
+    nickname: string;
+    avatar_url: string | null;
     wins: number;
     losses: number;
     rating: number;
@@ -149,11 +171,11 @@ export async function apiGetFriendRequests(): Promise<any[]> {
     return apiFetch<any[]>('/friends/requests');
 }
 
-// フレンド申請を送信 (senderId は JWT から取得 — 呼び出し元は receiverId のみ渡す)
-export async function apiSendFriendRequest(receiverId: string) {
+// フレンド申請を送信 (senderId は JWT から取得 — ニックネームで検索)
+export async function apiSendFriendRequest(nickname: string) {
     return apiFetch('/friends/requests', {
         method: 'POST',
-        body: JSON.stringify({ receiver_id: receiverId }),
+        body: JSON.stringify({ nickname }),
     });
 }
 
@@ -239,4 +261,39 @@ export function getAvatarUrl(url: string | null | undefined): string {
     }
     const apiBase = API_BASE.replace(/\/api$/, '');
     return `${apiBase}${url}`;
+}
+
+// ── Match history / ranking endpoints ────────────────────────────────────
+
+export async function apiGetMyMatches(
+    limit = 20,
+): Promise<{ matches: MatchRecord[] }> {
+    return apiFetch<{ matches: MatchRecord[] }>(
+        `/users/me/matches?limit=${limit}`,
+    );
+}
+
+export async function apiGetUserMatches(
+    userId: string,
+    limit = 20,
+): Promise<{ matches: MatchRecord[] }> {
+    return apiFetch<{ matches: MatchRecord[] }>(
+        `/users/${userId}/matches?limit=${limit}`,
+    );
+}
+
+export async function apiGetRanking(
+    limit = 50,
+): Promise<{ ranking: RankingEntry[] }> {
+    return apiFetch<{ ranking: RankingEntry[] }>(
+        `/users/ranking?limit=${limit}`,
+    );
+}
+
+export async function apiGetUserStats(
+    userId: string,
+): Promise<{ data: UserStats & { win_rate: number } }> {
+    return apiFetch<{ data: UserStats & { win_rate: number } }>(
+        `/users/${userId}/stats`,
+    );
 }

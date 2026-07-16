@@ -69,6 +69,11 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
             socket.emit('reconnect'); // let server know we're (re)joining the game page
         }
 
+        const onSessionExpired = () => {
+            setErrorMessage('Your match has already concluded.');
+        };
+        socket.on('sessionExpired', onSessionExpired);
+
         const cleanup = registerGameSessionSocketHandlers({
             socket,
             socketUrl,
@@ -102,6 +107,7 @@ export function useGameSession({ onRoomCreated }: UseGameSessionArgs = {}) {
         // handleDisconnect, the opponent's game is never paused, and the room
         // leaks until the reconnect timeout fires.
         return () => {
+            socket.off('sessionExpired', onSessionExpired);
             cleanup();
             if (joinedRoomIdRef.current) {
                 socket.emit('leaveRoom');

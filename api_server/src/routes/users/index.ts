@@ -1,7 +1,11 @@
 import { Hono } from 'hono';
-import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { userService } from '../../service/userService';
+import {
+    updateMeSchema,
+    matchesQuerySchema,
+    rankingQuerySchema,
+} from './schemas';
 import type { AuthEnv } from '../../middleware/auth';
 import { promises as fs } from 'fs';
 import { join, extname } from 'path';
@@ -31,14 +35,22 @@ function toPublicUser(user: Record<string, any>) {
 // All routes require authMiddleware applied at the router level in routes/index.ts.
 // c.get("userId") is the verified caller's UUID from the JWT.
 
-const updateMeSchema = z
-    .object({
-        nickname: z.string().min(1).max(20).optional(),
-        avatar_url: z.string().optional(),
-    })
-    .refine((d) => d.nickname !== undefined || d.avatar_url !== undefined, {
-        message: 'UNPROCESSABLE',
-    });
+type MatchRow = Awaited<ReturnType<typeof userService.getMatchHistory>>[number];
+
+function serializeMatches(matches: MatchRow[]) {
+    return matches.map((m) => ({
+        id: m.id,
+        session_id: m.sessionId,
+        player1_id: m.player1Id,
+        player1_nickname: m.player1Nickname,
+        player2_id: m.player2Id ?? null,
+        player2_nickname: m.player2Nickname ?? null,
+        winner_id: m.winnerId,
+        is_cpu_game: m.isCpuGame,
+        played_at:
+            m.playedAt instanceof Date ? m.playedAt.toISOString() : m.playedAt,
+    }));
+}
 
 // GET /users/me
 usersRoutes.get('/me', async (c) => {
@@ -53,6 +65,18 @@ usersRoutes.patch('/me', zValidator('json', updateMeSchema), async (c) => {
     const updated = await userService.updateMe(userId, c.req.valid('json'));
     return c.json({ user: toPublicUser(updated) });
 });
+
+// GET /users/me/matches?limit=20
+usersRoutes.get(
+    '/me/matches',
+    zValidator('query', matchesQuerySchema),
+    async (c) => {
+        const userId = c.get('userId') as string;
+        const { limit } = c.req.valid('query');
+        const matches = await userService.getMatchHistory(userId, limit);
+        return c.json({ matches: serializeMatches(matches) });
+    },
+);
 
 // GET /users/me/stats
 usersRoutes.get('/me/stats', async (c) => {
@@ -131,7 +155,28 @@ usersRoutes.post('/me/avatar', async (c) => {
     return c.json({ user: toPublicUser(updated) });
 });
 
-// GET /users/:id — returns a public profile with no email exposed
+// GET /users/ranking?limit=50 — leaderboard sorted by rating
+usersRoutes.get(
+    '/ranking',
+    zValidator('query', rankingQuerySchema),
+    async (c) => {
+        const { limit } = c.req.valid('query');
+        const rows = await userService.getRanking(limit);
+        return c.json({
+            ranking: rows.map((r, i) => ({
+                rank: i + 1,
+                id: r.id,
+                nickname: r.nickname,
+                avatar_url: r.avatarUrl ?? null,
+                wins: Number(r.wins),
+                losses: Number(r.losses),
+                rating: Number(r.rating),
+            })),
+        });
+    },
+);
+
+// GET /users/:id  — public profile, no email exposed
 usersRoutes.get('/:id', async (c) => {
     const id = c.req.param('id');
     const user = await userService.getById(id);
@@ -152,3 +197,15 @@ usersRoutes.get('/:id/stats', async (c) => {
     const stats = await userService.getStats(id);
     return c.json({ data: stats });
 });
+
+// GET /users/:id/matches?limit=20  — match history for a user
+usersRoutes.get(
+    '/:id/matches',
+    zValidator('query', matchesQuerySchema),
+    async (c) => {
+        const id = c.req.param('id');
+        const { limit } = c.req.valid('query');
+        const matches = await userService.getMatchHistory(id, limit);
+        return c.json({ matches: serializeMatches(matches) });
+    },
+);

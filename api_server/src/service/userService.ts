@@ -1,5 +1,6 @@
 import { createDbClient } from '../repository/dbClient';
 import { userRepository } from '../repository/userRepository';
+import { matchRepository } from '../repository/matchRepository';
 import { ApiError } from '../utils/apiError';
 
 export const userService = {
@@ -74,6 +75,24 @@ export const userService = {
                 win_rate,
                 rating: stats.rating,
             };
+        } finally {
+            await close();
+        }
+    },
+
+    async getMatchHistory(userId: string, limit: number) {
+        const { db, close } = createDbClient();
+        try {
+            return await matchRepository.getMatchHistory(db, userId, limit);
+        } finally {
+            await close();
+        }
+    },
+
+    async getRanking(limit: number) {
+        const { db, close } = createDbClient();
+        try {
+            return await matchRepository.getRanking(db, limit);
         } finally {
             await close();
         }

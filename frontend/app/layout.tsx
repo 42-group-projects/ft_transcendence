@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
+import { InviteToast } from './components/InviteToast';
 import { PresenceProvider } from './components/PresenceProvider';
 import './globals.css';
 
@@ -35,6 +36,7 @@ export default function RootLayout({
                     <Header />
                     {children}
                     <Footer />
+                    <InviteToast />
                 </PresenceProvider>
             </body>
         </html>

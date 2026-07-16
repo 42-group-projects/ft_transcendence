@@ -98,6 +98,7 @@ function createRoomRoundManager({
             endSession(room, {
                 reason: GAME_FINISH_REASON,
                 message: `${winner.name} is the winner!`,
+                payload: { winnerId: winner.userId },
             });
             return true;
         }
@@ -291,6 +292,7 @@ function createRoomRoundManager({
             });
             if (secondsRemaining === 0) {
                 room.roundInProgress = true;
+                room.roundStartedAt = new Date();
                 io.to(room.id).emit('roundStarted', { roomId: room.id });
                 io.to(room.id).emit('systemMessage', {
                     message: 'Round started! Last player on the plate wins.',
@@ -333,9 +335,10 @@ function createRoomRoundManager({
             });
             if (secondsRemaining === 0) {
                 room.roundInProgress = true;
+                room.roundStartedAt = new Date();
                 io.to(room.id).emit('roundStarted', { roomId: room.id });
                 io.to(room.id).emit('systemMessage', {
-                    message: `Solo — opponent: ${room.soloDifficulty}.`,
+                    message: `Solo \u2014 opponent: ${room.soloDifficulty}.`,
                 });
                 emitGameState(room);
                 return;

@@ -13,12 +13,14 @@ const sendRequestSchema = z
     .object({
         receiver_id: z.string().optional(),
         receiverId: z.string().optional(),
+        nickname: z.string().optional(),
     })
-    .refine((data) => data.receiver_id || data.receiverId, {
-        message: 'receiver_id is required',
+    .refine((data) => data.receiver_id || data.receiverId || data.nickname, {
+        message: 'receiver_id or nickname is required',
     })
     .transform((data) => ({
-        receiverId: (data.receiver_id ?? data.receiverId) as string,
+        receiverId: (data.receiver_id ?? data.receiverId) as string | undefined,
+        nickname: data.nickname,
     }));
 
 // --- Routes ---
@@ -43,10 +45,11 @@ friendsRoute.post(
     zValidator('json', sendRequestSchema),
     async (c) => {
         const userId = c.get('userId');
-        const { receiverId } = c.req.valid('json');
+        const { receiverId, nickname } = c.req.valid('json');
         const result = await friendService.sendFriendRequest(
             userId,
             receiverId,
+            nickname,
         );
         return c.json(result, 201);
     },
