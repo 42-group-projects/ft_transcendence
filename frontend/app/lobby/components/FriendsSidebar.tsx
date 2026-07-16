@@ -475,6 +475,7 @@ export function FriendsSidebar() {
                                                     }
                                                     disabled={
                                                         status === 'offline' ||
+                                                        status === 'in_game' ||
                                                         activeSessionOpponentId !==
                                                             null
                                                     }
