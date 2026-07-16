@@ -126,8 +126,29 @@ export default function GamePage() {
         joinRoom({ roomId, password, name: myNickname ?? '' });
     };
 
-    const showGameResult = sessionEndedReason === 'game_finished';
-    const resultTitle = roundResultMessage ?? 'Match finished';
+    const isSessionOver =
+        sessionEndedReason === 'game_finished' ||
+        sessionEndedReason === 'room_timeout' ||
+        sessionEndedReason === 'disconnect_timeout';
+
+    const resultTitle =
+        sessionEndedReason === 'room_timeout'
+            ? 'No opponent joined'
+            : sessionEndedReason === 'disconnect_timeout'
+              ? 'Opponent did not reconnect'
+              : (roundResultMessage ?? 'Match finished');
+    const resultDescription =
+        sessionEndedReason === 'game_finished'
+            ? systemMessage
+            : 'Returning to lobby…';
+
+    useEffect(() => {
+        if (!isSessionOver || sessionEndedReason === 'game_finished') return;
+        const t = setTimeout(() => {
+            window.location.href = '/lobby';
+        }, 4000);
+        return () => clearTimeout(t);
+    }, [isSessionOver, sessionEndedReason]);
 
     return (
         <main className="min-h-screen bg-neutral-950 text-neutral-100">
@@ -166,18 +187,6 @@ export default function GamePage() {
                     onLeaveRoom={leaveRoom}
                 />
 
-                {sessionEndedReason === 'room_timeout' && (
-                    <div className="flex items-center justify-between rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
-                        <span> Return to lobby?</span>
-                        <Link
-                            href="/lobby"
-                            className="ml-4 shrink-0 rounded border border-amber-500/40 px-3 py-1 text-xs font-medium text-amber-300 transition hover:bg-amber-500/20"
-                        >
-                            Back to Lobby
-                        </Link>
-                    </div>
-                )}
-
                 <div className="relative h-[72vh] overflow-hidden rounded-lg border border-neutral-700">
                     <Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
                         <FpsCounter setFps={setFps} />
@@ -197,10 +206,10 @@ export default function GamePage() {
                     {countdown && countdown > 0 ? (
                         <CountdownOverlay seconds={countdown} />
                     ) : null}
-                    {showGameResult ? (
+                    {isSessionOver ? (
                         <GameResultOverlay
                             title={resultTitle}
-                            description={systemMessage}
+                            description={resultDescription}
                         />
                     ) : null}
                 </div>

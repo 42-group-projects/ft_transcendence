@@ -223,9 +223,11 @@ function registerSocketHandlers(io, roomService) {
         });
 
         socket.on('reconnect', () => {
+            // Only signal expiry if the user had a session entry that is now gone.
+            const hadSession = !!roomService.getRoomIdForUser(userId);
             const result = roomService.reconnectPlayer(userId, socket.id);
             if (!result.ok || !result.room) {
-                socket.emit('sessionExpired');
+                if (hadSession) socket.emit('sessionExpired');
                 return;
             }
 
@@ -264,6 +266,15 @@ function registerSocketHandlers(io, roomService) {
                 socket.data.roomId ?? roomService.getRoomIdForUser(userId);
             if (!roomId) return;
 
+            // Snapshot remaining human players before the room is potentially destroyed
+            // so we can notify them their session ended.
+            const room = roomService.getRoom(roomId);
+            const otherHumanIds = room
+                ? [...room.players.values()]
+                      .filter((p) => !p.isCpu && p.userId !== userId)
+                      .map((p) => p.userId)
+                : [];
+
             const result = roomService.handleLeave(roomId, userId);
 
             socket.leave(roomId);
@@ -280,6 +291,14 @@ function registerSocketHandlers(io, roomService) {
                 io.to(roomId).emit('systemMessage', {
                     message: `${result.player.name} left.`,
                 });
+            }
+
+            if (result.removedRoom) {
+                // Room was destroyed — notify remaining players via their personal DM room
+                // so the lobby/sidebar can clear the active session indicator.
+                for (const otherId of otherHumanIds) {
+                    io.to(`dm_${otherId}`).emit('sessionEnded');
+                }
             }
 
             if (result.room) {

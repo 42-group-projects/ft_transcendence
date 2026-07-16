@@ -303,6 +303,7 @@ function createRoomService(io, presenceManager) {
                         playerSocket.emit('roomTimeout', {
                             message: 'Opponent did not join in time.',
                         });
+                        playerSocket.emit('sessionEnded');
                         playerSocket.leave(room.id);
                         playerSocket.data.roomId = null;
                     }
