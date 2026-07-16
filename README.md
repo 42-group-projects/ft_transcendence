@@ -60,13 +60,16 @@ SumoVerse is a browser-based 3D real-time multiplayer fighting game inspired by 
     POSTGRES_DB=sumoverse
     POSTGRES_USER=sumoverse
     POSTGRES_PASSWORD=<your-secure-password>
+    DATABASE_URL=postgresql://<user>:<password>@postgres:5432/<database>
 
     NODE_ENV=production
-    NEXT_PUBLIC_SOCKET_PORT=4000
-    SOCKET_PORT=4000
     API_PORT=4001
+    API_URL=http://localhost:4001/api
+
+    NEXT_PUBLIC_SOCKET_PORT=4000
     NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
     NEXT_PUBLIC_API_URL=http://localhost:4001/api
+
     ```
 
     See `.env.example` for additional required variables.

@@ -44,25 +44,18 @@ function registerSocketHandlers(io, roomService) {
             DASH_COOLDOWN_MS,
         });
 
-        const reconnectResult = roomService.reconnectPlayer(userId, socket.id);
-        if (reconnectResult.ok && reconnectResult.room) {
-            socket.join(reconnectResult.room.id);
-            socket.data.roomId = reconnectResult.room.id;
-
-            // 再接続でゲームに戻ったら「ゲーム中」にする
-            presenceManager.markUserInGame(userId);
-            io.to(`presence_${userId}`).emit('user_status_changed', {
-                userId,
-                status: 'in_game',
-            });
-
-            socket.emit('joinedRoom', {
-                roomId: reconnectResult.room.id,
-                playerId: reconnectResult.player.userId,
-            });
-            socket.emit('systemMessage', {
-                message: 'Reconnected to active session.',
-            });
+        // If the user has an active room session, notify the client so it can
+        // offer an explicit rejoin rather than auto-reconnecting.
+        if (userId) {
+            const activeRoom = roomService.getActiveRoomForUser(userId);
+            if (activeRoom) {
+                const opponentId =
+                    [...activeRoom.players.keys()].find(
+                        (id) =>
+                            id !== userId && !activeRoom.players.get(id).isCpu,
+                    ) ?? null;
+                socket.emit('hasActiveSession', { opponentId });
+            }
         }
 
         socket.on('createRoom', ({ password, name }) => {
@@ -230,8 +223,13 @@ function registerSocketHandlers(io, roomService) {
         });
 
         socket.on('reconnect', () => {
+            // Only signal expiry if the user had a session entry that is now gone.
+            const hadSession = !!roomService.getRoomIdForUser(userId);
             const result = roomService.reconnectPlayer(userId, socket.id);
-            if (!result.ok || !result.room) return;
+            if (!result.ok || !result.room) {
+                if (hadSession) socket.emit('sessionExpired');
+                return;
+            }
 
             socket.join(result.room.id);
             socket.data.roomId = result.room.id;
@@ -249,9 +247,33 @@ function registerSocketHandlers(io, roomService) {
             });
         });
 
+        socket.on('checkActiveSession', (callback) => {
+            if (typeof callback !== 'function') return;
+            const activeRoom = roomService.getActiveRoomForUser(userId);
+            if (!activeRoom) {
+                callback({ active: false, opponentId: null });
+                return;
+            }
+            const opponentId =
+                [...activeRoom.players.keys()].find(
+                    (id) => id !== userId && !activeRoom.players.get(id).isCpu,
+                ) ?? null;
+            callback({ active: true, opponentId });
+        });
+
         socket.on('leaveRoom', () => {
-            const roomId = socket.data.roomId;
+            const roomId =
+                socket.data.roomId ?? roomService.getRoomIdForUser(userId);
             if (!roomId) return;
+
+            // Snapshot remaining human players before the room is potentially destroyed
+            // so we can notify them their session ended.
+            const room = roomService.getRoom(roomId);
+            const otherHumanIds = room
+                ? [...room.players.values()]
+                      .filter((p) => !p.isCpu && p.userId !== userId)
+                      .map((p) => p.userId)
+                : [];
 
             const result = roomService.handleLeave(roomId, userId);
 
@@ -269,6 +291,14 @@ function registerSocketHandlers(io, roomService) {
                 io.to(roomId).emit('systemMessage', {
                     message: `${result.player.name} left.`,
                 });
+            }
+
+            if (result.removedRoom) {
+                // Room was destroyed — notify remaining players via their personal DM room
+                // so the lobby/sidebar can clear the active session indicator.
+                for (const otherId of otherHumanIds) {
+                    io.to(`dm_${otherId}`).emit('sessionEnded');
+                }
             }
 
             if (result.room) {

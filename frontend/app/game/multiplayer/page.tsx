@@ -7,6 +7,7 @@ import { Canvas } from '@react-three/fiber';
 
 import { GameResultOverlay } from '@/app/game/components/GameResultOverlay';
 import { CountdownOverlay } from '@/app/game/components/CountdownOverlay';
+import DashCooldownIndicator from '../components/DashCooldownIndicator';
 import { GameLobbyControls } from '../components/GameLobbyControls';
 import { WorldScene } from '../components/WorldScene';
 import { useGameSession } from '../hooks/useGameSession';
@@ -20,15 +21,13 @@ import { usePresenceSocket } from '@/app/components/PresenceProvider';
 import { apiGetMe } from '@/lib/api';
 
 export default function GamePage() {
-    const [name, setName] = useState('Player');
+    const [myNickname, setMyNickname] = useState<string | undefined>();
     const [roomId, setRoomId] = useState('');
     const [password, setPassword] = useState('');
     const [fps, setFps] = useState(0);
     const searchParams = useSearchParams();
     const autoJoinFiredRef = useRef(false);
 
-    // Invite-a-friend state
-    const [myNickname, setMyNickname] = useState<string | undefined>();
     const socket = usePresenceSocket();
 
     useEffect(() => {
@@ -68,24 +67,40 @@ export default function GamePage() {
 
     // Auto-join when arriving from an invite link (?join=roomId&pw=password)
     useEffect(() => {
-        if (autoJoinFiredRef.current || !connected || joinedRoomId) return;
+        if (
+            autoJoinFiredRef.current ||
+            !connected ||
+            joinedRoomId ||
+            !myNickname
+        )
+            return;
         const inviteRoomId = searchParams.get('join');
         const invitePassword = searchParams.get('pw');
         if (!inviteRoomId || !invitePassword) return;
         autoJoinFiredRef.current = true;
-        joinRoom({ roomId: inviteRoomId, password: invitePassword, name });
-    }, [connected, joinedRoomId, searchParams, name, joinRoom]);
+        joinRoom({
+            roomId: inviteRoomId,
+            password: invitePassword,
+            name: myNickname,
+        });
+    }, [connected, joinedRoomId, searchParams, myNickname, joinRoom]);
 
     // Auto-create room when arriving from a challenge link (?challenge=userId&pw=password)
     const challengeFiredRef = useRef(false);
     useEffect(() => {
-        if (challengeFiredRef.current || !connected || joinedRoomId) return;
+        if (
+            challengeFiredRef.current ||
+            !connected ||
+            joinedRoomId ||
+            !myNickname
+        )
+            return;
         const challengeTarget = searchParams.get('challenge');
         const challengePw = searchParams.get('pw');
         if (!challengeTarget || !challengePw) return;
         challengeFiredRef.current = true;
-        createRoom({ name, password: challengePw });
-    }, [connected, joinedRoomId, searchParams, name, createRoom]);
+        createRoom({ name: myNickname, password: challengePw });
+    }, [connected, joinedRoomId, searchParams, myNickname, createRoom]);
 
     // Once the room exists (created via challenge), send the invite
     const challengeInviteSentRef = useRef(false);
@@ -104,15 +119,36 @@ export default function GamePage() {
     }, [joinedRoomId, socket, searchParams, myNickname]);
 
     const handleCreateRoom = () => {
-        createRoom({ name, password });
+        createRoom({ name: myNickname ?? '', password });
     };
 
     const handleJoinRoom = () => {
-        joinRoom({ roomId, password, name });
+        joinRoom({ roomId, password, name: myNickname ?? '' });
     };
 
-    const showGameResult = sessionEndedReason === 'game_finished';
-    const resultTitle = roundResultMessage ?? 'Match finished';
+    const isSessionOver =
+        sessionEndedReason === 'game_finished' ||
+        sessionEndedReason === 'room_timeout' ||
+        sessionEndedReason === 'disconnect_timeout';
+
+    const resultTitle =
+        sessionEndedReason === 'room_timeout'
+            ? 'No opponent joined'
+            : sessionEndedReason === 'disconnect_timeout'
+              ? 'Opponent did not reconnect'
+              : (roundResultMessage ?? 'Match finished');
+    const resultDescription =
+        sessionEndedReason === 'game_finished'
+            ? systemMessage
+            : 'Returning to lobby…';
+
+    useEffect(() => {
+        if (!isSessionOver || sessionEndedReason === 'game_finished') return;
+        const t = setTimeout(() => {
+            window.location.href = '/lobby';
+        }, 4000);
+        return () => clearTimeout(t);
+    }, [isSessionOver, sessionEndedReason]);
 
     return (
         <main className="min-h-screen bg-neutral-950 text-neutral-100">
@@ -136,7 +172,6 @@ export default function GamePage() {
                 />
 
                 <GameLobbyControls
-                    name={name}
                     roomId={roomId}
                     password={password}
                     connected={connected}
@@ -145,25 +180,12 @@ export default function GamePage() {
                     errorMessage={errorMessage}
                     systemMessage={systemMessage}
                     roundResultMessage={roundResultMessage}
-                    onNameChange={setName}
                     onRoomIdChange={setRoomId}
                     onPasswordChange={setPassword}
                     onCreateRoom={handleCreateRoom}
                     onJoinRoom={handleJoinRoom}
                     onLeaveRoom={leaveRoom}
                 />
-
-                {sessionEndedReason === 'room_timeout' && (
-                    <div className="flex items-center justify-between rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
-                        <span> Return to lobby?</span>
-                        <Link
-                            href="/lobby"
-                            className="ml-4 shrink-0 rounded border border-amber-500/40 px-3 py-1 text-xs font-medium text-amber-300 transition hover:bg-amber-500/20"
-                        >
-                            Back to Lobby
-                        </Link>
-                    </div>
-                )}
 
                 <div className="relative h-[72vh] overflow-hidden rounded-lg border border-neutral-700">
                     <Canvas shadows camera={{ position: [0, 8, 10], fov: 55 }}>
@@ -172,20 +194,22 @@ export default function GamePage() {
                             players={players}
                             localPlayerId={localPlayerId}
                             gameConstants={gameConstants}
-                            dashCooldownMs={dashCooldownMs}
-                            dashCooldownTotalMs={dashCooldownTotalMs}
                             mawashiColor={mawashiColor}
                             dohyoTheme={dohyoTheme}
                         />
                     </Canvas>
                     <FrameRateDisplay fps={fps} />
+                    <DashCooldownIndicator
+                        dashCooldownMs={dashCooldownMs}
+                        dashCooldownTotalMs={dashCooldownTotalMs}
+                    />
                     {countdown && countdown > 0 ? (
                         <CountdownOverlay seconds={countdown} />
                     ) : null}
-                    {showGameResult ? (
+                    {isSessionOver ? (
                         <GameResultOverlay
                             title={resultTitle}
-                            description={systemMessage}
+                            description={resultDescription}
                         />
                     ) : null}
                 </div>

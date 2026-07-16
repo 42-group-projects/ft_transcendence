@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4001/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL!;
 
 // ── Types (mirrors the mock store / schema) ────────────────────────────────
 

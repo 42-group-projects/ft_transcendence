@@ -1,5 +1,4 @@
 type GameLobbyControlsProps = {
-    name: string;
     roomId: string;
     password: string;
     connected: boolean;
@@ -8,7 +7,6 @@ type GameLobbyControlsProps = {
     errorMessage: string | null;
     systemMessage: string | null;
     roundResultMessage: string | null;
-    onNameChange: (value: string) => void;
     onRoomIdChange: (value: string) => void;
     onPasswordChange: (value: string) => void;
     onCreateRoom: () => void;
@@ -17,7 +15,6 @@ type GameLobbyControlsProps = {
 };
 
 export function GameLobbyControls({
-    name,
     roomId,
     password,
     connected,
@@ -26,7 +23,6 @@ export function GameLobbyControls({
     errorMessage,
     systemMessage,
     roundResultMessage,
-    onNameChange,
     onRoomIdChange,
     onPasswordChange,
     onCreateRoom,
@@ -35,7 +31,7 @@ export function GameLobbyControls({
 }: GameLobbyControlsProps) {
     return (
         <>
-            <div className="grid gap-3 rounded-lg border border-neutral-700 bg-neutral-900 p-4 md:grid-cols-5">
+            {/* <div className="grid gap-3 rounded-lg border border-neutral-700 bg-neutral-900 p-4 md:grid-cols-5">
                 <input
                     className="rounded border border-neutral-600 bg-neutral-800 px-3 py-2 outline-none"
                     value={name}
@@ -71,7 +67,7 @@ export function GameLobbyControls({
                 >
                     Join room
                 </button>
-            </div>
+            </div> */}
 
             <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-300">
                 <span>Socket: {connected ? 'connected' : 'disconnected'}</span>

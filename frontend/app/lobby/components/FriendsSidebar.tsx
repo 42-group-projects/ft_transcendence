@@ -13,6 +13,7 @@ import {
 } from '@/lib/api';
 import { usePresence } from '../hooks/usePresence';
 import { useDmChat, type DmMessage } from '../hooks/useDmChat';
+import { usePresenceSocket } from '@/app/components/PresenceProvider';
 
 // ── Floating chat window ──────────────────────────────────────────────────
 
@@ -259,6 +260,55 @@ export function FriendsSidebar() {
         }
     };
 
+    const socket = usePresenceSocket();
+    const [activeSessionOpponentId, setActiveSessionOpponentId] = useState<
+        string | null
+    >(null);
+    const [sessionExpiredMsg, setSessionExpiredMsg] = useState(false);
+
+    const handleRejoin = () => {
+        socket?.emit(
+            'checkActiveSession',
+            ({ active }: { active: boolean; opponentId: string | null }) => {
+                if (active) {
+                    router.push('/game/multiplayer');
+                } else {
+                    setActiveSessionOpponentId(null);
+                    setSessionExpiredMsg(true);
+                    setTimeout(() => setSessionExpiredMsg(false), 4000);
+                }
+            },
+        );
+    };
+
+    useEffect(() => {
+        if (!socket) return;
+        // Listen for future notifications (e.g. after a socket reconnect)
+        const onActiveSession = ({
+            opponentId,
+        }: {
+            opponentId: string | null;
+        }) => setActiveSessionOpponentId(opponentId ?? 'unknown');
+        socket.on('hasActiveSession', onActiveSession);
+        // Query current state immediately — the connection event may have
+        // already fired before this component mounted.
+        socket.emit(
+            'checkActiveSession',
+            ({
+                active,
+                opponentId,
+            }: {
+                active: boolean;
+                opponentId: string | null;
+            }) => {
+                if (active) setActiveSessionOpponentId(opponentId ?? 'unknown');
+            },
+        );
+        return () => {
+            socket.off('hasActiveSession', onActiveSession);
+        };
+    }, [socket]);
+
     const handleChallenge = (friendId: string) => {
         const pw = Math.random().toString(36).slice(2, 10);
         router.push(
@@ -309,6 +359,11 @@ export function FriendsSidebar() {
                     </button>
                     {message && (
                         <p className="text-[10px] text-amber-400">{message}</p>
+                    )}
+                    {sessionExpiredMsg && (
+                        <p className="text-[10px] text-rose-400">
+                            Match has concluded — session expired.
+                        </p>
                     )}
                 </div>
 
@@ -400,19 +455,35 @@ export function FriendsSidebar() {
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
-                                            {/* Challenge button */}
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleChallenge(
-                                                        friend.userId,
-                                                    )
-                                                }
-                                                disabled={status === 'offline'}
-                                                className="rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-orange-400 hover:bg-orange-500/20 hover:text-orange-300 disabled:hover:bg-transparent"
-                                            >
-                                                Challenge
-                                            </button>
+                                            {/* Challenge / Rejoin button */}
+                                            {activeSessionOpponentId ===
+                                            friend.userId ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRejoin}
+                                                    className="rounded px-2 py-1 text-[10px] font-medium transition text-amber-400 hover:bg-amber-500/20 hover:text-amber-300"
+                                                >
+                                                    Rejoin
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleChallenge(
+                                                            friend.userId,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        status === 'offline' ||
+                                                        status === 'in_game' ||
+                                                        activeSessionOpponentId !==
+                                                            null
+                                                    }
+                                                    className="rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-orange-400 hover:bg-orange-500/20 hover:text-orange-300 disabled:hover:bg-transparent"
+                                                >
+                                                    Challenge
+                                                </button>
+                                            )}
                                             {/* Chat button */}
                                             <button
                                                 type="button"

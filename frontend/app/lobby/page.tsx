@@ -5,23 +5,24 @@ import { useEffect, useState } from 'react';
 
 import { FriendsSidebar } from '@/app/lobby/components/FriendsSidebar';
 import { apiGetMe, apiGetMyStats, type User, type UserStats } from '@/lib/api';
+import { usePresenceSocket } from '@/app/components/PresenceProvider';
 
 const roomLinks = [
     {
         href: '/game/solo',
-        title: 'Solo room',
+        title: 'Practice room',
         description: 'Practice movement, test AI levels, and warm up offline.',
         accentClassName:
             'border-blue-500/40 bg-blue-500/10 text-blue-100 hover:bg-blue-500/20',
     },
-    {
-        href: '/game/multiplayer',
-        title: 'Multiplayer room',
-        description:
-            'Join a shared room and test live matches with other players.',
-        accentClassName:
-            'border-orange-500/40 bg-orange-500/10 text-orange-100 hover:bg-orange-500/20',
-    },
+    // {
+    //     href: '/game/multiplayer',
+    //     title: 'Multiplayer room',
+    //     description:
+    //         'Join a shared room and test live matches with other players.',
+    //     accentClassName:
+    //         'border-orange-500/40 bg-orange-500/10 text-orange-100 hover:bg-orange-500/20',
+    // },
     {
         href: '/profile',
         title: 'Profile',
@@ -47,15 +48,61 @@ const roomLinks = [
 
 function getRankLabel(rating: number | undefined) {
     if (rating === undefined) return 'Rookie Wrestler';
-    if (rating >= 1800) return 'Yokozuna';
-    if (rating >= 1500) return 'Ozeki';
-    if (rating >= 1200) return 'Sekiwake';
+    if (rating >= 1500) return 'Yokozuna';
+    if (rating >= 1250) return 'Ozeki';
+    if (rating >= 1050) return 'Sekiwake';
     return 'Rookie Wrestler';
 }
 
 export default function LobbyPage() {
     const [user, setUser] = useState<User | null>(null);
     const [stats, setStats] = useState<UserStats | null>(null);
+    const [hasActiveSession, setHasActiveSession] = useState(false);
+
+    const socket = usePresenceSocket();
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const onActive = () => setHasActiveSession(true);
+        const onEnded = () => setHasActiveSession(false);
+
+        socket.on('hasActiveSession', onActive);
+        socket.on('sessionEnded', onEnded);
+        socket.on('roomTimeout', onEnded);
+
+        socket.emit(
+            'checkActiveSession',
+            ({ active }: { active: boolean; opponentId: string | null }) => {
+                setHasActiveSession(active);
+            },
+        );
+
+        // Re-check on tab focus as a safety net for timeouts that fired
+        // while the user was away.
+        const onVisible = () => {
+            if (document.visibilityState !== 'visible') return;
+            socket.emit(
+                'checkActiveSession',
+                ({
+                    active,
+                }: {
+                    active: boolean;
+                    opponentId: string | null;
+                }) => {
+                    setHasActiveSession(active);
+                },
+            );
+        };
+        document.addEventListener('visibilitychange', onVisible);
+
+        return () => {
+            socket.off('hasActiveSession', onActive);
+            socket.off('sessionEnded', onEnded);
+            socket.off('roomTimeout', onEnded);
+            document.removeEventListener('visibilitychange', onVisible);
+        };
+    }, [socket]);
 
     useEffect(() => {
         let cancelled = false;
@@ -122,20 +169,39 @@ export default function LobbyPage() {
 
                     <div className="relative z-10 flex h-full flex-col p-4 sm:p-6 md:pr-80">
                         <div className="flex flex-wrap gap-2 lg:gap-3">
-                            {roomLinks.map((room) => (
-                                <Link
-                                    key={room.href}
-                                    href={room.href}
-                                    className={`w-full min-w-0 rounded-xl border px-3 py-3 text-left backdrop-blur-sm transition sm:w-[calc(50%-0.25rem)] lg:w-[calc(20%-0.6rem)] ${room.accentClassName}`}
-                                >
-                                    <span className="block text-sm font-semibold">
-                                        {room.title}
-                                    </span>
-                                    <span className="mt-1 block text-xs text-neutral-300">
-                                        {room.description}
-                                    </span>
-                                </Link>
-                            ))}
+                            {roomLinks.map((room) => {
+                                const isSolo = room.href === '/game/solo';
+                                const disabled = isSolo && hasActiveSession;
+                                return disabled ? (
+                                    <div
+                                        key={room.href}
+                                        title="You are already in an active match"
+                                        className={`w-full min-w-0 cursor-not-allowed rounded-xl border px-3 py-3 text-left opacity-40 sm:w-[calc(50%-0.25rem)] lg:w-[calc(20%-0.6rem)] ${room.accentClassName}`}
+                                    >
+                                        <span className="block text-sm font-semibold">
+                                            {room.title}
+                                        </span>
+                                        <span className="mt-1 block text-xs text-neutral-300">
+                                            You're in an active match.join your
+                                            match or refresh to see if the game
+                                            ended.
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        key={room.href}
+                                        href={room.href}
+                                        className={`w-full min-w-0 rounded-xl border px-3 py-3 text-left backdrop-blur-sm transition sm:w-[calc(50%-0.25rem)] lg:w-[calc(20%-0.6rem)] ${room.accentClassName}`}
+                                    >
+                                        <span className="block text-sm font-semibold">
+                                            {room.title}
+                                        </span>
+                                        <span className="mt-1 block text-xs text-neutral-300">
+                                            {room.description}
+                                        </span>
+                                    </Link>
+                                );
+                            })}
                         </div>
 
                         <div className="flex flex-1 items-start justify-center py-6 md:items-center md:py-8">

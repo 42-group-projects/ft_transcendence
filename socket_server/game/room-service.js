@@ -148,6 +148,17 @@ function createRoomService(io, presenceManager) {
         return player;
     }
 
+    function getRoomIdForUser(userId) {
+        const session = userSessions.get(userId);
+        return session ? session.roomId : null;
+    }
+
+    function getActiveRoomForUser(userId) {
+        const session = userSessions.get(userId);
+        if (!session) return null;
+        return rooms.get(session.roomId) || null;
+    }
+
     function handleLeave(roomId, userId) {
         const room = rooms.get(roomId);
         if (!room) {
@@ -292,6 +303,7 @@ function createRoomService(io, presenceManager) {
                         playerSocket.emit('roomTimeout', {
                             message: 'Opponent did not join in time.',
                         });
+                        playerSocket.emit('sessionEnded');
                         playerSocket.leave(room.id);
                         playerSocket.data.roomId = null;
                     }
@@ -481,6 +493,8 @@ function createRoomService(io, presenceManager) {
         handleLeave,
         handleDisconnect: sessionManager.handleDisconnect,
         reconnectPlayer: sessionManager.reconnectPlayer,
+        getRoomIdForUser,
+        getActiveRoomForUser,
         isRoomPasswordValid,
         isRoomFull,
         isRoundInProgress,
