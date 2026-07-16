@@ -14,8 +14,6 @@ export default function DashCooldownIndicator({
         Math.min(1, 1 - dashCooldownMs / dashCooldownTotalMs),
     );
 
-    console.log('dashCooldownMs:' + dashCooldownMs);
-    console.log('total:' + dashCooldownTotalMs);
     return (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
             <div className="text-xs text-white bg-black/40 px-2 py-1 rounded font-mono select-none">

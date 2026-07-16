@@ -9,19 +9,19 @@ import { apiGetMe, apiGetMyStats, type User, type UserStats } from '@/lib/api';
 const roomLinks = [
     {
         href: '/game/solo',
-        title: 'Solo room',
+        title: 'Practice room',
         description: 'Practice movement, test AI levels, and warm up offline.',
         accentClassName:
             'border-blue-500/40 bg-blue-500/10 text-blue-100 hover:bg-blue-500/20',
     },
-    {
-        href: '/game/multiplayer',
-        title: 'Multiplayer room',
-        description:
-            'Join a shared room and test live matches with other players.',
-        accentClassName:
-            'border-orange-500/40 bg-orange-500/10 text-orange-100 hover:bg-orange-500/20',
-    },
+    // {
+    //     href: '/game/multiplayer',
+    //     title: 'Multiplayer room',
+    //     description:
+    //         'Join a shared room and test live matches with other players.',
+    //     accentClassName:
+    //         'border-orange-500/40 bg-orange-500/10 text-orange-100 hover:bg-orange-500/20',
+    // },
     {
         href: '/profile',
         title: 'Profile',
@@ -47,9 +47,9 @@ const roomLinks = [
 
 function getRankLabel(rating: number | undefined) {
     if (rating === undefined) return 'Rookie Wrestler';
-    if (rating >= 1800) return 'Yokozuna';
-    if (rating >= 1500) return 'Ozeki';
-    if (rating >= 1200) return 'Sekiwake';
+    if (rating >= 1500) return 'Yokozuna';
+    if (rating >= 1250) return 'Ozeki';
+    if (rating >= 1050) return 'Sekiwake';
     return 'Rookie Wrestler';
 }
 
