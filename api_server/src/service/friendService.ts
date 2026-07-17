@@ -154,10 +154,11 @@ export const friendService = {
     getFriendList: async (userId: string) => {
         const { db, close } = createDbClient();
         try {
-            const friends = await friendRepository.getFriendsWithProfilesByUserId(
-                db,
-                userId,
-            );
+            const friends =
+                await friendRepository.getFriendsWithProfilesByUserId(
+                    db,
+                    userId,
+                );
             return friends.map((f) => ({
                 userId: f.userId,
                 nickname: f.nickname,

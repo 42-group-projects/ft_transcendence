@@ -51,10 +51,14 @@ const app = new Hono()
     .use('/friends', authMiddleware)
     .route('/friends', friendsRoute)
     // Public / Internal uploads route
-    .use('/uploads/*', serveStatic({
-        root: './',
-        rewriteRequestPath: (path) => path.replace(/^\/api\/uploads/, '/uploads'),
-    }))
+    .use(
+        '/uploads/*',
+        serveStatic({
+            root: './',
+            rewriteRequestPath: (path) =>
+                path.replace(/^\/api\/uploads/, '/uploads'),
+        }),
+    )
     // Internal / tooling
     .use('/analysis/*', authMiddleware)
     .use('/analysis', authMiddleware)

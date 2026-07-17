@@ -385,13 +385,19 @@ export function FriendsSidebar() {
                                             alt={user.nickname}
                                             className="h-6 w-6 rounded-full border border-neutral-800 object-cover"
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src = getAvatarUrl(null);
+                                                (
+                                                    e.target as HTMLImageElement
+                                                ).src = getAvatarUrl(null);
                                             }}
                                         />
-                                        <span className="text-xs text-neutral-200 truncate">{user.nickname}</span>
+                                        <span className="text-xs text-neutral-200 truncate">
+                                            {user.nickname}
+                                        </span>
                                     </div>
                                     <button
-                                        onClick={() => handleSendRequest(user.id)}
+                                        onClick={() =>
+                                            handleSendRequest(user.id)
+                                        }
                                         className="rounded bg-emerald-600/80 hover:bg-emerald-500 px-2 py-1 text-[10px] font-semibold text-white transition"
                                     >
                                         Add
@@ -428,11 +434,14 @@ export function FriendsSidebar() {
                                             alt={req.senderNickname || 'User'}
                                             className="h-6 w-6 rounded-full border border-neutral-700 object-cover"
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src = getAvatarUrl(null);
+                                                (
+                                                    e.target as HTMLImageElement
+                                                ).src = getAvatarUrl(null);
                                             }}
                                         />
                                         <span className="text-xs font-medium text-neutral-200 truncate">
-                                            {req.senderNickname || req.senderId.substring(0, 8)}
+                                            {req.senderNickname ||
+                                                req.senderId.substring(0, 8)}
                                         </span>
                                     </div>
                                     <div className="flex gap-2">
@@ -490,28 +499,39 @@ export function FriendsSidebar() {
                                 >
                                     <div className="flex items-center justify-between px-3 py-2">
                                         <div className="flex items-center gap-2 truncate pr-2">
-                                        <img
-                                            src={avatarUrl}
-                                            alt={friend.nickname || 'Friend'}
-                                            className="h-8 w-8 rounded-full border border-neutral-700 object-cover"
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).src = getAvatarUrl(null);
-                                            }}
-                                        />
-                                        <div className="flex flex-col truncate">
-                                            <span
-                                                className="text-sm text-neutral-100 truncate"
-                                                title={friend.nickname || friend.userId}
-                                            >
-                                                {friend.nickname || friend.userId.substring(0, 8)}
-                                            </span>
-                                            <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
+                                            <img
+                                                src={avatarUrl}
+                                                alt={
+                                                    friend.nickname || 'Friend'
+                                                }
+                                                className="h-8 w-8 rounded-full border border-neutral-700 object-cover"
+                                                onError={(e) => {
+                                                    (
+                                                        e.target as HTMLImageElement
+                                                    ).src = getAvatarUrl(null);
+                                                }}
+                                            />
+                                            <div className="flex flex-col truncate">
                                                 <span
-                                                    className={`h-1.5 w-1.5 rounded-full ${statusColor}`}
-                                                />
-                                                {status.replace('_', ' ')}
-                                            </span>
-                                        </div>
+                                                    className="text-sm text-neutral-100 truncate"
+                                                    title={
+                                                        friend.nickname ||
+                                                        friend.userId
+                                                    }
+                                                >
+                                                    {friend.nickname ||
+                                                        friend.userId.substring(
+                                                            0,
+                                                            8,
+                                                        )}
+                                                </span>
+                                                <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
+                                                    <span
+                                                        className={`h-1.5 w-1.5 rounded-full ${statusColor}`}
+                                                    />
+                                                    {status.replace('_', ' ')}
+                                                </span>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-1.5">
                                             {/* Challenge / Rejoin button */}

@@ -88,7 +88,11 @@ usersRoutes.get('/me/stats', async (c) => {
 // GET /users/search — search users by nickname
 usersRoutes.get('/search', async (c) => {
     const nickname = c.req.query('nickname');
-    if (!nickname || typeof nickname !== 'string' || nickname.trim().length === 0) {
+    if (
+        !nickname ||
+        typeof nickname !== 'string' ||
+        nickname.trim().length === 0
+    ) {
         return c.json({ users: [] });
     }
     const { db, close } = createDbClient();
@@ -103,16 +107,16 @@ usersRoutes.get('/search', async (c) => {
             .where(
                 and(
                     sql`lower(${users.nickname}) like ${'%' + nickname.toLowerCase() + '%'}`,
-                    sql`${users.id} <> ${c.get('userId')}`
-                )
+                    sql`${users.id} <> ${c.get('userId')}`,
+                ),
             )
             .limit(10);
         return c.json({
-            users: foundUsers.map(u => ({
+            users: foundUsers.map((u) => ({
                 id: u.id,
                 nickname: u.nickname,
-                avatar_url: u.avatarUrl ?? '/api/uploads/default-avatar.svg'
-            }))
+                avatar_url: u.avatarUrl ?? '/api/uploads/default-avatar.svg',
+            })),
         });
     } finally {
         await close();
@@ -134,10 +138,22 @@ usersRoutes.post('/me/avatar', async (c) => {
         return c.json({ error: 'File size exceeds 5MB limit' }, 400);
     }
 
-    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'];
+    const allowedExtensions = [
+        '.png',
+        '.jpg',
+        '.jpeg',
+        '.gif',
+        '.webp',
+        '.svg',
+    ];
     const fileExt = extname(file.name).toLowerCase();
     if (!allowedExtensions.includes(fileExt)) {
-        return c.json({ error: 'Invalid file type. Allowed types: png, jpg, jpeg, gif, webp, svg' }, 400);
+        return c.json(
+            {
+                error: 'Invalid file type. Allowed types: png, jpg, jpeg, gif, webp, svg',
+            },
+            400,
+        );
     }
 
     const uploadsDir = join(process.cwd(), 'uploads');
@@ -150,7 +166,9 @@ usersRoutes.post('/me/avatar', async (c) => {
     await fs.writeFile(filePath, Buffer.from(arrayBuffer));
 
     const avatarUrl = `/api/uploads/${uniqueFilename}`;
-    const updated = await userService.updateMe(userId, { avatar_url: avatarUrl });
+    const updated = await userService.updateMe(userId, {
+        avatar_url: avatarUrl,
+    });
 
     return c.json({ user: toPublicUser(updated) });
 });

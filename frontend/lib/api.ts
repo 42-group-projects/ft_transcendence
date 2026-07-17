@@ -204,12 +204,18 @@ export async function apiRemoveFriend(friendId: string) {
 }
 
 // ユーザー検索
-export async function apiSearchUsers(nickname: string): Promise<{ users: any[] }> {
-    return apiFetch<{ users: any[] }>(`/users/search?nickname=${encodeURIComponent(nickname)}`);
+export async function apiSearchUsers(
+    nickname: string,
+): Promise<{ users: any[] }> {
+    return apiFetch<{ users: any[] }>(
+        `/users/search?nickname=${encodeURIComponent(nickname)}`,
+    );
 }
 
 // プロフィール更新 (ニックネーム)
-export async function apiUpdateProfile(nickname: string): Promise<{ user: User }> {
+export async function apiUpdateProfile(
+    nickname: string,
+): Promise<{ user: User }> {
     return apiFetch<{ user: User }>('/users/me', {
         method: 'PATCH',
         body: JSON.stringify({ nickname }),
@@ -263,7 +269,11 @@ export function getAvatarUrl(url: string | null | undefined): string {
     if (!url) {
         return `${apiBase}/api/uploads/default-avatar.svg`;
     }
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    if (
+        url.startsWith('http://') ||
+        url.startsWith('https://') ||
+        url.startsWith('data:')
+    ) {
         return url;
     }
     const cleanUrl = url.startsWith('/') ? url : `/${url}`;
