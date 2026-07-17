@@ -385,7 +385,7 @@ export function FriendsSidebar() {
                                             alt={user.nickname}
                                             className="h-6 w-6 rounded-full border border-neutral-800 object-cover"
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src = '/api/uploads/default-avatar.svg';
+                                                (e.target as HTMLImageElement).src = getAvatarUrl(null);
                                             }}
                                         />
                                         <span className="text-xs text-neutral-200 truncate">{user.nickname}</span>
@@ -428,7 +428,7 @@ export function FriendsSidebar() {
                                             alt={req.senderNickname || 'User'}
                                             className="h-6 w-6 rounded-full border border-neutral-700 object-cover"
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src = '/api/uploads/default-avatar.svg';
+                                                (e.target as HTMLImageElement).src = getAvatarUrl(null);
                                             }}
                                         />
                                         <span className="text-xs font-medium text-neutral-200 truncate">
@@ -495,7 +495,7 @@ export function FriendsSidebar() {
                                             alt={friend.nickname || 'Friend'}
                                             className="h-8 w-8 rounded-full border border-neutral-700 object-cover"
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src = '/api/uploads/default-avatar.svg';
+                                                (e.target as HTMLImageElement).src = getAvatarUrl(null);
                                             }}
                                         />
                                         <div className="flex flex-col truncate">

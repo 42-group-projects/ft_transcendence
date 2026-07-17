@@ -102,7 +102,7 @@ async function apiFetch<T>(
 
     const cleanBaseUrl = baseUrl.replace(/\/$/, '');
     const url = `${cleanBaseUrl}${path}`;
-    const res = await fetch(url, { ...options, headers });
+    const res = await fetch(url, { cache: 'no-store', ...options, headers });
 
     const text = await res.text();
     let data;
@@ -253,14 +253,21 @@ export async function apiUploadAvatar(file: File): Promise<{ user: User }> {
 
 // アバターURLの解決 (相対パスの場合にAPIベースURLを付与)
 export function getAvatarUrl(url: string | null | undefined): string {
+    let apiBase = 'http://localhost:4001';
+    try {
+        apiBase = new URL(API_BASE).origin;
+    } catch {
+        apiBase = API_BASE.replace(/\/api\/?$/, '');
+    }
+
     if (!url) {
-        return '/api/uploads/default-avatar.svg';
+        return `${apiBase}/api/uploads/default-avatar.svg`;
     }
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
         return url;
     }
-    const apiBase = API_BASE.replace(/\/api$/, '');
-    return `${apiBase}${url}`;
+    const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+    return `${apiBase}${cleanUrl}`;
 }
 
 // ── Match history / ranking endpoints ────────────────────────────────────

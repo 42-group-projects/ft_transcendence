@@ -211,7 +211,7 @@ export default function LobbyPage() {
                                     alt={`${displayName} avatar`}
                                     className="mx-auto h-28 w-28 rounded-full border-4 border-neutral-700 bg-neutral-900 object-cover shadow-lg shadow-black/30 sm:h-32 sm:w-32"
                                     onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '/api/uploads/default-avatar.svg';
+                                        (e.target as HTMLImageElement).src = getAvatarUrl(null);
                                     }}
                                 />
                                 <p className="mt-6 text-sm uppercase tracking-[0.3em] text-neutral-500">

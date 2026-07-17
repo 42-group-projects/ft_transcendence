@@ -157,7 +157,7 @@ export default function ProfilePage() {
                                                 alt={`${user.nickname} avatar`}
                                                 className="h-24 w-24 rounded-full border-2 border-emerald-500 bg-neutral-900 object-cover shadow-lg"
                                                 onError={(e) => {
-                                                    (e.target as HTMLImageElement).src = '/api/uploads/default-avatar.svg';
+                                                    (e.target as HTMLImageElement).src = getAvatarUrl(null);
                                                 }}
                                             />
                                             <label
@@ -231,7 +231,7 @@ export default function ProfilePage() {
                                             alt={`${user.nickname} avatar`}
                                             className="h-24 w-24 rounded-full border-2 border-neutral-800 bg-neutral-900 object-cover shadow-md"
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src = '/api/uploads/default-avatar.svg';
+                                                (e.target as HTMLImageElement).src = getAvatarUrl(null);
                                             }}
                                         />
                                         <div>

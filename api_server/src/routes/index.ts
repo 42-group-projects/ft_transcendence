@@ -10,6 +10,7 @@ import { authMiddleware } from '../middleware/auth';
 import { promises as fs } from 'fs';
 import { join, basename } from 'path';
 import { internalAuthMiddleware } from '../middleware/internalAuth';
+import { serveStatic } from '@hono/node-server/serve-static';
 
 const defaultAvatarSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
@@ -50,25 +51,10 @@ const app = new Hono()
     .use('/friends', authMiddleware)
     .route('/friends', friendsRoute)
     // Public / Internal uploads route
-    .get('/uploads/:filename', async (c) => {
-        const filename = basename(c.req.param('filename'));
-        const filePath = join(process.cwd(), 'uploads', filename);
-        try {
-            const fileContent = await fs.readFile(filePath);
-            let contentType = 'application/octet-stream';
-            if (filename.endsWith('.png')) contentType = 'image/png';
-            else if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) contentType = 'image/jpeg';
-            else if (filename.endsWith('.gif')) contentType = 'image/gif';
-            else if (filename.endsWith('.svg')) contentType = 'image/svg+xml';
-            else if (filename.endsWith('.webp')) contentType = 'image/webp';
-            
-            return c.body(fileContent, 200, {
-                'Content-Type': contentType,
-            });
-        } catch (e) {
-            return c.text('Not Found', 404);
-        }
-    })
+    .use('/uploads/*', serveStatic({
+        root: './',
+        rewriteRequestPath: (path) => path.replace(/^\/api\/uploads/, '/uploads'),
+    }))
     // Internal / tooling
     .use('/analysis/*', authMiddleware)
     .use('/analysis', authMiddleware)
