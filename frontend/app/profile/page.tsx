@@ -8,6 +8,7 @@ import {
     apiUpdateProfile,
     apiUploadAvatar,
     getAvatarUrl,
+    getFriendlyErrorMessage,
     type User,
     type UserStats,
 } from '@/lib/api';
@@ -92,9 +93,9 @@ export default function ProfilePage() {
             setAvatarFile(null);
             setAvatarPreview(null);
         } catch (err) {
-            setError(
-                err instanceof Error ? err.message : 'Failed to update profile',
-            );
+            const rawMessage =
+                err instanceof Error ? err.message : 'Failed to update profile';
+            setError(getFriendlyErrorMessage(rawMessage));
         } finally {
             setSaving(false);
         }

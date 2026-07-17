@@ -280,6 +280,24 @@ export function getAvatarUrl(url: string | null | undefined): string {
     return `${apiBase}${cleanUrl}`;
 }
 
+// Helper function to translate raw backend error codes to user-friendly English messages
+export function getFriendlyErrorMessage(message: string): string {
+    const errorMap: Record<string, string> = {
+        AUTH_INVALID_CREDENTIALS: 'Invalid email or password.',
+        AUTH_NICKNAME_EXISTS: 'This nickname is already taken.',
+        AUTH_EMAIL_EXISTS: 'This email is already registered.',
+        SOCIAL_SELF_REQUEST: 'You cannot add yourself as a friend.',
+        SOCIAL_ALREADY_FRIENDS: 'You are already friends with this user.',
+        SOCIAL_REQUEST_EXISTS:
+            'A friend request is already pending for this user.',
+        NOT_FOUND: 'User not found.',
+        UNPROCESSABLE: 'Invalid input. Please check the requirements.',
+        INTERNAL_ERROR:
+            'An internal server error occurred. Please try again later.',
+    };
+    return errorMap[message] ?? message;
+}
+
 // ── Match history / ranking endpoints ────────────────────────────────────
 
 export async function apiGetMyMatches(
