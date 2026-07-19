@@ -188,22 +188,23 @@ export default function ProfilePage() {
                                             <label className="block text-sm font-medium text-neutral-300">
                                                 Profile Picture
                                             </label>
-<input
-    id="avatar-upload"
-    type="file"
-    accept="image/png,image/jpeg,image/gif,image/webp"
-    onChange={handleFileChange}
-    className="hidden"
-/>
-<label
-    htmlFor="avatar-upload"
-    className="inline-block rounded-lg border border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 px-3 py-1.5 text-xs text-neutral-300 cursor-pointer transition"
->
-    Choose Image file
-</label>
-<p className="text-[10px] text-neutral-500">
-    Supports PNG, JPG, JPEG, GIF, WebP. Max 5MB.
-</p>
+                                            <input
+                                                id="avatar-upload"
+                                                type="file"
+                                                accept="image/png,image/jpeg,image/gif,image/webp"
+                                                onChange={handleFileChange}
+                                                className="hidden"
+                                            />
+                                            <label
+                                                htmlFor="avatar-upload"
+                                                className="inline-block rounded-lg border border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 px-3 py-1.5 text-xs text-neutral-300 cursor-pointer transition"
+                                            >
+                                                Choose Image file
+                                            </label>
+                                            <p className="text-[10px] text-neutral-500">
+                                                Supports PNG, JPG, JPEG, GIF,
+                                                WebP. Max 5MB.
+                                            </p>
                                         </div>
                                     </div>
 
