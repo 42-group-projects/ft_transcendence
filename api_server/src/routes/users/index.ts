@@ -138,16 +138,15 @@ usersRoutes.post('/me/avatar', async (c) => {
         return c.json({ error: 'File size exceeds 5MB limit' }, 400);
     }
 
-const allowedExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
-const fileExt = extname(file.name).toLowerCase();
-if (!allowedExtensions.includes(fileExt)) {
-    return c.json(
-        {
-            error: 'Invalid file type. Allowed types: png, jpg, jpeg, gif, webp',
-        },
-        400,
-    );
-}
+    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
+    const fileExt = extname(file.name).toLowerCase();
+    if (!allowedExtensions.includes(fileExt)) {
+        return c.json(
+            {
+                error: 'Invalid file type. Allowed types: png, jpg, jpeg, gif, webp',
+            },
+            400,
+        );
     }
 
     const uploadsDir = join(process.cwd(), 'uploads');

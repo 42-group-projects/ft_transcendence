@@ -394,18 +394,26 @@ export function FriendsSidebar() {
                                             {user.nickname}
                                         </span>
                                     </div>
-<button
-    onClick={() => handleSendRequest(user.nickname)}
-    className="rounded bg-emerald-600/80 hover:bg-emerald-500 px-2 py-1 text-[10px] font-semibold text-white transition"
->
+                                    <button
+                                        onClick={() =>
+                                            handleSendRequest(user.nickname)
+                                        }
+                                        className="rounded bg-emerald-600/80 hover:bg-emerald-500 px-2 py-1 text-[10px] font-semibold text-white transition"
                                     >
                                         Add
                                     </button>
                                 </li>
                             ))}
+                            {message && (
+                                <li className="border-t border-neutral-800/60 p-1.5 text-center">
+                                    <span className="text-[10px] text-amber-400 font-medium">
+                                        {message}
+                                    </span>
+                                </li>
+                            )}
                         </ul>
                     )}
-                    {message && (
+                    {searchResults.length === 0 && message && (
                         <p className="text-[10px] text-amber-400">{message}</p>
                     )}
                     {sessionExpiredMsg && (
