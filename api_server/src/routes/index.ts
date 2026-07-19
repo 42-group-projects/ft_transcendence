@@ -10,6 +10,7 @@ import { authMiddleware } from '../middleware/auth';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { serveStatic } from '@hono/node-server/serve-static';
+import { internalAuthMiddleware } from '../middleware/internalAuth';
 
 const defaultAvatarSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
