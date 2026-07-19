@@ -55,14 +55,22 @@ export default function ProfilePage() {
         loadProfile();
     }, []);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setAvatarFile(file);
-            const previewUrl = URL.createObjectURL(file);
-            setAvatarPreview(previewUrl);
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+        setAvatarFile(file);
+        const previewUrl = URL.createObjectURL(file);
+        setAvatarPreview(previewUrl);
+    }
+};
+
+useEffect(() => {
+    return () => {
+        if (avatarPreview) {
+            URL.revokeObjectURL(avatarPreview);
         }
     };
+}, [avatarPreview]);
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
