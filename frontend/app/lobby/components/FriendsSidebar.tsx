@@ -212,31 +212,31 @@ export function FriendsSidebar() {
     }, []);
 
     // リアルタイムニックネーム検索デバウンス
-useEffect(() => {
-    if (!searchQuery.trim()) {
-        setSearchResults([]);
-        return;
-    }
-
-    let cancelled = false;
-    const delayDebounce = setTimeout(async () => {
-        try {
-            const res = await apiSearchUsers(searchQuery);
-            if (!cancelled) {
-                setSearchResults(res.users || []);
-            }
-        } catch (err) {
-            if (!cancelled) {
-                console.error('Search failed:', err);
-            }
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setSearchResults([]);
+            return;
         }
-    }, 300);
 
-    return () => {
-        cancelled = true;
-        clearTimeout(delayDebounce);
-    };
-}, [searchQuery]);
+        let cancelled = false;
+        const delayDebounce = setTimeout(async () => {
+            try {
+                const res = await apiSearchUsers(searchQuery);
+                if (!cancelled) {
+                    setSearchResults(res.users || []);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    console.error('Search failed:', err);
+                }
+            }
+        }, 300);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(delayDebounce);
+        };
+    }, [searchQuery]);
 
     const onlineCount = useMemo(() => {
         return friends.filter(
