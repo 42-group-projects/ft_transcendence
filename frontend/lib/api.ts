@@ -173,7 +173,10 @@ export async function apiGetFriendRequests(): Promise<any[]> {
 
 // フレンド申請を送信 (IDまたはニックネームで自動判定して送信)
 export async function apiSendFriendRequest(target: string) {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(target);
+    const isUuid =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            target,
+        );
     const body = isUuid ? { receiver_id: target } : { nickname: target };
     return apiFetch('/friends/requests', {
         method: 'POST',
