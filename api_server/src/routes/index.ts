@@ -8,8 +8,7 @@ import { usersRoutes } from './users/index';
 import { internalRoutes } from './internal/index';
 import { authMiddleware } from '../middleware/auth';
 import { promises as fs } from 'fs';
-import { join, basename } from 'path';
-import { internalAuthMiddleware } from '../middleware/internalAuth';
+import { join } from 'path';
 import { serveStatic } from '@hono/node-server/serve-static';
 
 const defaultAvatarSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
