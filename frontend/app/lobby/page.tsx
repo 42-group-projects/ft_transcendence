@@ -4,7 +4,13 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { FriendsSidebar } from '@/app/lobby/components/FriendsSidebar';
-import { apiGetMe, apiGetMyStats, type User, type UserStats } from '@/lib/api';
+import {
+    apiGetMe,
+    apiGetMyStats,
+    getAvatarUrl,
+    type User,
+    type UserStats,
+} from '@/lib/api';
 import { usePresenceSocket } from '@/app/components/PresenceProvider';
 
 const roomLinks = [
@@ -206,17 +212,15 @@ export default function LobbyPage() {
 
                         <div className="flex flex-1 items-start justify-center py-6 md:items-center md:py-8">
                             <div className="w-full max-w-xs rounded-[2rem] border border-neutral-700/80 bg-neutral-950/80 p-6 text-center shadow-2xl shadow-black/40 backdrop-blur-md sm:max-w-sm sm:p-8">
-                                {user?.avatar_url ? (
-                                    <img
-                                        src={user.avatar_url}
-                                        alt={`${displayName} avatar`}
-                                        className="mx-auto h-28 w-28 rounded-full border-4 border-neutral-700 bg-neutral-900 object-cover shadow-lg shadow-black/30 sm:h-32 sm:w-32"
-                                    />
-                                ) : (
-                                    <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border-4 border-neutral-700 bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900 text-4xl font-semibold tracking-wide text-white shadow-lg shadow-black/30 sm:h-32 sm:w-32">
-                                        {avatarInitials}
-                                    </div>
-                                )}
+                                <img
+                                    src={getAvatarUrl(user?.avatar_url)}
+                                    alt={`${displayName} avatar`}
+                                    className="mx-auto h-28 w-28 rounded-full border-4 border-neutral-700 bg-neutral-900 object-cover shadow-lg shadow-black/30 sm:h-32 sm:w-32"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src =
+                                            getAvatarUrl(null);
+                                    }}
+                                />
                                 <p className="mt-6 text-sm uppercase tracking-[0.3em] text-neutral-500">
                                     Current avatar
                                 </p>

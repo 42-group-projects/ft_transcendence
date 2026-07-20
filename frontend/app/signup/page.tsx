@@ -4,7 +4,7 @@ import { AuthCard } from '@/app/components/AuthCard';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
-import { apiSignup, saveToken } from '@/lib/api';
+import { apiSignup, saveToken, getFriendlyErrorMessage } from '@/lib/api';
 
 export default function SignupPage() {
     const [displayName, setDisplayName] = useState('');
@@ -34,9 +34,9 @@ export default function SignupPage() {
             saveToken(access_token);
             router.push('/lobby');
         } catch (err) {
-            setStatusMessage(
-                err instanceof Error ? err.message : 'Signup failed',
-            );
+            const rawMessage =
+                err instanceof Error ? err.message : 'Signup failed';
+            setStatusMessage(getFriendlyErrorMessage(rawMessage));
         } finally {
             setLoading(false);
         }

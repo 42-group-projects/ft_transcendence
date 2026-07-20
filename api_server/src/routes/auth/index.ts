@@ -10,7 +10,7 @@ function toPublicUser(user: Record<string, any>) {
         id: user.id,
         email: user.email,
         nickname: user.nickname,
-        avatar_url: user.avatarUrl ?? null,
+        avatar_url: user.avatarUrl ?? '/api/uploads/default-avatar.svg',
         created_at:
             user.createdAt instanceof Date
                 ? user.createdAt.toISOString()

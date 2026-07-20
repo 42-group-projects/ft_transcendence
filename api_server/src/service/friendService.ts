@@ -154,27 +154,17 @@ export const friendService = {
     getFriendList: async (userId: string) => {
         const { db, close } = createDbClient();
         try {
-            const friendships = await friendRepository.getFriendsByUserId(
-                db,
-                userId,
-            );
-            const rawFriendIds = friendships.map((f) =>
-                f.userId === userId ? f.friendId : f.userId,
-            );
-            const uniqueFriendIds = Array.from(new Set(rawFriendIds));
-
-            const friendsWithNicknames = await Promise.all(
-                uniqueFriendIds.map(async (id) => {
-                    const user = await userRepository.findById(db, id);
-                    return {
-                        userId: id,
-                        nickname: user?.nickname ?? null,
-                        onlineStatus: 'offline',
-                    };
-                }),
-            );
-
-            return friendsWithNicknames;
+            const friends =
+                await friendRepository.getFriendsWithProfilesByUserId(
+                    db,
+                    userId,
+                );
+            return friends.map((f) => ({
+                userId: f.userId,
+                nickname: f.nickname,
+                avatarUrl: f.avatarUrl ?? '/api/uploads/default-avatar.svg',
+                onlineStatus: 'offline',
+            }));
         } finally {
             await close();
         }
