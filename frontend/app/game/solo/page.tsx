@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 
 import { GameResultOverlay } from '@/app/game/components/GameResultOverlay';
@@ -15,12 +15,22 @@ import { FrameRateDisplay } from '../components/FrameRateDispay';
 import { CustomizationPanel } from '../components/CustomizationPanel';
 import { FpsCounter } from '../utils/FpsCounter';
 import { useCustomization } from '../hooks/useCustomization';
+import { apiGetMe } from '@/lib/api';
 
 type SoloDifficulty = 'dummy' | 'easy' | 'medium' | 'hard';
 
 export default function SoloPage() {
     const [fps, setFps] = useState(0);
-    const [name, setName] = useState('Dev');
+    const [name, setName] = useState('Player');
+
+    useEffect(() => {
+        apiGetMe()
+            .then(({ user }) => {
+                if (user?.nickname) setName(user.nickname);
+            })
+            .catch(() => {});
+    }, []);
+
     const [difficulty, setDifficulty] = useState<SoloDifficulty>('easy');
     const {
         socketRef,
@@ -32,7 +42,6 @@ export default function SoloPage() {
         systemMessage,
         roundResultMessage,
         sessionEndedReason,
-        isPaused,
         countdown,
         gameConstants,
         leaveRoom,
@@ -81,12 +90,6 @@ export default function SoloPage() {
 
                 {!joinedRoomId ? (
                     <div className="flex flex-wrap items-center gap-3">
-                        <input
-                            className="rounded border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-100 placeholder-neutral-500 outline-none focus:border-neutral-500"
-                            placeholder="your name"
-                            value={name}
-                            onChange={(event) => setName(event.target.value)}
-                        />
                         <select
                             value={difficulty}
                             onChange={(event) =>
