@@ -23,21 +23,45 @@ function toPublicUser(user: Record<string, any>) {
 }
 
 // --- Routes ---
-authRoutes.post('/register', zValidator('json', registerSchema), async (c) => {
-    const { email, nickname, password } = c.req.valid('json');
-    const { access_token, user } = await authService.register(
-        email,
-        nickname,
-        password,
-    );
-    return c.json({ access_token, user: toPublicUser(user) }, 201);
-});
+authRoutes.post(
+    '/register',
+    zValidator('json', registerSchema, (result, c) => {
+        if (!result.success) {
+            const first = result.error.issues[0];
+            return c.json(
+                { error: first?.message ?? 'Invalid request data' },
+                400,
+            );
+        }
+    }),
+    async (c) => {
+        const { email, nickname, password } = c.req.valid('json');
+        const { access_token, user } = await authService.register(
+            email,
+            nickname,
+            password,
+        );
+        return c.json({ access_token, user: toPublicUser(user) }, 201);
+    },
+);
 
-authRoutes.post('/login', zValidator('json', loginSchema), async (c) => {
-    const { email, password } = c.req.valid('json');
-    const { access_token, user } = await authService.login(email, password);
-    return c.json({ access_token, user: toPublicUser(user) }, 200);
-});
+authRoutes.post(
+    '/login',
+    zValidator('json', loginSchema, (result, c) => {
+        if (!result.success) {
+            const first = result.error.issues[0];
+            return c.json(
+                { error: first?.message ?? 'Invalid request data' },
+                400,
+            );
+        }
+    }),
+    async (c) => {
+        const { email, password } = c.req.valid('json');
+        const { access_token, user } = await authService.login(email, password);
+        return c.json({ access_token, user: toPublicUser(user) }, 200);
+    },
+);
 
 // JWT is stateless — client discards the token. Endpoint exists as clean API contract.
 authRoutes.post('/logout', (c) =>
