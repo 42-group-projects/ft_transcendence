@@ -132,7 +132,7 @@ export default function PrivacyPage() {
                         href="/lobby"
                         className="transition hover:text-neutral-100"
                     >
-                        Back to lobby
+                        Back
                     </Link>
                     <span className="text-neutral-700">|</span>
                 </div>
