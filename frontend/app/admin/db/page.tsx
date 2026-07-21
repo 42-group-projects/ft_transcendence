@@ -17,8 +17,7 @@ type DbInspectResponse = {
 };
 
 const DB_INSPECT_API_URL =
-    process.env.NEXT_PUBLIC_DB_INSPECT_API_URL ??
-    'http://localhost:4001/api/admin/db';
+    process.env.NEXT_PUBLIC_DB_INSPECT_API_URL ?? '/api/admin/db';
 
 export default function AdminDbPage() {
     const [payload, setPayload] = useState<DbInspectResponse | null>(null);

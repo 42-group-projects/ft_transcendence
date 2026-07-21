@@ -1,4 +1,6 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4001/api';
+// Same-origin relative path: the browser calls the HTTPS Next.js origin, which
+// proxies /api/* to the API server via the rewrite in next.config.ts.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
 // ── Types (mirrors the mock store / schema) ────────────────────────────────
 
@@ -60,7 +62,7 @@ export function saveToken(token: string) {
     }
 
     localStorage.setItem(TOKEN_KEY, token);
-    document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=604800; samesite=lax`;
+    document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=604800; samesite=lax; secure`;
     window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
 }
 
@@ -78,7 +80,7 @@ export function clearToken() {
     }
 
     localStorage.removeItem(TOKEN_KEY);
-    document.cookie = `${TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax`;
+    document.cookie = `${TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax; secure`;
     window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
 }
 

@@ -24,7 +24,7 @@ services:
             - private-network
         restart: unless-stopped
 
-    # Socket.io
+    # Socket.io — served over WSS; the browser connects to it directly.
     socket-server:
         build:
             context: ./socket_server
@@ -37,25 +37,29 @@ services:
             - JWT_SECRET=${JWT_SECRET}
             - INTERNAL_SECRET=${INTERNAL_SECRET}
             - RECONNECT_GRACE_MS=${RECONNECT_GRACE_MS:-30000}
+            - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-https://localhost:3000}
+            - TLS_KEY_PATH=/certs/key.pem
+            - TLS_CERT_PATH=/certs/cert.pem
         volumes:
             - ./socket_server:/app
             - /app/node_modules
+            - ./certs:/certs:ro
         networks:
             - game-network
         restart: unless-stopped
 
-    # Production Web API server (Hono)
+    # Web API server (Hono) — not exposed to the host; the browser reaches it
+    # only through the frontend's /api rewrite over the internal network.
     api-server:
         build:
             context: ./api_server
             dockerfile: Dockerfile
-        ports:
-            - '${API_PORT:-4001}:4001'
         environment:
             - NODE_ENV=${NODE_ENV}
             - PORT=4001
             - JWT_SECRET=${JWT_SECRET}
             - INTERNAL_SECRET=${INTERNAL_SECRET}
+            - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-https://localhost:3000}
             - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
         volumes:
             - ./api_server:/app
@@ -68,19 +72,31 @@ services:
                 condition: service_healthy
         restart: unless-stopped
 
-    # Frontend (Next.js)
+    # Frontend (Next.js) — served over HTTPS via next dev --experimental-https.
     frontend:
         build:
             context: ./frontend
             dockerfile: Dockerfile
+        command:
+            - pnpm
+            - dev
+            - -H
+            - 0.0.0.0
+            - --experimental-https
+            - --experimental-https-key
+            - /certs/key.pem
+            - --experimental-https-cert
+            - /certs/cert.pem
         ports:
             - '3000:3000'
         environment:
-            - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL}
-            - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4001/api}
+            - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-https://localhost:3001}
+            - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api}
+            - API_INTERNAL_URL=${API_INTERNAL_URL:-http://api-server:4001}
         volumes:
             - ./frontend:/app
             - /app/node_modules
+            - ./certs:/certs:ro
         networks:
             - game-network
         depends_on:
