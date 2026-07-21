@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { EnterGameButton } from './components/EnterGameButton';
 
 export default function Home() {
     return (
@@ -10,12 +10,7 @@ export default function Home() {
                     we build the full experience.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                    <Link
-                        href="/lobby"
-                        className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
-                    >
-                        Enter Game (Temporary Link)
-                    </Link>
+                    <EnterGameButton />
                 </div>
             </section>
         </main>
