@@ -1,7 +1,7 @@
-const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || 'mock-super-secret-dev-key';
+const PORT = process.env.NEXT_PUBLIC_SOCKET_PORT;
+const JWT_SECRET = process.env.JWT_SECRET;
 const RECONNECT_GRACE_MS = Number(process.env.RECONNECT_GRACE_MS || 30000);
-const API_URL = process.env.API_URL || 'http://api-server:4001';
+const API_URL = process.env.API_URL;
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET;
 const TLS_KEY_PATH = process.env.TLS_KEY_PATH || '/certs/key.pem';
 const TLS_CERT_PATH = process.env.TLS_CERT_PATH || '/certs/cert.pem';

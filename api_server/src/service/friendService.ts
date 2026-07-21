@@ -1,18 +1,37 @@
 import { friendRepository } from '../repository/friendRepository';
+import { userRepository } from '../repository/userRepository';
 import { ApiError } from '../utils/apiError';
 import { createDbClient } from '../repository/dbClient';
 
 export const friendService = {
-    sendFriendRequest: async (senderId: string, receiverId: string) => {
+    sendFriendRequest: async (
+        senderId: string,
+        receiverId?: string,
+        nickname?: string,
+    ) => {
         const { db, close } = createDbClient();
         try {
-            if (senderId === receiverId) {
+            let resolvedReceiverId = receiverId;
+
+            if (!resolvedReceiverId && nickname) {
+                const user = await userRepository.findByNickname(db, nickname);
+                if (!user) {
+                    throw new ApiError(404, 'USER_NOT_FOUND');
+                }
+                resolvedReceiverId = user.id;
+            }
+
+            if (!resolvedReceiverId) {
+                throw new ApiError(422, 'receiver_id or nickname is required');
+            }
+
+            if (senderId === resolvedReceiverId) {
                 throw new ApiError(422, 'SOCIAL_SELF_REQUEST');
             }
 
             const receiverExists = await friendRepository.checkUserExists(
                 db,
-                receiverId,
+                resolvedReceiverId,
             );
             if (!receiverExists) {
                 throw new ApiError(404, 'NOT_FOUND');
@@ -22,7 +41,7 @@ export const friendService = {
                 await friendRepository.getFriendshipBetweenUsers(
                     db,
                     senderId,
-                    receiverId,
+                    resolvedReceiverId,
                 );
             if (existingFriendship) {
                 throw new ApiError(409, 'SOCIAL_ALREADY_FRIENDS');
@@ -32,7 +51,7 @@ export const friendService = {
                 await friendRepository.getPendingRequestBetweenUsers(
                     db,
                     senderId,
-                    receiverId,
+                    resolvedReceiverId,
                 );
             if (existingRequest) {
                 throw new ApiError(409, 'SOCIAL_REQUEST_EXISTS');
@@ -41,7 +60,7 @@ export const friendService = {
             return await friendRepository.createRequest(
                 db,
                 senderId,
-                receiverId,
+                resolvedReceiverId,
             );
         } finally {
             await close();
@@ -135,17 +154,15 @@ export const friendService = {
     getFriendList: async (userId: string) => {
         const { db, close } = createDbClient();
         try {
-            const friendships = await friendRepository.getFriendsByUserId(
-                db,
-                userId,
-            );
-            const rawFriendIds = friendships.map((f) =>
-                f.userId === userId ? f.friendId : f.userId,
-            );
-            const uniqueFriendIds = Array.from(new Set(rawFriendIds));
-
-            return uniqueFriendIds.map((id) => ({
-                userId: id,
+            const friends =
+                await friendRepository.getFriendsWithProfilesByUserId(
+                    db,
+                    userId,
+                );
+            return friends.map((f) => ({
+                userId: f.userId,
+                nickname: f.nickname,
+                avatarUrl: f.avatarUrl ?? '/api/uploads/default-avatar.svg',
                 onlineStatus: 'offline',
             }));
         } finally {

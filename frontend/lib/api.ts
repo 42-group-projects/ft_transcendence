@@ -1,6 +1,4 @@
-// Same-origin relative path: the browser calls the HTTPS Next.js origin, which
-// proxies /api/* to the API server via the rewrite in next.config.ts.
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL!;
 
 // ── Types (mirrors the mock store / schema) ────────────────────────────────
 
@@ -104,7 +102,7 @@ async function apiFetch<T>(
 
     const cleanBaseUrl = baseUrl.replace(/\/$/, '');
     const url = `${cleanBaseUrl}${path}`;
-    const res = await fetch(url, { ...options, headers });
+    const res = await fetch(url, { cache: 'no-store', ...options, headers });
 
     const text = await res.text();
     let data;
@@ -173,11 +171,16 @@ export async function apiGetFriendRequests(): Promise<any[]> {
     return apiFetch<any[]>('/friends/requests');
 }
 
-// フレンド申請を送信 (senderId は JWT から取得 — 呼び出し元は receiverId のみ渡す)
-export async function apiSendFriendRequest(receiverId: string) {
+// フレンド申請を送信 (IDまたはニックネームで自動判定して送信)
+export async function apiSendFriendRequest(target: string) {
+    const isUuid =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            target,
+        );
+    const body = isUuid ? { receiver_id: target } : { nickname: target };
     return apiFetch('/friends/requests', {
         method: 'POST',
-        body: JSON.stringify({ receiver_id: receiverId }),
+        body: JSON.stringify(body),
     });
 }
 
@@ -203,6 +206,101 @@ export async function apiRemoveFriend(friendId: string) {
         method: 'POST',
         body: JSON.stringify({}),
     });
+}
+
+// ユーザー検索
+export async function apiSearchUsers(
+    nickname: string,
+): Promise<{ users: any[] }> {
+    return apiFetch<{ users: any[] }>(
+        `/users/search?nickname=${encodeURIComponent(nickname)}`,
+    );
+}
+
+// プロフィール更新 (ニックネーム)
+export async function apiUpdateProfile(
+    nickname: string,
+): Promise<{ user: User }> {
+    return apiFetch<{ user: User }>('/users/me', {
+        method: 'PATCH',
+        body: JSON.stringify({ nickname }),
+    });
+}
+
+// アバターアップロード (File)
+export async function apiUploadAvatar(file: File): Promise<{ user: User }> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const token = getToken();
+    const headers: Record<string, string> = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const cleanBaseUrl = API_BASE.replace(/\/$/, '');
+    const url = `${cleanBaseUrl}/users/me/avatar`;
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+    });
+
+    const text = await res.text();
+    let data;
+    try {
+        data = text ? JSON.parse(text) : {};
+    } catch {
+        throw new Error('Invalid response format');
+    }
+
+    if (!res.ok) {
+        throw new Error(data.error ?? 'Failed to upload avatar');
+    }
+
+    return data as { user: User };
+}
+
+// アバターURLの解決 (相対パスの場合にAPIベースURLを付与)
+export function getAvatarUrl(url: string | null | undefined): string {
+    let apiBase = 'http://localhost:4001';
+    try {
+        apiBase = new URL(API_BASE).origin;
+    } catch {
+        apiBase = API_BASE.replace(/\/api\/?$/, '');
+    }
+
+    if (!url) {
+        return `${apiBase}/api/uploads/default-avatar.svg`;
+    }
+    if (
+        url.startsWith('http://') ||
+        url.startsWith('https://') ||
+        url.startsWith('data:')
+    ) {
+        return url;
+    }
+    const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+    return `${apiBase}${cleanUrl}`;
+}
+
+// Helper function to translate raw backend error codes to user-friendly English messages
+export function getFriendlyErrorMessage(message: string): string {
+    const errorMap: Record<string, string> = {
+        AUTH_INVALID_CREDENTIALS: 'Invalid email or password.',
+        AUTH_NICKNAME_EXISTS: 'This nickname is already taken.',
+        AUTH_EMAIL_EXISTS: 'This email is already registered.',
+        SOCIAL_SELF_REQUEST: 'You cannot add yourself as a friend.',
+        SOCIAL_ALREADY_FRIENDS: 'You are already friends with this user.',
+        SOCIAL_REQUEST_EXISTS:
+            'A friend request is already pending for this user.',
+        NOT_FOUND: 'User not found.',
+        UNPROCESSABLE: 'Invalid input. Please check the requirements.',
+        INTERNAL_ERROR:
+            'An internal server error occurred. Please try again later.',
+    };
+    return errorMap[message] ?? message;
 }
 
 // ── Match history / ranking endpoints ────────────────────────────────────

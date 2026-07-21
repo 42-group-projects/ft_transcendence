@@ -17,6 +17,10 @@ function registerSocketHandlers(io, roomService) {
                 userId,
                 status: 'online',
             });
+
+            // Join personal DM room so targeted messages can be delivered without
+            // tracking socketIds manually — emit to `dm_${userId}` to reach this user.
+            socket.join(`dm_${userId}`);
         }
 
         // フロントエンドが指定したフレンドたちの今の状態を教えて、と聞いてきた時の処理
@@ -40,25 +44,18 @@ function registerSocketHandlers(io, roomService) {
             DASH_COOLDOWN_MS,
         });
 
-        const reconnectResult = roomService.reconnectPlayer(userId, socket.id);
-        if (reconnectResult.ok && reconnectResult.room) {
-            socket.join(reconnectResult.room.id);
-            socket.data.roomId = reconnectResult.room.id;
-
-            // 再接続でゲームに戻ったら「ゲーム中」にする
-            presenceManager.markUserInGame(userId);
-            io.to(`presence_${userId}`).emit('user_status_changed', {
-                userId,
-                status: 'in_game',
-            });
-
-            socket.emit('joinedRoom', {
-                roomId: reconnectResult.room.id,
-                playerId: reconnectResult.player.userId,
-            });
-            socket.emit('systemMessage', {
-                message: 'Reconnected to active session.',
-            });
+        // If the user has an active room session, notify the client so it can
+        // offer an explicit rejoin rather than auto-reconnecting.
+        if (userId) {
+            const activeRoom = roomService.getActiveRoomForUser(userId);
+            if (activeRoom) {
+                const opponentId =
+                    [...activeRoom.players.keys()].find(
+                        (id) =>
+                            id !== userId && !activeRoom.players.get(id).isCpu,
+                    ) ?? null;
+                socket.emit('hasActiveSession', { opponentId });
+            }
         }
 
         socket.on('createRoom', ({ password, name }) => {
@@ -226,8 +223,13 @@ function registerSocketHandlers(io, roomService) {
         });
 
         socket.on('reconnect', () => {
+            // Only signal expiry if the user had a session entry that is now gone.
+            const hadSession = !!roomService.getRoomIdForUser(userId);
             const result = roomService.reconnectPlayer(userId, socket.id);
-            if (!result.ok || !result.room) return;
+            if (!result.ok || !result.room) {
+                if (hadSession) socket.emit('sessionExpired');
+                return;
+            }
 
             socket.join(result.room.id);
             socket.data.roomId = result.room.id;
@@ -245,9 +247,33 @@ function registerSocketHandlers(io, roomService) {
             });
         });
 
+        socket.on('checkActiveSession', (callback) => {
+            if (typeof callback !== 'function') return;
+            const activeRoom = roomService.getActiveRoomForUser(userId);
+            if (!activeRoom) {
+                callback({ active: false, opponentId: null });
+                return;
+            }
+            const opponentId =
+                [...activeRoom.players.keys()].find(
+                    (id) => id !== userId && !activeRoom.players.get(id).isCpu,
+                ) ?? null;
+            callback({ active: true, opponentId });
+        });
+
         socket.on('leaveRoom', () => {
-            const roomId = socket.data.roomId;
+            const roomId =
+                socket.data.roomId ?? roomService.getRoomIdForUser(userId);
             if (!roomId) return;
+
+            // Snapshot remaining human players before the room is potentially destroyed
+            // so we can notify them their session ended.
+            const room = roomService.getRoom(roomId);
+            const otherHumanIds = room
+                ? [...room.players.values()]
+                      .filter((p) => !p.isCpu && p.userId !== userId)
+                      .map((p) => p.userId)
+                : [];
 
             const result = roomService.handleLeave(roomId, userId);
 
@@ -267,11 +293,75 @@ function registerSocketHandlers(io, roomService) {
                 });
             }
 
+            if (result.removedRoom) {
+                // Room was destroyed — notify remaining players via their personal DM room
+                // so the lobby/sidebar can clear the active session indicator.
+                for (const otherId of otherHumanIds) {
+                    io.to(`dm_${otherId}`).emit('sessionEnded');
+                }
+            }
+
             if (result.room) {
                 roomService.broadcastRoomState(result.room);
                 roomService.notifyWaitingForOpponent(result.room);
             }
         });
+
+        // ── Direct messages ────────────────────────────────────────────────────
+        socket.on('sendDm', ({ toUserId, text }) => {
+            if (typeof toUserId !== 'string' || typeof text !== 'string')
+                return;
+            const trimmed = text.trim().slice(0, 500);
+            if (!trimmed) return;
+
+            const targetRoom = io.sockets.adapter.rooms.get(`dm_${toUserId}`);
+            if (!targetRoom || targetRoom.size === 0) {
+                socket.emit('dmFailed', { toUserId, reason: 'user_offline' });
+                return;
+            }
+
+            io.to(`dm_${toUserId}`).emit('receiveDm', {
+                fromUserId: userId,
+                text: trimmed,
+                timestamp: Date.now(),
+            });
+        });
+
+        // ── Room invites ───────────────────────────────────────────────────────
+        socket.on(
+            'sendRoomInvite',
+            ({ toUserId, roomId, password, fromNickname }) => {
+                if (
+                    typeof toUserId !== 'string' ||
+                    typeof roomId !== 'string' ||
+                    typeof password !== 'string'
+                ) {
+                    return;
+                }
+
+                const targetRoom = io.sockets.adapter.rooms.get(
+                    `dm_${toUserId}`,
+                );
+                if (!targetRoom || targetRoom.size === 0) {
+                    socket.emit('dmFailed', {
+                        toUserId,
+                        reason: 'user_offline',
+                    });
+                    return;
+                }
+
+                io.to(`dm_${toUserId}`).emit('receiveRoomInvite', {
+                    fromUserId: userId,
+                    fromNickname:
+                        typeof fromNickname === 'string'
+                            ? fromNickname
+                            : undefined,
+                    roomId,
+                    password,
+                    timestamp: Date.now(),
+                });
+            },
+        );
 
         socket.on('disconnect', () => {
             // 切断されたら「オフライン」として登録し、全員に通知

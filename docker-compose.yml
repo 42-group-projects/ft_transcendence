@@ -33,13 +33,14 @@ services:
             - '${NEXT_PUBLIC_SOCKET_PORT}:${NEXT_PUBLIC_SOCKET_PORT}'
         environment:
             - NODE_ENV=${NODE_ENV}
-            - PORT=${NEXT_PUBLIC_SOCKET_PORT}
+            - NEXT_PUBLIC_SOCKET_PORT=${NEXT_PUBLIC_SOCKET_PORT}
             - JWT_SECRET=${JWT_SECRET}
             - INTERNAL_SECRET=${INTERNAL_SECRET}
             - RECONNECT_GRACE_MS=${RECONNECT_GRACE_MS:-30000}
             - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-https://localhost:3000}
             - TLS_KEY_PATH=/certs/key.pem
             - TLS_CERT_PATH=/certs/cert.pem
+            - API_URL=${API_URL}
         volumes:
             - ./socket_server:/app
             - /app/node_modules
@@ -56,7 +57,7 @@ services:
             dockerfile: Dockerfile
         environment:
             - NODE_ENV=${NODE_ENV}
-            - PORT=4001
+            - API_PORT=${API_PORT}
             - JWT_SECRET=${JWT_SECRET}
             - INTERNAL_SECRET=${INTERNAL_SECRET}
             - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-https://localhost:3000}

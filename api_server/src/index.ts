@@ -20,7 +20,7 @@ app.onError((err, c) => {
     return c.json({ error: 'INTERNAL_ERROR' }, 500);
 });
 
-const port = Number(process.env.PORT ?? 4001);
+const port = Number(process.env.API_PORT!);
 
 serve({ fetch: app.fetch, port }, () => {
     console.log(`API server running on :${port}`);

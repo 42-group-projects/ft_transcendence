@@ -153,6 +153,23 @@ export const friendRepository = {
             );
     },
 
+    getFriendsWithProfilesByUserId: async (db: AppDb, userId: string) => {
+        return await db
+            .select({
+                userId: users.id,
+                nickname: users.nickname,
+                avatarUrl: users.avatarUrl,
+            })
+            .from(friendships)
+            .innerJoin(users, eq(friendships.friendId, users.id))
+            .where(
+                and(
+                    eq(friendships.userId, userId),
+                    eq(friendships.status, 'accepted'),
+                ),
+            );
+    },
+
     removeFriendship: async (db: AppDb, userId: string, friendId: string) => {
         const result = await db
             .update(friendships)

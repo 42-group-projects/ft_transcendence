@@ -17,8 +17,7 @@ type DbInspectResponse = {
     tables: DbTableDump[];
 };
 
-const DB_INSPECT_API_URL =
-    process.env.NEXT_PUBLIC_DB_INSPECT_API_URL ?? '/api/admin/db';
+const DB_INSPECT_API_URL = process.env.NEXT_PUBLIC_DB_INSPECT_API_URL!;
 
 function formatCellValue(value: unknown): string {
     if (value === null || value === undefined) {

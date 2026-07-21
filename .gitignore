@@ -24,3 +24,6 @@ certs/
 Thumbs.db
 
 .vscode
+
+# User uploads
+api_server/uploads/
