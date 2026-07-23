@@ -24,5 +24,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!_next/|favicon.ico|robots.txt|sitemap.xml).*)'],
+    // Exclude /api so proxied API calls (e.g. unauthenticated /api/auth/login)
+    // are not caught by the auth redirect before reaching the rewrite.
+    matcher: ['/((?!_next/|api/|favicon.ico|robots.txt|sitemap.xml).*)'],
 };
