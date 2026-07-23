@@ -60,7 +60,7 @@ export function saveToken(token: string) {
     }
 
     localStorage.setItem(TOKEN_KEY, token);
-    document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=604800; samesite=lax`;
+    document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=604800; samesite=lax; secure`;
     window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
 }
 
@@ -78,7 +78,7 @@ export function clearToken() {
     }
 
     localStorage.removeItem(TOKEN_KEY);
-    document.cookie = `${TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax`;
+    document.cookie = `${TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax; secure`;
     window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
 }
 

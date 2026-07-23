@@ -1,17 +1,33 @@
 const express = require('express');
-const http = require('http');
+const https = require('https');
+const fs = require('fs');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { Server } = require('socket.io');
-const { PORT, JWT_SECRET, SOCKET_CORS } = require('./config');
+const {
+    PORT,
+    JWT_SECRET,
+    SOCKET_CORS,
+    TLS_KEY_PATH,
+    TLS_CERT_PATH,
+} = require('./config');
 const { createRoomService } = require('./game/room-service');
 const { registerSocketHandlers } = require('./socket-handlers');
 const presenceManager = require('./presence-manager');
 
 const app = express();
-app.use(cors());
+app.use(cors(SOCKET_CORS));
 
-const server = http.createServer(app);
+// The browser connects to this server directly (cross-origin from the
+// frontend), so it must be served over TLS (wss://). Internal calls between
+// backend services still use plain HTTP.
+const server = https.createServer(
+    {
+        key: fs.readFileSync(TLS_KEY_PATH),
+        cert: fs.readFileSync(TLS_CERT_PATH),
+    },
+    app,
+);
 const io = new Server(server, {
     cors: SOCKET_CORS,
 });

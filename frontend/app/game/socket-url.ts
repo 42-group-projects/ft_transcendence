@@ -3,7 +3,7 @@ export function resolveSocketUrl() {
     const socketPort = process.env.NEXT_PUBLIC_SOCKET_PORT;
 
     if (typeof window === 'undefined') {
-        return configured || 'http://localhost:3001';
+        return configured || 'https://localhost:3001';
     }
 
     if (!configured) {
