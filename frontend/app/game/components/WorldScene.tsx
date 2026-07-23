@@ -4,12 +4,12 @@ import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 import {
-    PLAYER_RADIUS as IMPORTED_PLAYER_RADIUS,
     SPAWN_DISTANCE as IMPORTED_SPAWN_DISTANCE,
     SPAWN_LINE_OFFSET,
 } from '../constants';
 import type { GameConstants, PlayerState } from '../types';
 import { DOHYO_THEMES, type DohyoTheme } from '../hooks/useCustomization';
+import { Player } from '../components/Player';
 
 const PLATE_THICKNESS = 0.5;
 const SPAWN_LINE_LENGTH = 3.6;
@@ -67,8 +67,6 @@ export function WorldScene({
     dohyoTheme = 'default',
 }: WorldSceneProps) {
     // Use passed constants or fallback to imports (for backwards compatibility)
-    const PLAYER_RADIUS =
-        gameConstants?.PLAYER_RADIUS ?? IMPORTED_PLAYER_RADIUS;
     const SPAWN_DISTANCE =
         gameConstants?.SPAWN_DISTANCE ?? IMPORTED_SPAWN_DISTANCE;
     const WORLD_SIZE = gameConstants?.WORLD_HALF
@@ -141,21 +139,12 @@ export function WorldScene({
                 const isSelf = player.id === localPlayerId;
 
                 return (
-                    <group
+                    <Player
                         key={player.id}
-                        position={[
-                            player.position.x,
-                            player.position.y,
-                            player.position.z,
-                        ]}
-                    >
-                        <mesh castShadow>
-                            <sphereGeometry args={[PLAYER_RADIUS, 24, 24]} />
-                            <meshStandardMaterial
-                                color={isSelf ? mawashiColor : '#f97316'}
-                            />
-                        </mesh>
-                    </group>
+                        player={player}
+                        gameConstants={gameConstants}
+                        mawashiColor={isSelf ? mawashiColor : '#7d26b4'}
+                    ></Player>
                 );
             })}
 

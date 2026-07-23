@@ -73,11 +73,15 @@ function isPlayerOnPlate(player) {
     return distanceFromCenter <= PLATE_BOUNDARY_RADIUS + PLATE_EDGE_TOLERANCE;
 }
 
+function normalizeAngle(angle) {
+    return Math.atan2(Math.sin(angle), Math.cos(angle));
+}
+
 function applyMovementInput(player, dt) {
     const inputX = Number(player.input.x) || 0;
     const inputZ = Number(player.input.z) || 0;
 
-    const heading = Number(player.heading) || 0;
+    const heading = normalizeAngle(Number(player.heading) || 0);
     const newHeading = heading + inputX * TURN_SPEED * dt;
     player.heading = Number.isFinite(newHeading) ? newHeading : 0;
 
