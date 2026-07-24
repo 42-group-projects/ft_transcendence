@@ -18,7 +18,7 @@ export function AuthCard({
     footer,
 }: AuthCardProps) {
     return (
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/90 p-8 shadow-2xl shadow-black/30">
+        <div className=" border border-neutral-800 bg-yellow-100/90 p-8 shadow-2xl shadow-black/30">
             <div className="mb-8 text-center">
                 <p
                     className={`text-sm uppercase tracking-[0.3em] ${accentColorClassName}`}

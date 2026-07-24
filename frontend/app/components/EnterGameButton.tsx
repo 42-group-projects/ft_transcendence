@@ -21,7 +21,7 @@ export function EnterGameButton() {
     return (
         <Link
             href={isLoggedIn ? '/lobby' : '/login'}
-            className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
+            className=" bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
         >
             {isLoggedIn ? 'Enter Game' : 'Log in to Play'}
         </Link>

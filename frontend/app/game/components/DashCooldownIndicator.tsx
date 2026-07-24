@@ -16,9 +16,9 @@ export default function DashCooldownIndicator({
 
     return (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
-            <div className="text-xs text-white bg-black/40 px-2 py-1 rounded font-mono select-none">
+            <div className="text-xs text-stone-900 bg-yellow-100/80 px-2 py-1 rounded font-mono select-none">
                 <div className="flex items-center gap-2">
-                    <span className="text-neutral-400">Dash</span>
+                    <span className="text-stone-700">Dash</span>
                     <progress
                         value={dashCooldownTotalMs - dashCooldownMs}
                         max={dashCooldownTotalMs}

@@ -42,45 +42,43 @@ export default function Home() {
     }, []);
 
     return (
-        <main className="bg-neutral-950 text-neutral-100">
+        <main className="text-stone-900">
             {/* ── Hero ── */}
-            <section className="relative overflow-hidden">
-                {/* Background glows */}
+            <section className="relative overflow-hidden border-b-4 border-amber-200">
+                {/* Aged paper effect */}
                 <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute left-1/2 top-0 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-orange-500/10 blur-[120px]" />
-                    <div className="absolute bottom-0 right-0 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px]" />
+                    <div className="absolute left-1/3 top-0 h-96 w-96 rounded-full bg-red-700/8 blur-[120px]" />
+                    <div className="absolute right-1/3 bottom-0 h-80 w-80 rounded-full bg-amber-700/8 blur-[100px]" />
                 </div>
 
                 <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl flex-col items-center justify-center gap-8 px-6 py-24 text-center">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-orange-400">
+                    <div className="inline-flex items-center gap-2 border-2 border-red-800/40 bg-red-900/8 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-red-900">
                         a 42 School Project
                     </div>
 
-                    <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+                    <h1 className="text-5xl font-bold tracking-tight text-stone-950 sm:text-6xl lg:text-7xl">
                         Step into the{' '}
-                        <span className="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">
-                            Dohyo
-                        </span>
+                        <span className="text-red-900">Dohyo</span>
                     </h1>
 
-                    <p className="max-w-xl text-lg text-neutral-400">
+                    <p className="max-w-xl text-lg text-stone-700">
                         SumoVerse is a real-time 3D sumo wrestling game. Face
                         off against friends, climb the rankings, and prove you
                         are the last one standing.
                     </p>
 
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-xs text-stone-600">
                         By using SumoVerse you agree to our{' '}
                         <Link
                             href="/terms"
-                            className="underline underline-offset-2 transition hover:text-neutral-300"
+                            className="underline underline-offset-2 transition hover:text-stone-800"
                         >
                             Terms of Service
                         </Link>{' '}
                         and{' '}
                         <Link
                             href="/privacy"
-                            className="underline underline-offset-2 transition hover:text-neutral-300"
+                            className="underline underline-offset-2 transition hover:text-stone-800"
                         >
                             Privacy Policy
                         </Link>
@@ -91,7 +89,7 @@ export default function Home() {
                         {isLoggedIn ? (
                             <Link
                                 href="/lobby"
-                                className="rounded-lg bg-orange-500 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-400"
+                                className="bg-red-900 px-7 py-3 text-sm font-semibold text-yellow-50 shadow-lg shadow-red-900/20 transition hover:bg-red-800"
                             >
                                 Enter SumoVerse
                             </Link>
@@ -99,13 +97,13 @@ export default function Home() {
                             <>
                                 <Link
                                     href="/signup"
-                                    className="rounded-lg bg-orange-500 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-400"
+                                    className="bg-red-900 px-7 py-3 text-sm font-semibold text-yellow-50 shadow-lg shadow-red-900/20 transition hover:bg-red-800"
                                 >
                                     Create Account
                                 </Link>
                                 <Link
                                     href="/login"
-                                    className="rounded-lg border border-neutral-700 px-7 py-3 text-sm font-semibold text-neutral-200 transition hover:border-neutral-500 hover:text-white"
+                                    className="border-2 border-stone-400 px-7 py-3 text-sm font-semibold text-stone-900 transition hover:border-stone-600 hover:bg-stone-200"
                                 >
                                     Log In
                                 </Link>
@@ -117,10 +115,10 @@ export default function Home() {
 
             {/* ── Features ── */}
             <section className="mx-auto max-w-5xl px-6 py-24">
-                <p className="mb-3 text-center text-xs uppercase tracking-[0.3em] text-neutral-500">
+                <p className="mb-3 text-center text-xs uppercase tracking-[0.3em] text-stone-700">
                     What&apos;s inside
                 </p>
-                <h2 className="mb-12 text-center text-2xl font-semibold tracking-tight sm:text-3xl">
+                <h2 className="mb-12 text-center text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
                     Everything you need to compete
                 </h2>
 
@@ -128,13 +126,13 @@ export default function Home() {
                     {features.map((f) => (
                         <div
                             key={f.title}
-                            className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 transition hover:border-neutral-700"
+                            className="border-2 border-stone-300 bg-yellow-100/90 p-6 transition hover:border-stone-400 hover:shadow-md hover:shadow-red-900/10"
                         >
                             <div className="mb-3 text-2xl">{f.icon}</div>
-                            <h3 className="mb-1.5 font-semibold text-neutral-100">
+                            <h3 className="mb-1.5 font-semibold text-stone-900">
                                 {f.title}
                             </h3>
-                            <p className="text-sm leading-relaxed text-neutral-400">
+                            <p className="text-sm leading-relaxed text-stone-700">
                                 {f.description}
                             </p>
                         </div>

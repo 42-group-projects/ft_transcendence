@@ -31,7 +31,7 @@ export function GameLobbyControls({
 }: GameLobbyControlsProps) {
     return (
         <>
-            {/* <div className="grid gap-3 rounded-lg border border-neutral-700 bg-neutral-900 p-4 md:grid-cols-5">
+            {/* <div className="grid gap-3  border border-neutral-700 bg-neutral-900 p-4 md:grid-cols-5">
                 <input
                     className="rounded border border-neutral-600 bg-neutral-800 px-3 py-2 outline-none"
                     value={name}
@@ -69,13 +69,13 @@ export function GameLobbyControls({
                 </button>
             </div> */}
 
-            <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-300">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-stone-700">
                 <span>Socket: {connected ? 'connected' : 'disconnected'}</span>
                 <span>Room: {joinedRoomId ?? 'none'}</span>
                 <span>Players: {playersCount}</span>
                 {joinedRoomId ? (
                     <button
-                        className="rounded border border-neutral-600 px-2 py-1 hover:bg-neutral-800"
+                        className="rounded border-2 border-neutral-600 px-2 py-1 text-stone-900 hover:bg-stone-100"
                         onClick={onLeaveRoom}
                         type="button"
                     >
@@ -85,13 +85,13 @@ export function GameLobbyControls({
             </div>
 
             {errorMessage ? (
-                <p className="text-sm text-red-400">{errorMessage}</p>
+                <p className="text-sm text-red-700">{errorMessage}</p>
             ) : null}
             {systemMessage ? (
-                <p className="text-sm text-emerald-400">{systemMessage}</p>
+                <p className="text-sm text-green-700">{systemMessage}</p>
             ) : null}
             {roundResultMessage ? (
-                <p className="text-base font-semibold text-yellow-300">
+                <p className="text-base font-semibold text-amber-800">
                     {roundResultMessage}
                 </p>
             ) : null}

@@ -95,7 +95,7 @@ export function WorldScene({
     return (
         <>
             <Environment
-                preset="warehouse"
+                preset="studio"
                 // files={'../images/sky_04_2k.png'}
                 background
             />
