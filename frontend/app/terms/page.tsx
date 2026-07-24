@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function TermsPage() {
     return (
-        <main className="min-h-screen bg-yellow-50 px-4 py-10 text-stone-900 sm:px-6">
+        <main className="min-h-screen bg- px-4 py-10 text-stone-900 sm:px-6">
             <section className="mx-auto w-full max-w-3xl">
                 <div className="mb-8">
                     <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-950">

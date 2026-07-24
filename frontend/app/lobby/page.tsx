@@ -19,7 +19,7 @@ const roomLinks = [
         title: 'Practice room',
         description: 'Practice movement, test AI levels, and warm up offline.',
         accentClassName:
-            'border-red-950/40 bg-red-300/50 text-red-900 hover:bg-red-900/20',
+            'border-red-950/40 bg-red-300/10 text-red-900 hover:bg-red-900/20',
     },
     {
         href: '/profile',
@@ -155,13 +155,13 @@ export default function LobbyPage() {
                     </Link>
                 </div>
 
-                <div className="relative flex-1 overflow-hidden border-2 bg-amber-50 shadow-lg shadow-red-900/10">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(127,29,29,0.08),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(180,83,9,0.08),_transparent_30%),linear-gradient(180deg,_rgba(255,251,235,0.98),_rgba(254,243,199,1))]" />
+                <div className="relative flex-1 overflow-hidden border-2 shadow-lg shadow-red-900/10">
+                    {/* <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(127,29,29,0.08),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(180,83,9,0.08),_transparent_30%),linear-gradient(180deg,_rgba(255,251,235,0.98),_rgba(254,243,199,1))]" />
                     <div className="absolute inset-0 opacity-10 [background-image:linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] [background-size:60px_60px]" />
                     <div className="absolute left-[18%] top-[22%] h-24 w-24 border border-red-900/20 bg-red-900/8 blur-sm" />
                     <div className="absolute bottom-[20%] right-[18%] h-32 w-32 border border-amber-900/20 bg-amber-900/8 blur-sm" />
                     <div className="absolute left-[24%] top-[48%] h-px w-[18%] -rotate-12 bg-gradient-to-r from-red-900/30 to-transparent" />
-                    <div className="absolute right-[25%] top-[40%] h-px w-[16%] rotate-[18deg] bg-gradient-to-r from-amber-900/30 to-transparent" />
+                    <div className="absolute right-[25%] top-[40%] h-px w-[16%] rotate-[18deg] bg-gradient-to-r from-amber-900/30 to-transparent" /> */}
 
                     <FriendsSidebar />
 
@@ -207,7 +207,7 @@ export default function LobbyPage() {
                                 <img
                                     src={getAvatarUrl(user?.avatar_url)}
                                     alt={`${displayName} avatar`}
-                                    className="mx-auto h-28 w-28 border-4 border-stone-400 bg-yellow-50 object-cover shadow-md shadow-stone-400/30 sm:h-32 sm:w-32"
+                                    className="mx-auto h-28 w-28 border-4 border-stone-400 bg- object-cover shadow-md shadow-stone-400/30 sm:h-32 sm:w-32"
                                     onError={(e) => {
                                         (e.target as HTMLImageElement).src =
                                             getAvatarUrl(null);

@@ -103,7 +103,7 @@ export default function CareerPage() {
             : 0;
 
     return (
-        <main className="min-h-screen bg-yellow-50 px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
+        <main className="min-h-screen bg- px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
             <section className="mx-auto w-full max-w-2xl bg-yellow-100 px-3 py-3 border-2 border-grey-500">
                 <p className="text-sm uppercase tracking-[0.3em] text-stone-700">
                     Career
@@ -188,7 +188,7 @@ export default function CareerPage() {
                 <div className="mt-8 flex items-center justify-center gap-3">
                     <Link
                         href="/lobby"
-                        className="bg-red-900 px-5 py-2.5 text-sm font-semibold text-yellow-50 transition hover:bg-red-800"
+                        className="bg-red-900 px-5 py-2.5 text-sm font-semibold text- transition hover:bg-red-800"
                     >
                         Back to Lobby
                     </Link>

@@ -151,7 +151,7 @@ export default function GamePage() {
     }, [isSessionOver, sessionEndedReason]);
 
     return (
-        <main className="min-h-screen bg-yellow-50 text-stone-900">
+        <main className="min-h-screen bg- text-stone-900">
             <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold text-stone-950">

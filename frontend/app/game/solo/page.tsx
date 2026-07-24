@@ -66,7 +66,7 @@ export default function SoloPage() {
     const resultTitle = roundResultMessage ?? 'Match finished';
 
     return (
-        <main className="min-h-screen bg-yellow-50 text-stone-900">
+        <main className="min-h-screen bg- text-stone-900">
             <section className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -97,7 +97,7 @@ export default function SoloPage() {
                                     event.target.value as SoloDifficulty,
                                 )
                             }
-                            className="rounded border-2 border-neutral-600 bg-yellow-50 px-3 py-1.5 text-sm text-stone-900 outline-none focus:border-stone-700"
+                            className="rounded border-2 border-neutral-600 bg- px-3 py-1.5 text-sm text-stone-900 outline-none focus:border-stone-700"
                         >
                             <option value="dummy">Dummy (no AI)</option>
                             <option value="easy">Easy CPU</option>
@@ -107,7 +107,7 @@ export default function SoloPage() {
                         <button
                             disabled={!connected}
                             onClick={handleStart}
-                            className="rounded bg-red-900 px-4 py-1.5 text-sm font-medium text-yellow-50 hover:bg-red-800 disabled:opacity-40"
+                            className="rounded bg-red-900 px-4 py-1.5 text-sm font-medium text- hover:bg-red-800 disabled:opacity-40"
                         >
                             Start Solo
                         </button>

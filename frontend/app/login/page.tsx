@@ -30,7 +30,7 @@ export default function LoginPage() {
     };
 
     return (
-        <main className="min-h-screen bg-yellow-50 text-stone-900">
+        <main className="min-h-screen bg- text-stone-900">
             <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center px-6 py-12">
                 <AuthCard
                     accentLabel="SumoVerse"
@@ -66,7 +66,7 @@ export default function LoginPage() {
                                     setEmail(event.target.value)
                                 }
                                 placeholder="you@example.com"
-                                className="w-full border-2 border-stone-300 bg-yellow-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
+                                className="w-full border-2 border-stone-300 bg- px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                             />
                         </label>
 
@@ -81,14 +81,14 @@ export default function LoginPage() {
                                     setPassword(event.target.value)
                                 }
                                 placeholder="••••••••"
-                                className="w-full border-2 border-stone-300 bg-yellow-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
+                                className="w-full border-2 border-stone-300 bg- px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                             />
                         </label>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-red-900 px-4 py-3 text-sm font-semibold text-yellow-50 transition hover:bg-red-800 disabled:opacity-50"
+                            className="w-full bg-red-900 px-4 py-3 text-sm font-semibold text- transition hover:bg-red-800 disabled:opacity-50"
                         >
                             {loading ? 'Signing in…' : 'Sign in'}
                         </button>

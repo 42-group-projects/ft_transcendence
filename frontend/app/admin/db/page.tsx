@@ -77,7 +77,7 @@ export default function AdminDbPage() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-yellow-50 px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
+        <main className="min-h-screen bg- px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
             <section className="mx-auto w-full max-w-6xl space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
@@ -123,7 +123,7 @@ export default function AdminDbPage() {
                                 <Link
                                     key={table.name}
                                     href={`/admin/db/${encodeURIComponent(table.name)}`}
-                                    className="border-2 border-neutral-600 bg-yellow-50 p-4 transition hover:border-stone-700 hover:bg-stone-50"
+                                    className="border-2 border-neutral-600 bg- p-4 transition hover:border-stone-700 hover:bg-stone-50"
                                 >
                                     <h2 className="text-base font-semibold text-stone-900">
                                         {table.name}

@@ -89,7 +89,7 @@ export default function Home() {
                         {isLoggedIn ? (
                             <Link
                                 href="/lobby"
-                                className="bg-red-900 px-7 py-3 text-sm font-semibold text-yellow-50 shadow-lg shadow-red-900/20 transition hover:bg-red-800"
+                                className="bg-red-900 px-7 py-3 text-sm font-semibold text- shadow-lg shadow-red-900/20 transition hover:bg-red-800"
                             >
                                 Enter SumoVerse
                             </Link>
@@ -97,7 +97,7 @@ export default function Home() {
                             <>
                                 <Link
                                     href="/signup"
-                                    className="bg-red-900 px-7 py-3 text-sm font-semibold text-yellow-50 shadow-lg shadow-red-900/20 transition hover:bg-red-800"
+                                    className="bg-red-900 px-7 py-3 text-sm font-semibold text- shadow-lg shadow-red-900/20 transition hover:bg-red-800"
                                 >
                                     Create Account
                                 </Link>

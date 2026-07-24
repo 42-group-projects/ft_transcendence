@@ -263,7 +263,7 @@ export default function AdminDbTablePage() {
                                                                 );
                                                             }}
                                                             placeholder={`Search ${column}`}
-                                                            className="w-full rounded border-2 border-neutral-600 bg-yellow-50 px-2 py-1 text-xs font-normal text-stone-900 outline-none transition focus:border-stone-700"
+                                                            className="w-full rounded border-2 border-neutral-600 bg- px-2 py-1 text-xs font-normal text-stone-900 outline-none transition focus:border-stone-700"
                                                         />
                                                     </th>
                                                 ))}
@@ -274,7 +274,7 @@ export default function AdminDbTablePage() {
                                                 (row, rowIndex) => (
                                                     <tr
                                                         key={`${selectedTable.name}-${rowIndex}`}
-                                                        className="odd:bg-yellow-50 even:bg-amber-50"
+                                                        className="odd:bg- even:bg-amber-50"
                                                     >
                                                         {columns.map(
                                                             (column) => (

@@ -119,7 +119,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <main className="min-h-screen bg-yellow-50 px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
+        <main className="min-h-screen bg- px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
             <section className="mx-auto w-full max-w-3xl border-2 border-stone-300 bg-yellow-100 p-6 sm:p-8 shadow-lg shadow-red-900/10 backdrop-blur-sm">
                 <p className="text-sm uppercase tracking-[0.3em] text-stone-700">
                     Profile
@@ -233,7 +233,7 @@ export default function ProfilePage() {
                                             onChange={(e) =>
                                                 setNicknameInput(e.target.value)
                                             }
-                                            className="w-full border-2 border-neutral-600 bg-yellow-50 px-3.5 py-2 text-sm text-stone-900 outline-none focus:border-stone-700 transition"
+                                            className="w-full border-2 border-neutral-600 bg- px-3.5 py-2 text-sm text-stone-900 outline-none focus:border-stone-700 transition"
                                         />
                                     </div>
 
@@ -241,7 +241,7 @@ export default function ProfilePage() {
                                         <button
                                             type="submit"
                                             disabled={saving}
-                                            className="bg-green-700 hover:bg-green-600 disabled:bg-green-800 px-5 py-2 text-xs font-semibold text-yellow-50 transition shadow-lg shadow-green-950/20"
+                                            className="bg-green-700 hover:bg-green-600 disabled:bg-green-800 px-5 py-2 text-xs font-semibold text- transition shadow-lg shadow-green-950/20"
                                         >
                                             {saving
                                                 ? 'Saving...'
@@ -262,7 +262,7 @@ export default function ProfilePage() {
                                         <img
                                             src={getAvatarUrl(user.avatar_url)}
                                             alt={`${user.nickname} avatar`}
-                                            className="h-24 w-24 border-2 border-neutral-600 bg-yellow-50 object-cover shadow-md"
+                                            className="h-24 w-24 border-2 border-neutral-600 bg- object-cover shadow-md"
                                             onError={(e) => {
                                                 (
                                                     e.target as HTMLImageElement
@@ -287,7 +287,7 @@ export default function ProfilePage() {
                                     </div>
 
                                     <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                                        <div className="border-2 border-neutral-600 bg-yellow-50 p-3">
+                                        <div className="border-2 border-neutral-600 bg- p-3">
                                             <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 User ID
                                             </dt>
@@ -295,7 +295,7 @@ export default function ProfilePage() {
                                                 {user.id}
                                             </dd>
                                         </div>
-                                        <div className="border-2 border-neutral-600 bg-yellow-50 p-3">
+                                        <div className="border-2 border-neutral-600 bg- p-3">
                                             <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 Email Address
                                             </dt>
@@ -303,7 +303,7 @@ export default function ProfilePage() {
                                                 {user.email}
                                             </dd>
                                         </div>
-                                        <div className="border-2 border-neutral-600 bg-yellow-50 p-3">
+                                        <div className="border-2 border-neutral-600 bg- p-3">
                                             <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 Nickname
                                             </dt>
@@ -311,7 +311,7 @@ export default function ProfilePage() {
                                                 {user.nickname}
                                             </dd>
                                         </div>
-                                        <div className="border-2 border-neutral-600 bg-yellow-50 p-3">
+                                        <div className="border-2 border-neutral-600 bg- p-3">
                                             <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 Avatar Path
                                             </dt>
@@ -319,7 +319,7 @@ export default function ProfilePage() {
                                                 {user.avatar_url ?? 'null'}
                                             </dd>
                                         </div>
-                                        <div className="border-2 border-neutral-600 bg-yellow-50 p-3">
+                                        <div className="border-2 border-neutral-600 bg- p-3">
                                             <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 Created At
                                             </dt>
@@ -329,7 +329,7 @@ export default function ProfilePage() {
                                                 ).toLocaleString()}
                                             </dd>
                                         </div>
-                                        <div className="border-2 border-neutral-600 bg-yellow-50 p-3">
+                                        <div className="border-2 border-neutral-600 bg- p-3">
                                             <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 Last Updated
                                             </dt>
@@ -349,7 +349,7 @@ export default function ProfilePage() {
                                 Gameplay Stats
                             </h2>
                             <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-                                <div className="border-2 border-neutral-600 bg-yellow-50 p-3 text-center">
+                                <div className="border-2 border-neutral-600 bg- p-3 text-center">
                                     <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                         Wins
                                     </dt>
@@ -357,7 +357,7 @@ export default function ProfilePage() {
                                         {stats?.wins ?? 0}
                                     </dd>
                                 </div>
-                                <div className="border-2 border-neutral-600 bg-yellow-50 p-3 text-center">
+                                <div className="border-2 border-neutral-600 bg- p-3 text-center">
                                     <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                         Losses
                                     </dt>
@@ -365,7 +365,7 @@ export default function ProfilePage() {
                                         {stats?.losses ?? 0}
                                     </dd>
                                 </div>
-                                <div className="border-2 border-neutral-600 bg-yellow-50 p-3 text-center">
+                                <div className="border-2 border-neutral-600 bg- p-3 text-center">
                                     <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                         Win Rate
                                     </dt>
@@ -377,7 +377,7 @@ export default function ProfilePage() {
                                             : '0%'}
                                     </dd>
                                 </div>
-                                <div className="border-2 border-neutral-600 bg-yellow-50 p-3 text-center">
+                                <div className="border-2 border-neutral-600 bg- p-3 text-center">
                                     <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                         Rating
                                     </dt>
@@ -393,7 +393,7 @@ export default function ProfilePage() {
                 <div className="mt-8 flex items-center justify-center gap-3 border-t-2 border-neutral-600 pt-6">
                     <Link
                         href="/lobby"
-                        className="bg-red-900 px-6 py-2.5 text-sm font-semibold text-yellow-50 transition hover:bg-red-800 shadow-lg shadow-red-950/20"
+                        className="bg-red-900 px-6 py-2.5 text-sm font-semibold text- transition hover:bg-red-800 shadow-lg shadow-red-950/20"
                     >
                         Back to Lobby
                     </Link>
