@@ -10,6 +10,7 @@ import {
 import type { GameConstants, PlayerState } from '../types';
 import { DOHYO_THEMES, type DohyoTheme } from '../hooks/useCustomization';
 import { Player } from '../components/Player';
+import { Environment } from '@react-three/drei';
 
 const PLATE_THICKNESS = 0.5;
 const SPAWN_LINE_LENGTH = 3.6;
@@ -93,6 +94,11 @@ export function WorldScene({
 
     return (
         <>
+            <Environment
+                preset="warehouse"
+                // files={'../images/sky_04_2k.png'}
+                background
+            />
             <ambientLight intensity={0.6} />
             <directionalLight
                 intensity={1.2}
