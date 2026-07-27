@@ -67,7 +67,7 @@ export default function LoginPage() {
                                 }
                                 placeholder="you@example.com"
                                 className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-blue-500"
-                                // required
+                                required
                             />
                         </label>
 
@@ -83,7 +83,7 @@ export default function LoginPage() {
                                 }
                                 placeholder="••••••••"
                                 className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-blue-500"
-                                // required
+                                required
                             />
                         </label>
 
