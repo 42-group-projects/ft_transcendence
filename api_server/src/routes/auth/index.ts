@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { registerSchema, loginSchema } from './schemas';
 import { authService } from '../../service/authService';
+import { handleValidationError } from './utils';
 
 export const authRoutes = new Hono();
 
@@ -25,15 +26,7 @@ function toPublicUser(user: Record<string, any>) {
 // --- Routes ---
 authRoutes.post(
     '/register',
-    zValidator('json', registerSchema, (result, c) => {
-        if (!result.success) {
-            const first = result.error.issues[0];
-            return c.json(
-                { error: first?.message ?? 'Invalid request data' },
-                400,
-            );
-        }
-    }),
+    zValidator('json', registerSchema, handleValidationError),
     async (c) => {
         const { email, nickname, password } = c.req.valid('json');
         const { access_token, user } = await authService.register(
@@ -47,15 +40,7 @@ authRoutes.post(
 
 authRoutes.post(
     '/login',
-    zValidator('json', loginSchema, (result, c) => {
-        if (!result.success) {
-            const first = result.error.issues[0];
-            return c.json(
-                { error: first?.message ?? 'Invalid request data' },
-                400,
-            );
-        }
-    }),
+    zValidator('json', loginSchema, handleValidationError),
     async (c) => {
         const { email, password } = c.req.valid('json');
         const { access_token, user } = await authService.login(email, password);
