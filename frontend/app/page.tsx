@@ -127,7 +127,6 @@ export default function Home() {
                 <div className="pointer-events-none absolute inset-0 top-0 flex items-start justify-center">
                     <div className="h-[400px] w-full max-w-3xl rounded-full bg-gradient-to-r from-yellow-200/30 via-yellow-100/40 to-yellow-200/30 blur-3xl" />
                 </div>
-
                 <div className="relative">
                     <p className="mb-3 text-center text-xs uppercase tracking-[0.3em] text-stone-800 ">
                         What&apos;s inside
@@ -137,7 +136,6 @@ export default function Home() {
                         Everything you need to compete
                     </h2>
                 </div>
-
                 <div className="relative grid gap-5 sm:grid-cols-2">
                     {features.map((f) => (
                         <div

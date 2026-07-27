@@ -4,7 +4,7 @@ export default function PrivacyPage() {
     return (
         <main className="relative min-h-screen bg- px-4 py-10 text-stone-900 sm:px-6 overflow-hidden">
             <div className="pointer-events-none absolute inset-0 top-0 flex items-start justify-center">
-                <div className="h-[1200px] w-full max-w-3xl bg-gradient-to-r from-yellow-200/30 via-yellow-100/40 to-yellow-200/30 blur-3xl" />
+                <div className="h-[1200px] w-full max-w-3xl bg-gradient-to-r from-yellow-200/70 via-yellow-100/90 to-yellow-200/70 blur-3xl" />
             </div>
             <section className="relative mx-auto w-full max-w-3xl">
                 <div className="mb-8">

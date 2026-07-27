@@ -100,8 +100,8 @@ function FloatingChatWindow({
                         <span
                             className={`max-w-[80%] break-words rounded px-2 py-1 text-[11px] ${
                                 msg.direction === 'out'
-                                    ? 'bg-red-800/30 text-red-900'
-                                    : 'bg-neutral-600 text-'
+                                    ? 'bg-green-600/30 text-green-900'
+                                    : 'bg-blue-600/30 text-blue-900'
                             }`}
                         >
                             {msg.text}
@@ -362,7 +362,16 @@ export function FriendsSidebar() {
     };
 
     const renderSidebarContent = () => (
-        <div className="flex h-full flex-col border-3 border-stone-500">
+        <div
+            className="flex h-full flex-col border-3 border-stone-700 
+        "
+            style={{
+                backgroundImage:
+                    'linear-gradient(rgba(253, 244, 191, 0.4), rgba(253, 244, 191, 0.4)), url(/washi.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+            }}
+        >
             <div className="mb-3 mt-3 px-3">
                 <p className="text-xs uppercase tracking-[0.25em] text-stone-700">
                     Friends

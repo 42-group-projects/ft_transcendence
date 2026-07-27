@@ -76,9 +76,13 @@ export default function RankingPage() {
     return (
         <main className="min-h-screen bg- px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
             <div className="pointer-events-none fixed inset-0 -z-10">
-                <div className="absolute -top-10 -left-10 h-[400px] w-[400px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -top-10 -left-10 h-[400px] w-[1200px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
                 <div className="absolute -bottom-10 -right-10 h-[400px] w-[400px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
             </div>
+
+            {/* <div className="pointer-events-none absolute inset-0 top-0 flex items-start justify-center">
+                <div className="h-[1200px] w-full max-w-3xl bg-gradient-to-r from-yellow-200/30 via-yellow-100/80 to-yellow-200/30 blur-3xl" />
+            </div> */}
             <section className="mx-auto w-full max-w-2xl">
                 <p className="text-sm uppercase tracking-[0.3em] text-stone-700">
                     Ranking
