@@ -75,6 +75,10 @@ export default function RankingPage() {
 
     return (
         <main className="min-h-screen bg- px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-10 -left-10 h-[400px] w-[400px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -bottom-10 -right-10 h-[400px] w-[400px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
+            </div>
             <section className="mx-auto w-full max-w-2xl">
                 <p className="text-sm uppercase tracking-[0.3em] text-stone-700">
                     Ranking
@@ -124,7 +128,7 @@ export default function RankingPage() {
                                                 key={entry.id}
                                                 className={`border-b border-stone-200 transition-colors ${
                                                     isMe
-                                                        ? 'bg-red-900/15'
+                                                        ? 'bg-red-800/15'
                                                         : 'hover:bg-amber-100/50'
                                                 }`}
                                             >
@@ -176,13 +180,13 @@ export default function RankingPage() {
                 <div className="mt-8 flex items-center justify-center gap-3">
                     <Link
                         href="/lobby"
-                        className="bg-red-900 px-5 py-2.5 text-sm font-semibold text- transition hover:bg-red-800"
+                        className="bg-red-800 px-5 py-2.5 text-sm font-semibold text- transition hover:bg-red-800 border-2 border-neutral-600"
                     >
                         Back to Lobby
                     </Link>
                     <Link
                         href="/career"
-                        className="border-2 border-neutral-600 px-5 py-2.5 text-sm font-semibold text-stone-900 transition hover:border-stone-700 hover:bg-stone-100"
+                        className="border-2 border-neutral-600 px-5 py-2.5 text-sm font-semibold text-stone-900 transition hover:border-stone-700 hover:bg-stone-100 bg-yellow-100"
                     >
                         My Match History
                     </Link>

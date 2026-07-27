@@ -151,7 +151,11 @@ export default function GamePage() {
     }, [isSessionOver, sessionEndedReason]);
 
     return (
-        <main className="min-h-screen bg- text-stone-900">
+        <main className="min-h-screen text-stone-900">
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-40 -left-40 h-[800px] w-[800px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -bottom-32 -right-32 h-[800px] w-[800px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
+            </div>
             <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold text-stone-950">
@@ -160,7 +164,7 @@ export default function GamePage() {
                     <div className="flex items-center gap-2">
                         <Link
                             href="/lobby"
-                            className="border-2 border-neutral-600 px-3 py-1.5 text-xs font-medium text-stone-900 transition hover:bg-stone-100"
+                            className="border-2 border-neutral-600 px-3 py-1.5 text-xs font-medium text-stone-900 transition hover:bg-stone-100 bg-yellow-100"
                         >
                             Back to Lobby
                         </Link>

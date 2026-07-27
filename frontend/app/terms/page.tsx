@@ -2,8 +2,11 @@ import Link from 'next/link';
 
 export default function TermsPage() {
     return (
-        <main className="min-h-screen bg- px-4 py-10 text-stone-900 sm:px-6">
-            <section className="mx-auto w-full max-w-3xl">
+        <main className="relative min-h-screen bg- px-4 py-10 text-stone-900 sm:px-6 overflow-hidden">
+            <div className="pointer-events-none absolute inset-0 top-0 flex items-start justify-center">
+                <div className="h-[1200px] w-full max-w-3xl bg-gradient-to-r from-yellow-200/30 via-yellow-100/40 to-yellow-200/30 blur-3xl" />
+            </div>
+            <section className="relative mx-auto w-full max-w-3xl">
                 <div className="mb-8">
                     <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-950">
                         Terms of Service
@@ -122,15 +125,13 @@ export default function TermsPage() {
                     </section>
                 </div>
 
-                <div className="mt-10 flex items-center gap-4 text-sm text-stone-700">
-                    <span className="text-stone-600">|</span>
+                <div className="mt-10 flex items-stretch gap-4 text-sm text-stone-700">
                     <Link
                         href="/lobby"
-                        className="transition hover:text-stone-900"
+                        className="border-2 border-stone-400 bg-yellow-100 px-4 py-2 text-sm font-medium text-stone-900 transition hover:bg-stone-200"
                     >
                         Back
                     </Link>
-                    <span className="text-stone-600">|</span>
                 </div>
             </section>
         </main>

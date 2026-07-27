@@ -43,8 +43,12 @@ export default function SignupPage() {
     };
 
     return (
-        <main className="min-h-screen bg- text-stone-900">
-            <section className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-12">
+        <main className="relative min-h-screen bg- text-stone-900 overflow-hidden">
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-10 -left-10 h-[400px] w-[400px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -bottom-10 -right-10 h-[400px] w-[400px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
+            </div>
+            <section className="relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-12">
                 <AuthCard
                     accentLabel="SumoVerse"
                     accentColorClassName="text-red-900"
@@ -79,7 +83,7 @@ export default function SignupPage() {
                                     setDisplayName(event.target.value)
                                 }
                                 placeholder="Display Name"
-                                className="w-full border-2 border-stone-300 bg- px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
+                                className="w-full border-2 border-stone-300 bg-yellow-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                                 required
                             />
                         </label>
@@ -95,7 +99,7 @@ export default function SignupPage() {
                                     setEmail(event.target.value)
                                 }
                                 placeholder="you@example.com"
-                                className="w-full border-2 border-stone-300 bg- px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
+                                className="w-full border-2 border-stone-300 bg-yellow-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                                 required
                             />
                         </label>
@@ -111,7 +115,7 @@ export default function SignupPage() {
                                     setPassword(event.target.value)
                                 }
                                 placeholder="••••••••"
-                                className="w-full border-2 border-stone-300 bg- px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
+                                className="w-full border-2 border-stone-300 bg-yellow-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                                 required
                             />
                         </label>
@@ -127,7 +131,7 @@ export default function SignupPage() {
                                     setConfirmPassword(event.target.value)
                                 }
                                 placeholder="••••••••"
-                                className="w-full border-2 border-stone-300 bg- px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
+                                className="w-full border-2 border-stone-300 bg-yellow-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                                 required
                             />
                         </label>
@@ -135,7 +139,7 @@ export default function SignupPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-red-900 px-4 py-3 text-sm font-semibold text- transition hover:bg-red-800 disabled:opacity-50"
+                            className="w-full bg-red-800 px-4 py-3 text-sm font-semibold text- transition hover:bg-red-900 disabled:opacity-50"
                         >
                             {loading ? 'Creating account…' : 'Sign up'}
                         </button>

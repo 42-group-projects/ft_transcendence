@@ -48,9 +48,9 @@ function FloatingChatWindow({
     };
 
     return (
-        <div className="flex w-full flex-col overflow-hidden border-2 border-neutral-600 bg- shadow-lg shadow-red-900/10 backdrop-blur-sm">
+        <div className="flex w-full flex-col overflow-hidden border-2 border-neutral-600 bg-yellow-100 shadow-lg shadow-red-900/10 backdrop-blur-sm">
             {/* Header */}
-            <div className="flex items-center justify-between border-b-2 border-neutral-600 bg-neutral-800 px-3 py-2">
+            <div className="flex items-center justify-between border-b-2 border-neutral-600 bg-neutral-800 px-3 py-2 bg-red-700">
                 <span
                     className="truncate text-xs font-semibold text-"
                     title={displayName}
@@ -60,7 +60,7 @@ function FloatingChatWindow({
                 <button
                     type="button"
                     onClick={onClose}
-                    className="ml-2 shrink-0 rounded p-0.5 text-neutral-600 transition hover:bg-neutral-700 hover:text-neutral-800"
+                    className="ml-2 shrink-0 rounded p-0.5 text-neutral-600 transition hover:bg-red-400 bg-red-100 hover:text-neutral-800"
                     aria-label="Close chat"
                 >
                     <svg
@@ -100,7 +100,7 @@ function FloatingChatWindow({
                         <span
                             className={`max-w-[80%] break-words rounded px-2 py-1 text-[11px] ${
                                 msg.direction === 'out'
-                                    ? 'bg-red-900/30 text-red-900'
+                                    ? 'bg-red-800/30 text-red-900'
                                     : 'bg-neutral-600 text-'
                             }`}
                         >
@@ -122,12 +122,12 @@ function FloatingChatWindow({
                     }}
                     maxLength={500}
                     placeholder="Message…"
-                    className="min-w-0 flex-1 rounded border-2 border-neutral-600 bg- px-2 py-1 text-[11px] text-stone-900 outline-none transition focus:border-stone-700"
+                    className="min-w-0 flex-1 rounded border-2 border-neutral-600 bg-yellow-100 px-2 py-1 text-[11px] text-stone-900 outline-none transition focus:border-stone-700"
                 />
                 <button
                     type="button"
                     onClick={handleSend}
-                    className="rounded bg-red-900 px-2 py-1 text-[10px] font-semibold text- transition hover:bg-red-800"
+                    className="rounded bg-green-400 px-2 py-1 text-[10px] font-semibold text- transition hover:bg-green-800"
                 >
                     Send
                 </button>
@@ -362,7 +362,7 @@ export function FriendsSidebar() {
     };
 
     const renderSidebarContent = () => (
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col border-3 border-stone-500">
             <div className="mb-3 mt-3 px-3">
                 <p className="text-xs uppercase tracking-[0.25em] text-stone-700">
                     Friends
@@ -380,10 +380,10 @@ export function FriendsSidebar() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search nickname to add..."
-                        className="w-full border-2 border-neutral-600 bg- px-3 py-1.5 text-xs text-stone-900 outline-none focus:border-stone-700 transition"
+                        className="w-full border-2 border-neutral-600 bg-yellow-50 px-3 py-1.5 text-xs text-stone-900 outline-none focus:border-stone-700 transition"
                     />
                     {searchResults.length > 0 && (
-                        <ul className="absolute left-0 right-0 z-40 mt-1 max-h-48 overflow-y-auto border-2 border-neutral-600 bg- p-1 shadow-lg">
+                        <ul className="absolute left-0 right-0 z-40 mt-1 max-h-48 overflow-y-auto border-2 border-neutral-600 bg-yellow-100 p-1 shadow-lg">
                             {searchResults.map((user) => (
                                 <li
                                     key={user.id}
@@ -443,7 +443,7 @@ export function FriendsSidebar() {
                             {requests.map((req) => (
                                 <li
                                     key={req.id}
-                                    className="border-2 border-neutral-600 bg- p-2"
+                                    className="border-2 border-neutral-600 bg-yellow-100 p-2"
                                 >
                                     <div className="flex items-center gap-2 mb-2">
                                         <img
@@ -597,7 +597,7 @@ export function FriendsSidebar() {
                                             >
                                                 Chat
                                                 {unread > 0 && !isOpen && (
-                                                    <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center bg-red-900 text-[8px] font-bold text-">
+                                                    <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center bg-green-300 text-[8px] font-bold text-">
                                                         {unread > 9
                                                             ? '9+'
                                                             : unread}
@@ -633,13 +633,13 @@ export function FriendsSidebar() {
                     <button
                         type="button"
                         onClick={() => setMobileOpen((value) => !value)}
-                        className="border-2 border-neutral-600 bg-neutral-800 px-3 py-2 text-xs font-semibold text- backdrop-blur-md transition hover:bg-stone-700"
+                        className="border-2 border-neutral-600 bg-red-800 px-3 py-2 text-xs font-semibold text- backdrop-blur-md transition hover:bg-red-900"
                     >
                         Friends ({onlineCount})
                     </button>
 
                     {mobileOpen && (
-                        <div className="mt-2 w-[min(88vw,20rem)] max-h-[80vh] flex flex-col overflow-hidden border-2 border-neutral-600 bg- shadow-lg shadow-red-900/10 backdrop-blur-md">
+                        <div className="mt-2 w-[min(88vw,20rem)] max-h-[80vh] flex flex-col overflow-hidden border-2 border-neutral-600 bg-yellow-100 shadow-lg shadow-red-900/10 backdrop-blur-md">
                             {renderSidebarContent()}
                         </div>
                     )}
@@ -648,7 +648,7 @@ export function FriendsSidebar() {
 
             {/* --- Desktop Drawer --- */}
             <div className="pointer-events-none absolute inset-y-0 right-0 z-20 hidden items-start md:flex">
-                <div className="pointer-events-auto flex h-full w-[min(80vw,18rem)] flex-col overflow-hidden border-l-2 border-neutral-600 bg- shadow-lg shadow-red-900/10 backdrop-blur-md sm:w-72">
+                <div className="pointer-events-auto flex h-full w-[min(80vw,18rem)] flex-col overflow-hidden border-l-2 border-neutral-600 bg-yellow-100 shadow-lg shadow-red-900/10 backdrop-blur-md sm:w-72">
                     {renderSidebarContent()}
                 </div>
             </div>

@@ -21,7 +21,7 @@ export function CustomizationPanel({
     onUpdate,
 }: CustomizationPanelProps) {
     return (
-        <div className="flex flex-wrap items-center gap-4 border-2 border-neutral-600 bg-amber-50 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-4 border-2 border-neutral-600 bg-amber-50 px-4 py-3 bg-yellow-100">
             <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-stone-700">
                     Mawashi

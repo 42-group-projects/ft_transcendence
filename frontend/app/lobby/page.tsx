@@ -19,28 +19,28 @@ const roomLinks = [
         title: 'Practice room',
         description: 'Practice movement, test AI levels, and warm up offline.',
         accentClassName:
-            'border-red-950/40 bg-red-300/10 text-red-900 hover:bg-red-900/20',
+            'border-red-950/40 bg-red-300/10 text-stone-800  hover:bg-red-800/20',
     },
     {
         href: '/profile',
         title: 'Profile',
         description: 'View and edit your profile details and avatar settings.',
         accentClassName:
-            'border-orange-600/80 bg-orange-600/10 text-orange-900 hover:bg-orange-600/20',
+            'border-orange-600/80 bg-orange-600/10 text-stone-800 hover:bg-orange-600/20',
     },
     {
         href: '/career',
         title: 'Career',
         description: 'Check milestones, progress, and future career unlocks.',
         accentClassName:
-            'border-amber-700/40 bg-amber-700/10 text-amber-900 hover:bg-amber-700/20',
+            'border-amber-700/40 bg-amber-700/10 text-stone-800 hover:bg-amber-700/20',
     },
     {
         href: '/ranking',
         title: 'Ranking',
         description: 'See leaderboard standings and competitive ranking info.',
         accentClassName:
-            'border-red-800/40 bg-red-800/10 text-red-900 hover:bg-red-800/20',
+            'border-red-800/40 bg-red-800/10 text-stone-800 hover:bg-red-800/20',
     },
 ];
 
@@ -136,11 +136,21 @@ export default function LobbyPage() {
     const rankLabel = getRankLabel(stats?.rating);
 
     return (
-        <main className="min-h-screen px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
-            <section className="mx-auto flex min-h-[calc(100vh-6.5rem)] w-full max-w-6xl flex-col gap-4">
+        <main className="min-h-screen px-2 py-6 text-stone-900 sm:px-6 lg:px-8 relative overflow-hidden">
+            {/* Asymmetrical yellow gradient backdrop */}
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-40 -left-40 h-[800px] w-[800px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -bottom-32 -right-32 h-[800px] w-[800px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
+            </div>
+
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="h-[600px] w-full max-w-3xl rounded-full bg-gradient-to-r from-yellow-200/30 via-yellow-100/40 to-yellow-200/30 blur-3xl" />
+            </div>
+
+            <section className="relative mx-auto flex min-h-[calc(100vh-6.5rem)] w-full max-w-6xl flex-col gap-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-sm uppercase tracking-[0.3em] text-stone-700">
+                        <p className="text-sm uppercase tracking-[0.3em] text-stone-800">
                             Lobby
                         </p>
                         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-stone-950">
@@ -149,16 +159,16 @@ export default function LobbyPage() {
                     </div>
                     <Link
                         href="/"
-                        className="border-2 border-stone-400 px-4 py-2 text-sm font-medium text-stone-900 transition hover:bg-stone-200"
+                        className="border-2 border-stone-400 bg-red-800 px-4 py-2 text-sm font-medium text-stone-900 transition hover:bg-stone-200"
                     >
                         Back home
                     </Link>
                 </div>
 
-                <div className="relative flex-1 overflow-hidden border-2 shadow-lg shadow-red-900/10">
+                <div className="relative flex-1 overflow-hidden shadow-lg">
                     {/* <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(127,29,29,0.08),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(180,83,9,0.08),_transparent_30%),linear-gradient(180deg,_rgba(255,251,235,0.98),_rgba(254,243,199,1))]" />
                     <div className="absolute inset-0 opacity-10 [background-image:linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] [background-size:60px_60px]" />
-                    <div className="absolute left-[18%] top-[22%] h-24 w-24 border border-red-900/20 bg-red-900/8 blur-sm" />
+                    <div className="absolute left-[18%] top-[22%] h-24 w-24 border border-red-900/20 bg-red-800/8 blur-sm" />
                     <div className="absolute bottom-[20%] right-[18%] h-32 w-32 border border-amber-900/20 bg-amber-900/8 blur-sm" />
                     <div className="absolute left-[24%] top-[48%] h-px w-[18%] -rotate-12 bg-gradient-to-r from-red-900/30 to-transparent" />
                     <div className="absolute right-[25%] top-[40%] h-px w-[16%] rotate-[18deg] bg-gradient-to-r from-amber-900/30 to-transparent" /> */}
@@ -207,7 +217,7 @@ export default function LobbyPage() {
                                 <img
                                     src={getAvatarUrl(user?.avatar_url)}
                                     alt={`${displayName} avatar`}
-                                    className="mx-auto h-28 w-28 border-4 border-stone-400 bg- object-cover shadow-md shadow-stone-400/30 sm:h-32 sm:w-32"
+                                    className="mx-auto h-28 w-28 border-4 border-stone-400 object-cover shadow-md shadow-stone-400/30 sm:h-32 sm:w-32"
                                     onError={(e) => {
                                         (e.target as HTMLImageElement).src =
                                             getAvatarUrl(null);
