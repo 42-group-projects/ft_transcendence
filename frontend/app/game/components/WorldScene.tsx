@@ -94,11 +94,7 @@ export function WorldScene({
 
     return (
         <>
-            <Environment
-                preset="studio"
-                // files={'../images/sky_04_2k.png'}
-                background
-            />
+            <Environment preset="forest" background />
             <ambientLight intensity={0.6} />
             <directionalLight
                 intensity={1.2}

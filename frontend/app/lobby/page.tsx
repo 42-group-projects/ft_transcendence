@@ -147,6 +147,7 @@ export default function LobbyPage() {
                         <p className="text-sm uppercase tracking-[0.3em] text-stone-800">
                             Lobby
                         </p>
+                        awd
                         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-stone-950">
                             Choose your next match
                         </h1>
@@ -162,7 +163,7 @@ export default function LobbyPage() {
                 <div className="relative flex-1 overflow-hidden shadow-lg">
                     <FriendsSidebar />
                     <div className="relative z-10 flex h-full flex-col p-4 sm:p-6 md:pr-80">
-                        <div className="flex flex-wrap gap-2 lg:gap-3">
+                        <div className="flex flex-wrap gap-1 items-center lg:items-center">
                             {roomLinks.map((room) => {
                                 const isSolo = room.href === '/game/solo';
                                 const disabled = isSolo && hasActiveSession;
