@@ -22,7 +22,7 @@ SumoVerse is a browser-based 3D real-time multiplayer fighting game inspired by 
 - **3D Graphics** rendered in the browser using Three.js with physics powered by Rapier
 - **Real-time Multiplayer** via WebSocket (Socket.io) with server-side game logic
 - **Multiple Matchmaking Modes**: keyword matching, friend invite, random matchmaking, and CPU battle
-- **AI Opponents** with 4 difficulty levels (Easy, Medium, Hard, Oni)
+- **AI Opponents** with 4 difficulty levels (Easy, Medium, Hard)
 - **User Authentication** with email/password (bcrypt hashed)
 - **Player Profiles** with avatar, stats, and match history
 - **Friend System** with friend requests and friend list
