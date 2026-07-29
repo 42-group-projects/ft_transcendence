@@ -8,7 +8,11 @@ import {
     SPAWN_LINE_OFFSET,
 } from '../constants';
 import type { GameConstants, PlayerState } from '../types';
-import { DOHYO_THEMES, type DohyoTheme, type EnvironmentType } from '../hooks/useCustomization';
+import {
+    DOHYO_THEMES,
+    type DohyoTheme,
+    type EnvironmentType,
+} from '../hooks/useCustomization';
 import { Player } from '../components/Player';
 import { Environment } from '@react-three/drei';
 
