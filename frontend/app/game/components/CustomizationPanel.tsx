@@ -85,7 +85,9 @@ export function CustomizationPanel({
                 <select
                     value={environment}
                     onChange={(e) =>
-                        onUpdate({ environment: e.target.value as EnvironmentType })
+                        onUpdate({
+                            environment: e.target.value as EnvironmentType,
+                        })
                     }
                     onKeyDown={(e) => e.preventDefault()}
                     className="rounded border-2 border-neutral-600 bg-white px-2 py-1 text-xs text-stone-700 transition hover:border-stone-700"
