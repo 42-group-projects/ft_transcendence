@@ -26,5 +26,8 @@ export function middleware(request: NextRequest) {
 export const config = {
     // Exclude /api so proxied API calls (e.g. unauthenticated /api/auth/login)
     // are not caught by the auth redirect before reaching the rewrite.
-    matcher: ['/((?!_next/|api/|favicon.ico|robots.txt|sitemap.xml).*)'],
+    // Also exclude any path with a file extension: public/ assets such as
+    // webappbackground.png would otherwise be redirected to / for logged-out
+    // visitors, so the browser receives HTML instead of the image.
+    matcher: ['/((?!_next/|api/|.*\\.[^/]+$).*)'],
 };
