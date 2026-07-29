@@ -66,23 +66,27 @@ export default function SoloPage() {
     const resultTitle = roundResultMessage ?? 'Match finished';
 
     return (
-        <main className="min-h-screen bg-neutral-950 text-neutral-100">
+        <main className="min-h-screen bg- text-stone-900">
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-40 -left-40 h-[800px] w-[800px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -bottom-32 -right-32 h-[800px] w-[800px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
+            </div>
             <section className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <h1 className="text-xl font-semibold tracking-tight">
-                            solo dev mode
+                        <h1 className="text-xl font-semibold tracking-tight text-stone-950">
+                            Practice Mode
                         </h1>
-                        <span className="flex items-center gap-2 text-sm text-neutral-400">
+                        <span className="flex items-center gap-2 text-sm text-stone-700">
                             <span
-                                className={`inline-block h-2 w-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}
+                                className={`inline-block h-2 w-2 ${connected ? 'bg-green-600' : 'bg-red-800'}`}
                             />
                             {connected ? 'connected' : 'disconnected'}
                         </span>
                     </div>
                     <Link
                         href="/lobby"
-                        className="rounded-md border border-neutral-700 px-3 py-1.5 text-xs font-medium text-neutral-200 transition hover:bg-neutral-900"
+                        className="border-2 border-neutral-600 px-3 py-1.5 text-xs font-medium text-stone-900 transition hover:bg-stone-100 bg-yellow-100"
                     >
                         Back to Lobby
                     </Link>
@@ -97,7 +101,7 @@ export default function SoloPage() {
                                     event.target.value as SoloDifficulty,
                                 )
                             }
-                            className="rounded border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-100 outline-none focus:border-neutral-500"
+                            className="rounded border-2 border-neutral-600 bg-yellow-100 px-3 py-1.5 text-sm text-stone-900 outline-none focus:border-stone-700 hover:bg-yellow-50"
                         >
                             <option value="dummy">Dummy (no AI)</option>
                             <option value="easy">Easy CPU</option>
@@ -107,22 +111,22 @@ export default function SoloPage() {
                         <button
                             disabled={!connected}
                             onClick={handleStart}
-                            className="rounded bg-indigo-600 px-4 py-1.5 text-sm font-medium hover:bg-indigo-500 disabled:opacity-40"
+                            className="rounded px-4 py-1.5 text-sm font-medium border-2 border-neutral-600 hover:bg-yellow-50 disabled:opacity-40 bg-yellow-100"
                         >
                             Start Solo
                         </button>
                     </div>
                 ) : (
                     <div className="flex items-center gap-3">
-                        <span className="text-sm text-neutral-400">
+                        <span className="text-sm text-stone-700">
                             room:{' '}
-                            <span className="font-mono text-neutral-200">
+                            <span className="font-mono text-stone-900">
                                 {joinedRoomId}
                             </span>
                         </span>
                         <button
                             onClick={leaveRoom}
-                            className="rounded border border-neutral-700 px-3 py-1 text-sm text-neutral-300 hover:bg-neutral-800"
+                            className="rounded border-2 border-neutral-600 px-3 py-1 text-sm text-stone-900 hover:bg-stone-100 bg-red-800"
                         >
                             Leave
                         </button>
@@ -136,18 +140,18 @@ export default function SoloPage() {
                 />
 
                 {errorMessage && (
-                    <p className="text-sm text-red-400">{errorMessage}</p>
+                    <p className="text-sm text-red-700">{errorMessage}</p>
                 )}
                 {systemMessage && !errorMessage && (
-                    <p className="text-sm text-neutral-400">{systemMessage}</p>
+                    <p className="text-sm text-green-700">{systemMessage}</p>
                 )}
                 {roundResultMessage && (
-                    <p className="text-sm font-medium text-yellow-400">
+                    <p className="text-sm font-medium text-yellow-700">
                         {roundResultMessage}
                     </p>
                 )}
 
-                <div className="relative h-[70vh] overflow-hidden rounded-lg border border-neutral-700">
+                <div className="relative h-[70vh] overflow-hidden border-2 border-natural-600">
                     <Canvas
                         shadows="basic"
                         camera={{ position: [0, 8, 10], fov: 55 }}

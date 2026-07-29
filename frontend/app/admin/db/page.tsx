@@ -77,39 +77,39 @@ export default function AdminDbPage() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-neutral-950 px-4 py-6 text-neutral-100 sm:px-6 lg:px-8">
+        <main className="min-h-screen bg- px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
             <section className="mx-auto w-full max-w-6xl space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">
+                        <p className="text-sm uppercase tracking-[0.3em] text-stone-700">
                             Admin
                         </p>
-                        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+                        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-stone-950">
                             Database Snapshot
                         </h1>
                     </div>
                     <Link
                         href="/lobby"
-                        className="rounded-md border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:bg-neutral-900"
+                        className="border-2 border-neutral-600 px-4 py-2 text-sm font-medium text-stone-900 transition hover:bg-stone-100"
                     >
                         Back to Lobby
                     </Link>
                 </div>
 
-                <p className="text-sm text-neutral-400">
+                <p className="text-sm text-stone-600">
                     Read-only preview from API endpoint: {DB_INSPECT_API_URL}
                 </p>
 
                 {loading ? (
-                    <p className="text-neutral-300">
+                    <p className="text-stone-700">
                         Loading database contents...
                     </p>
                 ) : null}
-                {error ? <p className="text-sm text-red-400">{error}</p> : null}
+                {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
                 {!loading && !error && payload ? (
                     <div className="space-y-4">
-                        <div className="rounded-xl border border-neutral-800 bg-neutral-900/80 p-4 text-sm text-neutral-300">
+                        <div className="border-2 border-neutral-600 bg-amber-50 p-4 text-sm text-stone-900">
                             <p>Generated at: {payload.generatedAt}</p>
                             <p>Tables: {payload.tableCount}</p>
                             <p>
@@ -123,15 +123,15 @@ export default function AdminDbPage() {
                                 <Link
                                     key={table.name}
                                     href={`/admin/db/${encodeURIComponent(table.name)}`}
-                                    className="rounded-xl border border-neutral-800 bg-neutral-900/80 p-4 transition hover:border-neutral-700 hover:bg-neutral-900"
+                                    className="border-2 border-neutral-600 bg- p-4 transition hover:border-stone-700 hover:bg-stone-50"
                                 >
-                                    <h2 className="text-base font-semibold text-neutral-100">
+                                    <h2 className="text-base font-semibold text-stone-900">
                                         {table.name}
                                     </h2>
-                                    <p className="mt-2 text-sm text-neutral-400">
+                                    <p className="mt-2 text-sm text-stone-700">
                                         Rows: {table.rowCount}
                                     </p>
-                                    <p className="mt-1 text-xs text-neutral-500">
+                                    <p className="mt-1 text-xs text-stone-600">
                                         Click to view table data
                                     </p>
                                 </Link>

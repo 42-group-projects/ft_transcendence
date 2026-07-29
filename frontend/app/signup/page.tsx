@@ -43,24 +43,28 @@ export default function SignupPage() {
     };
 
     return (
-        <main className="min-h-screen bg-neutral-950 text-neutral-100">
-            <section className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-12">
+        <main className="relative min-h-screen bg- text-stone-900 overflow-hidden">
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-10 -left-10 h-[400px] w-[400px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -bottom-10 -right-10 h-[400px] w-[400px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
+            </div>
+            <section className="relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-12">
                 <AuthCard
                     accentLabel="SumoVerse"
-                    accentColorClassName="text-orange-400"
+                    accentColorClassName="text-red-900"
                     title="Create account"
                     description="Temporary UI only. This form is ready for future API wiring."
                     footer={
                         <>
                             <Link
                                 href="/"
-                                className="transition hover:text-neutral-200"
+                                className="transition hover:text-stone-700"
                             >
                                 Back home
                             </Link>
                             <Link
                                 href="/login"
-                                className="text-orange-400 transition hover:text-orange-300"
+                                className="text-red-900 transition hover:text-red-800"
                             >
                                 Already have an account?
                             </Link>
@@ -69,7 +73,7 @@ export default function SignupPage() {
                 >
                     <form className="space-y-4" onSubmit={handleSubmit}>
                         <label className="block">
-                            <span className="mb-2 block text-sm font-medium text-neutral-200">
+                            <span className="mb-2 block text-sm font-medium text-stone-900">
                                 Display name
                             </span>
                             <input
@@ -79,13 +83,13 @@ export default function SignupPage() {
                                     setDisplayName(event.target.value)
                                 }
                                 placeholder="Display Name"
-                                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-orange-500"
+                                className="w-full border-2 border-stone-300 bg-yellow-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                                 required
                             />
                         </label>
 
                         <label className="block">
-                            <span className="mb-2 block text-sm font-medium text-neutral-200">
+                            <span className="mb-2 block text-sm font-medium text-stone-900">
                                 Email
                             </span>
                             <input
@@ -95,13 +99,13 @@ export default function SignupPage() {
                                     setEmail(event.target.value)
                                 }
                                 placeholder="you@example.com"
-                                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-orange-500"
+                                className="w-full border-2 border-stone-300 bg-yellow-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                                 required
                             />
                         </label>
 
                         <label className="block">
-                            <span className="mb-2 block text-sm font-medium text-neutral-200">
+                            <span className="mb-2 block text-sm font-medium text-stone-900">
                                 Password
                             </span>
                             <input
@@ -111,13 +115,13 @@ export default function SignupPage() {
                                     setPassword(event.target.value)
                                 }
                                 placeholder="••••••••"
-                                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-orange-500"
+                                className="w-full border-2 border-stone-300 bg-yellow-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                                 required
                             />
                         </label>
 
                         <label className="block">
-                            <span className="mb-2 block text-sm font-medium text-neutral-200">
+                            <span className="mb-2 block text-sm font-medium text-stone-900">
                                 Confirm password
                             </span>
                             <input
@@ -127,7 +131,7 @@ export default function SignupPage() {
                                     setConfirmPassword(event.target.value)
                                 }
                                 placeholder="••••••••"
-                                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-orange-500"
+                                className="w-full border-2 border-stone-300 bg-yellow-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                                 required
                             />
                         </label>
@@ -135,14 +139,14 @@ export default function SignupPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50"
+                            className="w-full bg-red-800 px-4 py-3 text-sm font-semibold text- transition hover:bg-red-900 disabled:opacity-50"
                         >
                             {loading ? 'Creating account…' : 'Sign up'}
                         </button>
                     </form>
 
                     {statusMessage ? (
-                        <p className="mt-4 text-sm text-amber-400">
+                        <p className="mt-4 text-sm text-red-800">
                             {statusMessage}
                         </p>
                     ) : null}

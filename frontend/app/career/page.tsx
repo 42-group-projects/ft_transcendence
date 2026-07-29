@@ -33,27 +33,27 @@ function MatchRow({ match, myId }: { match: MatchRecord; myId: string }) {
             : match.player1_nickname;
 
     return (
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-800 bg-neutral-950/60 px-4 py-3 text-sm">
+        <div className="flex items-center justify-between gap-4 border-2 border-stone-300 bg-amber-50 px-4 py-3 text-sm">
             <div className="flex items-center gap-3 min-w-0">
                 <span
                     className={`inline-flex shrink-0 items-center rounded px-2 py-0.5 text-xs font-semibold ${
                         won
-                            ? 'bg-green-900/60 text-green-300'
-                            : 'bg-red-900/60 text-red-400'
+                            ? 'bg-green-900/30 text-green-800'
+                            : 'bg-red-800/30 text-red-800'
                     }`}
                 >
                     {won ? 'WIN' : 'LOSS'}
                 </span>
-                <span className="truncate text-neutral-200">
+                <span className="truncate text-stone-900">
                     vs <span className="font-medium">{opponentNickname}</span>
                     {isCpu && (
-                        <span className="ml-1.5 rounded bg-neutral-800 px-1.5 py-0.5 text-xs text-neutral-400">
+                        <span className="ml-1.5 rounded bg-stone-300 px-1.5 py-0.5 text-xs text-stone-700">
                             CPU
                         </span>
                     )}
                 </span>
             </div>
-            <span className="shrink-0 text-neutral-500 tabular-nums">
+            <span className="shrink-0 text-stone-600 tabular-nums">
                 {timeAgo(match.played_at)}
             </span>
         </div>
@@ -103,43 +103,47 @@ export default function CareerPage() {
             : 0;
 
     return (
-        <main className="min-h-screen bg-neutral-950 px-4 py-6 text-neutral-100 sm:px-6 lg:px-8">
-            <section className="mx-auto w-full max-w-2xl">
-                <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">
+        <main className="min-h-screen bg- px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-10 -left-10 h-[400px] w-[400px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -bottom-10 -right-10 h-[400px] w-[400px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
+            </div>
+            <section className="mx-auto w-full max-w-2xl bg-yellow-100 px-3 py-3 border-2 border-grey-500">
+                <p className="text-sm uppercase tracking-[0.3em] text-stone-700">
                     Career
                 </p>
-                <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-950">
                     Match History
                 </h1>
 
-                {loading && <p className="mt-6 text-neutral-400">Loading…</p>}
-                {error && <p className="mt-6 text-sm text-red-400">{error}</p>}
+                {loading && <p className="mt-6 text-stone-600">Loading…</p>}
+                {error && <p className="mt-6 text-sm text-red-700">{error}</p>}
 
                 {!loading && !error && (
                     <>
                         {stats && (
                             <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-                                <div className="rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-4">
-                                    <p className="text-2xl font-bold text-green-400">
+                                <div className="border-2 border-stone-300 bg-amber-50 px-4 py-4">
+                                    <p className="text-2xl font-bold text-green-700">
                                         {stats.wins}
                                     </p>
-                                    <p className="mt-1 text-xs text-neutral-500 uppercase tracking-wider">
+                                    <p className="mt-1 text-xs text-stone-700 uppercase tracking-wider">
                                         Wins
                                     </p>
                                 </div>
-                                <div className="rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-4">
-                                    <p className="text-2xl font-bold text-red-400">
+                                <div className="border-2 border-stone-300 bg-amber-50 px-4 py-4">
+                                    <p className="text-2xl font-bold text-red-700">
                                         {stats.losses}
                                     </p>
-                                    <p className="mt-1 text-xs text-neutral-500 uppercase tracking-wider">
+                                    <p className="mt-1 text-xs text-stone-700 uppercase tracking-wider">
                                         Losses
                                     </p>
                                 </div>
-                                <div className="rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-4">
-                                    <p className="text-2xl font-bold text-blue-400">
+                                <div className="border-2 border-stone-300 bg-amber-50 px-4 py-4">
+                                    <p className="text-2xl font-bold text-red-900">
                                         {stats.rating}
                                     </p>
-                                    <p className="mt-1 text-xs text-neutral-500 uppercase tracking-wider">
+                                    <p className="mt-1 text-xs text-stone-700 uppercase tracking-wider">
                                         Rating
                                     </p>
                                 </div>
@@ -148,13 +152,13 @@ export default function CareerPage() {
 
                         {stats && stats.wins + stats.losses > 0 && (
                             <div className="mt-4">
-                                <div className="mb-1 flex justify-between text-xs text-neutral-500">
+                                <div className="mb-1 flex justify-between text-xs text-stone-700">
                                     <span>Win rate</span>
                                     <span>{winRate}%</span>
                                 </div>
-                                <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-800">
+                                <div className="h-2 w-full overflow-hidden bg-stone-300">
                                     <div
-                                        className="h-2 rounded-full bg-green-500 transition-all"
+                                        className="h-2 bg-green-700 transition-all"
                                         style={{ width: `${winRate}%` }}
                                     />
                                 </div>
@@ -162,11 +166,11 @@ export default function CareerPage() {
                         )}
 
                         <div className="mt-8">
-                            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-400">
+                            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-stone-800">
                                 Recent matches
                             </h2>
                             {matches.length === 0 ? (
-                                <p className="text-sm text-neutral-500">
+                                <p className="text-sm text-stone-600">
                                     No matches yet. Play a game to see your
                                     history here!
                                 </p>
@@ -188,13 +192,13 @@ export default function CareerPage() {
                 <div className="mt-8 flex items-center justify-center gap-3">
                     <Link
                         href="/lobby"
-                        className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500"
+                        className="bg-red-800 px-5 py-2.5 text-sm font-semibold text- transition hover:bg-red-800 border-2 border-neutral-600"
                     >
                         Back to Lobby
                     </Link>
                     <Link
                         href="/ranking"
-                        className="rounded-md border border-neutral-700 px-5 py-2.5 text-sm font-semibold text-neutral-300 transition hover:border-neutral-500 hover:text-white"
+                        className="border-2 border-neutral-600 px-5 py-2.5 text-sm font-semibold text-stone-900 transition hover:border-stone-700 hover:bg-stone-100"
                     >
                         Leaderboard →
                     </Link>

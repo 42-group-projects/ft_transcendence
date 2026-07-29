@@ -21,9 +21,9 @@ export function CustomizationPanel({
     onUpdate,
 }: CustomizationPanelProps) {
     return (
-        <div className="flex flex-wrap items-center gap-4 rounded-lg border border-neutral-700 bg-neutral-900/60 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-4 border-2 border-neutral-600 bg-amber-50 px-4 py-3 bg-yellow-100">
             <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-neutral-400">
+                <span className="text-xs font-medium text-stone-700">
                     Mawashi
                 </span>
                 <div className="flex gap-1.5">
@@ -32,10 +32,10 @@ export function CustomizationPanel({
                             key={c.value}
                             title={c.label}
                             onClick={() => onUpdate({ mawashiColor: c.value })}
-                            className={`h-6 w-6 rounded-full border-2 transition ${
+                            className={`h-6 w-6 border-2 transition ${
                                 mawashiColor === c.value
-                                    ? 'border-white scale-110'
-                                    : 'border-neutral-600 hover:border-neutral-400'
+                                    ? 'border-stone-900 scale-110'
+                                    : 'border-neutral-600 hover:border-stone-700'
                             }`}
                             style={{ backgroundColor: c.value }}
                         />
@@ -43,10 +43,10 @@ export function CustomizationPanel({
                 </div>
             </div>
 
-            <div className="h-5 w-px bg-neutral-700" />
+            <div className="h-5 w-px bg-neutral-600" />
 
             <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-neutral-400">
+                <span className="text-xs font-medium text-stone-700">
                     Dohyo
                 </span>
                 <div className="flex gap-1.5">
@@ -62,8 +62,8 @@ export function CustomizationPanel({
                             onClick={() => onUpdate({ dohyoTheme: key })}
                             className={`h-6 w-6 rounded border-2 transition ${
                                 dohyoTheme === key
-                                    ? 'border-white scale-110'
-                                    : 'border-neutral-600 hover:border-neutral-400'
+                                    ? 'border-stone-900 scale-110'
+                                    : 'border-neutral-600 hover:border-stone-700'
                             }`}
                             style={{ backgroundColor: theme.surface }}
                         />

@@ -42,10 +42,10 @@ export function InviteToast() {
     };
 
     return (
-        <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 shadow-xl max-w-xs text-sm text-neutral-100">
+        <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 border-2 border-neutral-600 bg-yellow-100 px-4 py-3 shadow-lg max-w-xs text-sm text-stone-900">
             <p className="font-medium">
                 Match invite from{' '}
-                <span className="text-orange-400">
+                <span className="text-red-900">
                     {invite.fromNickname ||
                         invite.fromUserId.substring(0, 8) + '…'}
                 </span>
@@ -54,14 +54,14 @@ export function InviteToast() {
                 <button
                     type="button"
                     onClick={handleAccept}
-                    className="flex-1 rounded bg-orange-500/20 py-1 text-xs text-orange-400 transition hover:bg-orange-500/40"
+                    className="flex-1 rounded bg-red-800/20 py-1 text-xs text-red-900 transition hover:bg-red-800/40"
                 >
                     Accept
                 </button>
                 <button
                     type="button"
                     onClick={() => setInvite(null)}
-                    className="flex-1 rounded bg-neutral-700 py-1 text-xs text-neutral-300 transition hover:bg-neutral-600"
+                    className="flex-1 rounded bg-neutral-600 py-1 text-xs bg-red-800 transition hover:bg-neutral-700"
                 >
                     Dismiss
                 </button>

@@ -119,28 +119,32 @@ export default function ProfilePage() {
     };
 
     return (
-        <main className="min-h-screen bg-neutral-950 px-4 py-6 text-neutral-100 sm:px-6 lg:px-8">
-            <section className="mx-auto w-full max-w-3xl rounded-2xl border border-neutral-800 bg-neutral-900/90 p-6 sm:p-8 shadow-xl backdrop-blur-md">
-                <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">
+        <main className="min-h-screen bg- px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-10 -left-10 h-[400px] w-[400px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -bottom-10 -right-10 h-[400px] w-[400px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
+            </div>
+            <section className="mx-auto w-full max-w-3xl border-2 border-stone-300 bg-yellow-100 p-6 sm:p-8 shadow-lg shadow-red-900/10 backdrop-blur-sm">
+                <p className="text-sm uppercase tracking-[0.3em] text-stone-700">
                     Profile
                 </p>
-                <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-950">
                     Your Account Data
                 </h1>
-                <p className="mt-3 text-sm text-neutral-400">
+                <p className="mt-3 text-sm text-stone-700">
                     Manage your identity and check your gameplay stats.
                 </p>
 
                 {loading ? (
-                    <p className="mt-6 text-neutral-300">Loading profile...</p>
+                    <p className="mt-6 text-stone-600">Loading profile...</p>
                 ) : null}
                 {error ? (
-                    <p className="mt-6 text-sm text-red-400 bg-red-950/40 border border-red-800/60 rounded-lg p-3">
+                    <p className="mt-6 text-sm text-red-800 bg-red-100/60 border-2 border-red-300 p-3">
                         {error}
                     </p>
                 ) : null}
                 {saveMessage ? (
-                    <p className="mt-6 text-sm text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 rounded-lg p-3">
+                    <p className="mt-6 text-sm text-green-800 bg-green-100/60 border-2 border-green-300 p-3">
                         {saveMessage}
                     </p>
                 ) : null}
@@ -148,14 +152,14 @@ export default function ProfilePage() {
                 {!loading && user ? (
                     <div className="mt-8 space-y-8">
                         <div>
-                            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
-                                <h2 className="text-xl font-semibold text-neutral-100">
+                            <div className="flex items-center justify-between border-b-2 border-stone-300 pb-3">
+                                <h2 className="text-xl font-semibold text-stone-900">
                                     Identity & Settings
                                 </h2>
                                 {!editMode && (
                                     <button
                                         onClick={() => setEditMode(true)}
-                                        className="rounded-lg bg-neutral-800 px-4 py-1.5 text-xs font-semibold text-neutral-200 hover:bg-neutral-700 transition"
+                                        className="bg-stone-300 px-4 py-1.5 text-xs font-semibold text-stone-900 hover:bg-stone-400 transition"
                                     >
                                         Edit Profile
                                     </button>
@@ -178,7 +182,7 @@ export default function ProfilePage() {
                                                     )
                                                 }
                                                 alt={`${user.nickname} avatar`}
-                                                className="h-24 w-24 rounded-full border-2 border-emerald-500 bg-neutral-900 object-cover shadow-lg"
+                                                className="h-24 w-24 border-2 border-red-900 bg-amber-50 object-cover shadow-lg"
                                                 onError={(e) => {
                                                     (
                                                         e.target as HTMLImageElement
@@ -187,13 +191,16 @@ export default function ProfilePage() {
                                             />
                                             <label
                                                 htmlFor="avatar-upload"
-                                                className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition cursor-pointer text-xs text-white font-medium"
+                                                className="absolute inset-0 flex items-center justify-center  bg-black/60 opacity-0 group-hover:opacity-100 transition cursor-pointer text-xs text-white font-medium"
                                             >
                                                 Change
                                             </label>
                                         </div>
                                         <div className="flex-1 space-y-1">
-                                            <label className="block text-sm font-medium text-neutral-300">
+                                            <label
+                                                htmlFor="avatar-upload"
+                                                className="block text-sm font-medium text-stone-900"
+                                            >
                                                 Profile Picture
                                             </label>
                                             <input
@@ -205,7 +212,7 @@ export default function ProfilePage() {
                                             />
                                             <label
                                                 htmlFor="avatar-upload"
-                                                className="inline-block rounded-lg border border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 px-3 py-1.5 text-xs text-neutral-300 cursor-pointer transition"
+                                                className="inline-block border-2 border-stone-400 bg-stone-100/50 hover:bg-stone-100 px-3 py-1.5 text-xs text-stone-900 cursor-pointer transition"
                                             >
                                                 Choose Image file
                                             </label>
@@ -218,7 +225,7 @@ export default function ProfilePage() {
 
                                     {/* Nickname Input */}
                                     <div className="space-y-1.5">
-                                        <label className="block text-sm font-medium text-neutral-300">
+                                        <label className="block text-sm font-medium text-neutral-700">
                                             Nickname
                                         </label>
                                         <input
@@ -230,7 +237,7 @@ export default function ProfilePage() {
                                             onChange={(e) =>
                                                 setNicknameInput(e.target.value)
                                             }
-                                            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3.5 py-2 text-sm text-neutral-200 outline-none focus:border-emerald-500 transition"
+                                            className="w-full border-2 border-neutral-600 bg- px-3.5 py-2 text-sm text-stone-900 outline-none focus:border-stone-700 transition bg-yellow-50"
                                         />
                                     </div>
 
@@ -238,7 +245,7 @@ export default function ProfilePage() {
                                         <button
                                             type="submit"
                                             disabled={saving}
-                                            className="rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 px-5 py-2 text-xs font-semibold text-white transition shadow-lg shadow-emerald-950/20"
+                                            className="bg-green-700 hover:bg-green-600 disabled:bg-green-800 px-5 py-2 text-xs font-semibold text- transition shadow-lg shadow-green-950/20"
                                         >
                                             {saving
                                                 ? 'Saving...'
@@ -247,7 +254,7 @@ export default function ProfilePage() {
                                         <button
                                             type="button"
                                             onClick={handleCancel}
-                                            className="rounded-lg bg-neutral-800 hover:bg-neutral-700 px-5 py-2 text-xs font-semibold text-neutral-300 transition"
+                                            className="bg-stone-300 hover:bg-stone-400 px-5 py-2 text-xs font-semibold text-stone-900 transition"
                                         >
                                             Cancel
                                         </button>
@@ -255,11 +262,11 @@ export default function ProfilePage() {
                                 </form>
                             ) : (
                                 <div className="mt-6 space-y-6">
-                                    <div className="flex flex-col items-center gap-4 sm:flex-row rounded-xl border border-neutral-800/80 bg-neutral-950/40 p-4">
+                                    <div className="flex flex-col items-center gap-4 sm:flex-row border-2 border-neutral-600 bg-amber-50 p-4">
                                         <img
                                             src={getAvatarUrl(user.avatar_url)}
                                             alt={`${user.nickname} avatar`}
-                                            className="h-24 w-24 rounded-full border-2 border-neutral-800 bg-neutral-900 object-cover shadow-md"
+                                            className="h-24 w-24 border-2 border-neutral-600 bg- object-cover shadow-md"
                                             onError={(e) => {
                                                 (
                                                     e.target as HTMLImageElement
@@ -267,70 +274,70 @@ export default function ProfilePage() {
                                             }}
                                         />
                                         <div>
-                                            <h3 className="text-lg font-medium text-neutral-200">
+                                            <h3 className="text-lg font-medium text-neutral-700">
                                                 {user.nickname}
                                             </h3>
-                                            <p className="text-xs text-neutral-500">
+                                            <p className="text-xs text-stone-700">
                                                 {user.email}
                                             </p>
-                                            <p className="mt-1.5 text-[11px] text-neutral-400 bg-neutral-900/60 border border-neutral-800 px-2 py-0.5 rounded inline-block">
-                                                {user.avatar_url &&
-                                                user.avatar_url !==
-                                                    '/api/uploads/default-avatar.svg'
-                                                    ? 'Custom avatar set'
-                                                    : 'Using default avatar'}
-                                            </p>
+                                            {!user.avatar_url ? (
+                                                <p className="mt-1.5 text-[11px] text-stone-800 bg-stone-100 border-2 border-neutral-600 px-2 py-0.5 rounded inline-block">
+                                                    : 'Using default avatar'
+                                                </p>
+                                            ) : (
+                                                <p></p>
+                                            )}
                                         </div>
                                     </div>
 
                                     <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                                        <div className="rounded-lg border border-neutral-800/60 bg-neutral-950/30 p-3">
-                                            <dt className="text-neutral-500 text-xs uppercase tracking-wider">
+                                        <div className="border-2 border-neutral-600 bg- p-3 bg-yellow-50">
+                                            <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 User ID
                                             </dt>
-                                            <dd className="mt-1 break-all text-neutral-100 font-mono text-xs">
+                                            <dd className="mt-1 break-all text-stone-900 font-mono text-xs">
                                                 {user.id}
                                             </dd>
                                         </div>
-                                        <div className="rounded-lg border border-neutral-800/60 bg-neutral-950/30 p-3">
-                                            <dt className="text-neutral-500 text-xs uppercase tracking-wider">
+                                        <div className="border-2 border-neutral-600 bg- p-3 bg-yellow-50">
+                                            <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 Email Address
                                             </dt>
-                                            <dd className="mt-1 break-all text-neutral-100">
+                                            <dd className="mt-1 break-all text-stone-900">
                                                 {user.email}
                                             </dd>
                                         </div>
-                                        <div className="rounded-lg border border-neutral-800/60 bg-neutral-950/30 p-3">
-                                            <dt className="text-neutral-500 text-xs uppercase tracking-wider">
+                                        <div className="border-2 border-neutral-600 bg- p-3 bg-yellow-50">
+                                            <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 Nickname
                                             </dt>
-                                            <dd className="mt-1 text-neutral-100">
+                                            <dd className="mt-1 text-stone-900">
                                                 {user.nickname}
                                             </dd>
                                         </div>
-                                        <div className="rounded-lg border border-neutral-800/60 bg-neutral-950/30 p-3">
-                                            <dt className="text-neutral-500 text-xs uppercase tracking-wider">
+                                        <div className="border-2 border-neutral-600 bg- p-3 bg-yellow-50">
+                                            <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 Avatar Path
                                             </dt>
-                                            <dd className="mt-1 break-all text-neutral-100 font-mono text-xs">
+                                            <dd className="mt-1 break-all text-stone-900 font-mono text-xs">
                                                 {user.avatar_url ?? 'null'}
                                             </dd>
                                         </div>
-                                        <div className="rounded-lg border border-neutral-800/60 bg-neutral-950/30 p-3">
-                                            <dt className="text-neutral-500 text-xs uppercase tracking-wider">
+                                        <div className="border-2 border-neutral-600 bg- p-3 bg-yellow-50">
+                                            <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 Created At
                                             </dt>
-                                            <dd className="mt-1 text-neutral-100">
+                                            <dd className="mt-1 text-stone-900">
                                                 {new Date(
                                                     user.created_at,
                                                 ).toLocaleString()}
                                             </dd>
                                         </div>
-                                        <div className="rounded-lg border border-neutral-800/60 bg-neutral-950/30 p-3">
-                                            <dt className="text-neutral-500 text-xs uppercase tracking-wider">
+                                        <div className="border-2 border-neutral-600 bg- p-3 bg-yellow-50">
+                                            <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                                 Last Updated
                                             </dt>
-                                            <dd className="mt-1 text-neutral-100">
+                                            <dd className="mt-1 text-stone-900">
                                                 {new Date(
                                                     user.updated_at,
                                                 ).toLocaleString()}
@@ -342,31 +349,31 @@ export default function ProfilePage() {
                         </div>
 
                         <div>
-                            <h2 className="border-b border-neutral-800 pb-3 text-xl font-semibold text-neutral-100">
+                            <h2 className="border-b-2 border-neutral-600 pb-3 text-xl font-semibold text-stone-900">
                                 Gameplay Stats
                             </h2>
                             <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-                                <div className="rounded-lg border border-neutral-800/60 bg-neutral-950/30 p-3 text-center">
-                                    <dt className="text-neutral-500 text-xs uppercase tracking-wider">
+                                <div className="border-2 border-neutral-600 bg- p-3 text-center bg-yellow-50">
+                                    <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                         Wins
                                     </dt>
-                                    <dd className="mt-1 text-2xl font-bold text-emerald-400">
+                                    <dd className="mt-1 text-2xl font-bold text-green-700">
                                         {stats?.wins ?? 0}
                                     </dd>
                                 </div>
-                                <div className="rounded-lg border border-neutral-800/60 bg-neutral-950/30 p-3 text-center">
-                                    <dt className="text-neutral-500 text-xs uppercase tracking-wider">
+                                <div className="border-2 border-neutral-600 bg- p-3 text-center bg-yellow-50">
+                                    <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                         Losses
                                     </dt>
-                                    <dd className="mt-1 text-2xl font-bold text-rose-400">
+                                    <dd className="mt-1 text-2xl font-bold text-red-700">
                                         {stats?.losses ?? 0}
                                     </dd>
                                 </div>
-                                <div className="rounded-lg border border-neutral-800/60 bg-neutral-950/30 p-3 text-center">
-                                    <dt className="text-neutral-500 text-xs uppercase tracking-wider">
+                                <div className="border-2 border-neutral-600 bg- p-3 text-center bg-yellow-50">
+                                    <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                         Win Rate
                                     </dt>
-                                    <dd className="mt-1 text-2xl font-bold text-neutral-100">
+                                    <dd className="mt-1 text-2xl font-bold text-stone-900">
                                         {stats
                                             ? stats.wins + stats.losses > 0
                                                 ? `${Math.round((stats.wins / (stats.wins + stats.losses)) * 100)}%`
@@ -374,11 +381,11 @@ export default function ProfilePage() {
                                             : '0%'}
                                     </dd>
                                 </div>
-                                <div className="rounded-lg border border-neutral-800/60 bg-neutral-950/30 p-3 text-center">
-                                    <dt className="text-neutral-500 text-xs uppercase tracking-wider">
+                                <div className="border-2 border-neutral-600 bg- p-3 text-center bg-yellow-50">
+                                    <dt className="text-stone-700 text-xs uppercase tracking-wider">
                                         Rating
                                     </dt>
-                                    <dd className="mt-1 text-2xl font-bold text-blue-400">
+                                    <dd className="mt-1 text-2xl font-bold text-red-900">
                                         {stats?.rating ?? 1000}
                                     </dd>
                                 </div>
@@ -387,10 +394,10 @@ export default function ProfilePage() {
                     </div>
                 ) : null}
 
-                <div className="mt-8 flex items-center justify-center gap-3 border-t border-neutral-800 pt-6">
+                <div className="mt-8 flex items-center justify-center gap-3 border-t-2 border-neutral-600 pt-6">
                     <Link
                         href="/lobby"
-                        className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500 shadow-lg shadow-blue-950/20"
+                        className="bg-red-800 px-6 py-2.5 text-sm font-semibold text- transition hover:bg-red-800 shadow-lg shadow-red-950/20"
                     >
                         Back to Lobby
                     </Link>

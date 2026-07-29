@@ -2,20 +2,23 @@ import Link from 'next/link';
 
 export default function TermsPage() {
     return (
-        <main className="min-h-screen bg-neutral-950 px-4 py-10 text-neutral-100 sm:px-6">
-            <section className="mx-auto w-full max-w-3xl">
+        <main className="relative min-h-screen bg- px-4 py-10 text-stone-900 sm:px-6 overflow-hidden">
+            <div className="pointer-events-none absolute inset-0 top-0 flex items-start justify-center">
+                <div className="h-[1200px] w-full max-w-3xl bg-gradient-to-r from-yellow-200/70 via-yellow-100/90 to-yellow-200/70 blur-3xl" />
+            </div>
+            <section className="relative mx-auto w-full max-w-3xl">
                 <div className="mb-8">
-                    <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                    <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-950">
                         Terms of Service
                     </h1>
-                    <p className="mt-2 text-sm text-neutral-400">
+                    <p className="mt-2 text-sm text-stone-700">
                         Last updated: July 2026
                     </p>
                 </div>
 
-                <div className="space-y-8 text-sm leading-relaxed text-neutral-300">
+                <div className="space-y-8 text-sm leading-relaxed text-stone-700">
                     <section>
-                        <h2 className="mb-3 text-base font-semibold text-neutral-100">
+                        <h2 className="mb-3 text-base font-semibold text-stone-900">
                             1. About SumoVerse
                         </h2>
                         <p>
@@ -27,10 +30,10 @@ export default function TermsPage() {
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-base font-semibold text-neutral-100">
+                        <h2 className="mb-3 text-base font-semibold text-stone-900">
                             2. Accounts
                         </h2>
-                        <ul className="list-inside list-disc space-y-2 text-neutral-400">
+                        <ul className="list-inside list-disc space-y-2 text-stone-700">
                             <li>
                                 You must provide a valid email address and a
                                 unique nickname to register.
@@ -47,13 +50,13 @@ export default function TermsPage() {
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-base font-semibold text-neutral-100">
+                        <h2 className="mb-3 text-base font-semibold text-stone-900">
                             3. Acceptable Use
                         </h2>
-                        <p className="mb-2 text-neutral-400">
+                        <p className="mb-2 text-stone-700">
                             When using SumoVerse you agree not to:
                         </p>
-                        <ul className="list-inside list-disc space-y-2 text-neutral-400">
+                        <ul className="list-inside list-disc space-y-2 text-stone-700">
                             <li>
                                 Harass, abuse, or threaten other players via
                                 chat or any other feature.
@@ -74,10 +77,10 @@ export default function TermsPage() {
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-base font-semibold text-neutral-100">
+                        <h2 className="mb-3 text-base font-semibold text-stone-900">
                             4. Game & Rankings
                         </h2>
-                        <p className="text-neutral-400">
+                        <p className="text-stone-700">
                             Match results and rating changes are recorded
                             automatically by the server. Ratings are calculated
                             based on match outcomes. The project team reserves
@@ -87,10 +90,10 @@ export default function TermsPage() {
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-base font-semibold text-neutral-100">
+                        <h2 className="mb-3 text-base font-semibold text-stone-900">
                             5. Availability
                         </h2>
-                        <p className="text-neutral-400">
+                        <p className="text-stone-700">
                             SumoVerse is a student project and is provided as-is
                             with no guarantees of uptime or continued
                             availability. The service may be taken offline at
@@ -99,10 +102,10 @@ export default function TermsPage() {
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-base font-semibold text-neutral-100">
+                        <h2 className="mb-3 text-base font-semibold text-stone-900">
                             6. Limitation of Liability
                         </h2>
-                        <p className="text-neutral-400">
+                        <p className="text-stone-700">
                             This platform is a non-commercial educational
                             project. The developers are not liable for any loss
                             of data, service interruptions, or any other issues
@@ -111,10 +114,10 @@ export default function TermsPage() {
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-base font-semibold text-neutral-100">
+                        <h2 className="mb-3 text-base font-semibold text-stone-900">
                             7. Changes to These Terms
                         </h2>
-                        <p className="text-neutral-400">
+                        <p className="text-stone-700">
                             These terms may be updated as the project evolves.
                             Continued use of the platform after changes
                             constitutes acceptance of the updated terms.
@@ -122,15 +125,13 @@ export default function TermsPage() {
                     </section>
                 </div>
 
-                <div className="mt-10 flex items-center gap-4 text-sm text-neutral-400">
-                    <span className="text-neutral-700">|</span>
+                <div className="mt-10 flex items-stretch gap-4 text-sm text-stone-700">
                     <Link
                         href="/lobby"
-                        className="transition hover:text-neutral-100"
+                        className="border-2 border-stone-400 bg-yellow-100 px-4 py-2 text-sm font-medium text-stone-900 transition hover:bg-stone-200"
                     >
                         Back
                     </Link>
-                    <span className="text-neutral-700">|</span>
                 </div>
             </section>
         </main>

@@ -30,24 +30,28 @@ export default function LoginPage() {
     };
 
     return (
-        <main className="min-h-screen bg-neutral-950 text-neutral-100">
-            <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center px-6 py-12">
+        <main className="relative min-h-screen bg- text-stone-900 overflow-hidden">
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-10 -left-10 h-[400px] w-[400px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -bottom-10 -right-10 h-[400px] w-[400px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
+            </div>
+            <section className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center px-6 py-12">
                 <AuthCard
                     accentLabel="SumoVerse"
-                    accentColorClassName="text-blue-400"
+                    accentColorClassName="text-red-900"
                     title="Sign in"
                     description="Temporary UI only. This form is ready for future API wiring."
                     footer={
                         <>
                             <Link
                                 href="/"
-                                className="transition hover:text-neutral-200"
+                                className="transition hover:text-stone-700"
                             >
                                 Back home
                             </Link>
                             <Link
                                 href="/signup"
-                                className="text-blue-400 transition hover:text-blue-300"
+                                className="text-red-900 transition hover:text-red-800"
                             >
                                 Create account
                             </Link>
@@ -56,7 +60,7 @@ export default function LoginPage() {
                 >
                     <form className="space-y-4" onSubmit={handleSubmit}>
                         <label className="block">
-                            <span className="mb-2 block text-sm font-medium text-neutral-200">
+                            <span className="mb-2 block text-sm font-medium text-stone-900">
                                 Email
                             </span>
                             <input
@@ -66,13 +70,12 @@ export default function LoginPage() {
                                     setEmail(event.target.value)
                                 }
                                 placeholder="you@example.com"
-                                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-blue-500"
-                                required
+                                className="w-full border-2 border-stone-300 bg-yellow-50  px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                             />
                         </label>
 
                         <label className="block">
-                            <span className="mb-2 block text-sm font-medium text-neutral-200">
+                            <span className="mb-2 block text-sm font-medium text-stone-900">
                                 Password
                             </span>
                             <input
@@ -82,21 +85,20 @@ export default function LoginPage() {
                                     setPassword(event.target.value)
                                 }
                                 placeholder="••••••••"
-                                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm outline-none transition focus:border-blue-500"
-                                required
+                                className="w-full border-2 border-stone-300 bg-yellow-50  px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-red-900 focus:ring-2 focus:ring-red-900/10"
                             />
                         </label>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
+                            className="w-full bg-red-800 px-4 py-3 text-sm font-semibold text- transition hover:bg-red-900 disabled:opacity-50"
                         >
                             {loading ? 'Signing in…' : 'Sign in'}
                         </button>
                     </form>
                     {statusMessage ? (
-                        <p className="mt-4 text-sm text-amber-400">
+                        <p className="mt-4 text-sm text-red-800">
                             {statusMessage}
                         </p>
                     ) : null}

@@ -10,10 +10,10 @@ import {
 } from '@/lib/api';
 
 function medalColor(rank: number) {
-    if (rank === 1) return 'text-yellow-400';
-    if (rank === 2) return 'text-neutral-300';
-    if (rank === 3) return 'text-amber-600';
-    return 'text-neutral-600';
+    if (rank === 1) return 'text-yellow-600';
+    if (rank === 2) return 'text-stone-400';
+    if (rank === 3) return 'text-amber-700';
+    return 'text-stone-500';
 }
 
 function Avatar({
@@ -29,13 +29,13 @@ function Avatar({
             <img
                 src={avatarUrl}
                 alt={nickname}
-                className="h-8 w-8 rounded-full border border-neutral-700 object-cover"
+                className="h-8 w-8 border-2 border-neutral-600 object-cover"
                 onError={() => setFailed(true)}
             />
         );
     }
     return (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-neutral-700 bg-neutral-800 text-xs font-semibold text-neutral-300">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center border border-stone-400 bg-amber-50 text-xs font-semibold text-stone-700">
             {nickname.slice(0, 1).toUpperCase()}
         </div>
     );
@@ -74,44 +74,52 @@ export default function RankingPage() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-neutral-950 px-4 py-6 text-neutral-100 sm:px-6 lg:px-8">
+        <main className="min-h-screen bg- px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-10 -left-10 h-[400px] w-[1200px] rounded-full bg-gradient-to-r from-yellow-200/25 via-yellow-100/30 to-yellow-200/20 blur-3xl" />
+                <div className="absolute -bottom-10 -right-10 h-[400px] w-[400px] rounded-full bg-gradient-to-l from-yellow-200/25 via-yellow-100/35 to-yellow-200/20 blur-3xl" />
+            </div>
+
+            {/* <div className="pointer-events-none absolute inset-0 top-0 flex items-start justify-center">
+                <div className="h-[1200px] w-full max-w-3xl bg-gradient-to-r from-yellow-200/30 via-yellow-100/80 to-yellow-200/30 blur-3xl" />
+            </div> */}
             <section className="mx-auto w-full max-w-2xl">
-                <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">
+                <p className="text-sm uppercase tracking-[0.3em] text-stone-700">
                     Ranking
                 </p>
-                <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-950">
                     Leaderboard
                 </h1>
-                <p className="mt-2 text-sm text-neutral-500">
+                <p className="mt-2 text-sm text-stone-700">
                     Sorted by rating · PvP matches only affect rating
                 </p>
 
-                {loading && <p className="mt-6 text-neutral-400">Loading…</p>}
-                {error && <p className="mt-6 text-sm text-red-400">{error}</p>}
+                {loading && <p className="mt-6 text-stone-600">Loading…</p>}
+                {error && <p className="mt-6 text-sm text-red-700">{error}</p>}
 
                 {!loading && !error && (
-                    <div className="mt-6 overflow-hidden rounded-xl border border-neutral-800">
+                    <div className="mt-6 overflow-hidden border-2 border-stone-300 bg-amber-50">
                         {ranking.length === 0 ? (
-                            <p className="p-6 text-sm text-neutral-500">
+                            <p className="p-6 text-sm text-stone-700">
                                 No players ranked yet. Play a PvP match!
                             </p>
                         ) : (
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-neutral-800 bg-neutral-900/80">
-                                        <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-neutral-500 w-10">
+                                    <tr className="border-b-2 border-stone-300 bg-amber-100">
+                                        <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-stone-700 w-10">
                                             #
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-neutral-500">
+                                        <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-stone-700">
                                             Player
                                         </th>
-                                        <th className="px-4 py-3 text-right text-xs uppercase tracking-wider text-neutral-500">
+                                        <th className="px-4 py-3 text-right text-xs uppercase tracking-wider text-stone-700">
                                             W
                                         </th>
-                                        <th className="px-4 py-3 text-right text-xs uppercase tracking-wider text-neutral-500">
+                                        <th className="px-4 py-3 text-right text-xs uppercase tracking-wider text-stone-700">
                                             L
                                         </th>
-                                        <th className="px-4 py-3 text-right text-xs uppercase tracking-wider text-neutral-500">
+                                        <th className="px-4 py-3 text-right text-xs uppercase tracking-wider text-stone-700">
                                             Rating
                                         </th>
                                     </tr>
@@ -122,10 +130,10 @@ export default function RankingPage() {
                                         return (
                                             <tr
                                                 key={entry.id}
-                                                className={`border-b border-neutral-800/50 transition-colors ${
+                                                className={`border-b border-stone-200 transition-colors ${
                                                     isMe
-                                                        ? 'bg-blue-950/30'
-                                                        : 'hover:bg-neutral-900/50'
+                                                        ? 'bg-red-800/15'
+                                                        : 'hover:bg-amber-100/50'
                                                 }`}
                                             >
                                                 <td
@@ -144,24 +152,24 @@ export default function RankingPage() {
                                                             }
                                                         />
                                                         <span
-                                                            className={`font-medium ${isMe ? 'text-blue-300' : 'text-neutral-200'}`}
+                                                            className={`font-medium ${isMe ? 'text-red-900' : 'text-stone-900'}`}
                                                         >
                                                             {entry.nickname}
                                                             {isMe && (
-                                                                <span className="ml-2 text-xs text-blue-500 font-normal">
+                                                                <span className="ml-2 text-xs text-red-900 font-normal">
                                                                     (you)
                                                                 </span>
                                                             )}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-3 text-right tabular-nums text-green-400">
+                                                <td className="px-4 py-3 text-right tabular-nums text-green-700">
                                                     {entry.wins}
                                                 </td>
                                                 <td className="px-4 py-3 text-right tabular-nums text-red-400">
                                                     {entry.losses}
                                                 </td>
-                                                <td className="px-4 py-3 text-right tabular-nums font-semibold text-blue-300">
+                                                <td className="px-4 py-3 text-right tabular-nums font-semibold text-red-900">
                                                     {entry.rating}
                                                 </td>
                                             </tr>
@@ -176,13 +184,13 @@ export default function RankingPage() {
                 <div className="mt-8 flex items-center justify-center gap-3">
                     <Link
                         href="/lobby"
-                        className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500"
+                        className="bg-red-800 px-5 py-2.5 text-sm font-semibold text- transition hover:bg-red-800 border-2 border-neutral-600"
                     >
                         Back to Lobby
                     </Link>
                     <Link
                         href="/career"
-                        className="rounded-md border border-neutral-700 px-5 py-2.5 text-sm font-semibold text-neutral-300 transition hover:border-neutral-500 hover:text-white"
+                        className="border-2 border-neutral-600 px-5 py-2.5 text-sm font-semibold text-stone-900 transition hover:border-stone-700 hover:bg-stone-100 bg-yellow-100"
                     >
                         My Match History
                     </Link>

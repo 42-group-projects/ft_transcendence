@@ -48,11 +48,11 @@ function FloatingChatWindow({
     };
 
     return (
-        <div className="flex w-full flex-col overflow-hidden rounded-t-xl border border-neutral-700/80 bg-neutral-950 shadow-2xl shadow-black/50 backdrop-blur-md">
+        <div className="flex w-full flex-col overflow-hidden border-2 border-neutral-600 bg-yellow-100 shadow-lg shadow-red-900/10 backdrop-blur-sm">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-neutral-700/80 bg-neutral-900/90 px-3 py-2">
+            <div className="flex items-center justify-between border-b-2 border-neutral-600 bg-neutral-800 px-3 py-2 bg-red-700">
                 <span
-                    className="truncate text-xs font-semibold text-neutral-200"
+                    className="truncate text-xs font-semibold text-"
                     title={displayName}
                 >
                     {displayName}
@@ -60,7 +60,7 @@ function FloatingChatWindow({
                 <button
                     type="button"
                     onClick={onClose}
-                    className="ml-2 shrink-0 rounded p-0.5 text-neutral-500 transition hover:bg-neutral-700 hover:text-neutral-200"
+                    className="ml-2 shrink-0 rounded p-0.5 text-neutral-600 transition hover:bg-red-400 bg-red-100 hover:text-neutral-800"
                     aria-label="Close chat"
                 >
                     <svg
@@ -83,12 +83,12 @@ function FloatingChatWindow({
             {/* Messages */}
             <div className="flex h-48 flex-col gap-1 overflow-y-auto p-2">
                 {isOfflineWarning && (
-                    <p className="text-[10px] text-rose-400">
+                    <p className="text-[10px] text-red-700">
                         User is offline — message not delivered.
                     </p>
                 )}
                 {thread.length === 0 && (
-                    <p className="py-4 text-center text-[10px] text-neutral-600">
+                    <p className="py-4 text-center text-[10px] text-stone-600">
                         No messages yet.
                     </p>
                 )}
@@ -100,8 +100,8 @@ function FloatingChatWindow({
                         <span
                             className={`max-w-[80%] break-words rounded px-2 py-1 text-[11px] ${
                                 msg.direction === 'out'
-                                    ? 'bg-sky-600/30 text-sky-100'
-                                    : 'bg-neutral-700 text-neutral-200'
+                                    ? 'bg-green-600/30 text-green-900'
+                                    : 'bg-blue-600/30 text-blue-900'
                             }`}
                         >
                             {msg.text}
@@ -112,7 +112,7 @@ function FloatingChatWindow({
             </div>
 
             {/* Input */}
-            <div className="flex gap-1 border-t border-neutral-800 px-2 py-2">
+            <div className="flex gap-1 border-t-2 border-neutral-600 px-2 py-2">
                 <input
                     type="text"
                     value={input}
@@ -122,12 +122,12 @@ function FloatingChatWindow({
                     }}
                     maxLength={500}
                     placeholder="Message…"
-                    className="min-w-0 flex-1 rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-[11px] text-neutral-200 outline-none transition focus:border-sky-500"
+                    className="min-w-0 flex-1 rounded border-2 border-neutral-600 bg-yellow-100 px-2 py-1 text-[11px] text-stone-900 outline-none transition focus:border-stone-700"
                 />
                 <button
                     type="button"
                     onClick={handleSend}
-                    className="rounded bg-sky-600/70 px-2 py-1 text-[10px] font-semibold text-white transition hover:bg-sky-500"
+                    className="rounded bg-green-400 px-2 py-1 text-[10px] font-semibold text- transition hover:bg-green-800"
                 >
                     Send
                 </button>
@@ -362,45 +362,54 @@ export function FriendsSidebar() {
     };
 
     const renderSidebarContent = () => (
-        <div className="flex h-full flex-col">
+        <div
+            className="flex h-full flex-col border-3 border-stone-700 
+        "
+            style={{
+                backgroundImage:
+                    'linear-gradient(rgba(253, 244, 191, 0.4), rgba(253, 244, 191, 0.4)), url(/washi.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+            }}
+        >
             <div className="mb-3 mt-3 px-3">
-                <p className="text-xs uppercase tracking-[0.25em] text-neutral-500">
+                <p className="text-xs uppercase tracking-[0.25em] text-stone-700">
                     Friends
                 </p>
-                <p className="mt-1 text-xs text-neutral-400">
+                <p className="mt-1 text-xs text-stone-600">
                     {onlineCount} online • {friends.length} total
                 </p>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 space-y-5">
+            <div className="min-h-0 flex-1 overflow-y-auto pb-3 space-y-5">
                 {/* フレンド検索・追加フォーム */}
-                <div className="relative space-y-2">
+                <div className="relative space-y-2 px-3 ">
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search nickname to add..."
-                        className="w-full rounded-lg border border-neutral-700 bg-neutral-900/80 px-3 py-1.5 text-xs text-neutral-200 outline-none focus:border-emerald-500 transition"
+                        className="w-full border-2 border-neutral-600 bg-yellow-50 px-3 py-1.5 text-xs text-stone-900 outline-none focus:border-stone-700 transition"
                     />
                     {searchResults.length > 0 && (
-                        <ul className="absolute left-0 right-0 z-40 mt-1 max-h-48 overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-950 p-1 shadow-xl">
+                        <ul className="absolute left-0 right-0 z-40 mt-1 max-h-48 overflow-y-auto border-2 border-neutral-600 bg-yellow-100 p-1 shadow-lg">
                             {searchResults.map((user) => (
                                 <li
                                     key={user.id}
-                                    className="flex items-center justify-between rounded-md p-1.5 hover:bg-neutral-900 transition"
+                                    className="flex items-center justify-between p-1.5 hover:bg-stone-100 transition"
                                 >
                                     <div className="flex items-center gap-2 truncate pr-2">
                                         <img
                                             src={getAvatarUrl(user.avatar_url)}
                                             alt={user.nickname}
-                                            className="h-6 w-6 rounded-full border border-neutral-800 object-cover"
+                                            className="h-6 w-6 border-2 border-neutral-600 object-cover"
                                             onError={(e) => {
                                                 (
                                                     e.target as HTMLImageElement
                                                 ).src = getAvatarUrl(null);
                                             }}
                                         />
-                                        <span className="text-xs text-neutral-200 truncate">
+                                        <span className="text-xs text-stone-900 truncate">
                                             {user.nickname}
                                         </span>
                                     </div>
@@ -408,15 +417,15 @@ export function FriendsSidebar() {
                                         onClick={() =>
                                             handleSendRequest(user.nickname)
                                         }
-                                        className="rounded bg-emerald-600/80 hover:bg-emerald-500 px-2 py-1 text-[10px] font-semibold text-white transition"
+                                        className="rounded bg-green-700 hover:bg-green-600 px-2 py-1 text-[10px] font-semibold text- transition"
                                     >
                                         Add
                                     </button>
                                 </li>
                             ))}
                             {message && (
-                                <li className="border-t border-neutral-800/60 p-1.5 text-center">
-                                    <span className="text-[10px] text-amber-400 font-medium">
+                                <li className="border-t-2 border-neutral-600 p-1.5 text-center">
+                                    <span className="text-[10px] text-amber-700 font-medium">
                                         {message}
                                     </span>
                                 </li>
@@ -424,10 +433,10 @@ export function FriendsSidebar() {
                         </ul>
                     )}
                     {searchResults.length === 0 && message && (
-                        <p className="text-[10px] text-amber-400">{message}</p>
+                        <p className="text-[10px] text-amber-700">{message}</p>
                     )}
                     {sessionExpiredMsg && (
-                        <p className="text-[10px] text-rose-400">
+                        <p className="text-[10px] text-red-700">
                             Match has concluded — session expired.
                         </p>
                     )}
@@ -436,27 +445,27 @@ export function FriendsSidebar() {
                 {/* Pending requests */}
                 {requests.length > 0 && (
                     <div>
-                        <p className="mb-2 text-[10px] uppercase tracking-wider text-amber-500">
+                        <p className="mb-2 text-[10px] uppercase tracking-wider text-amber-700">
                             Pending Requests
                         </p>
                         <ul className="space-y-2">
                             {requests.map((req) => (
                                 <li
                                     key={req.id}
-                                    className="rounded-lg border border-neutral-800 bg-neutral-900/80 p-2"
+                                    className="border-2 border-neutral-600 bg-yellow-100 p-2"
                                 >
                                     <div className="flex items-center gap-2 mb-2">
                                         <img
                                             src={getAvatarUrl(req.senderAvatar)}
                                             alt={req.senderNickname || 'User'}
-                                            className="h-6 w-6 rounded-full border border-neutral-700 object-cover"
+                                            className="h-6 w-6 border-2 border-neutral-600 object-cover"
                                             onError={(e) => {
                                                 (
                                                     e.target as HTMLImageElement
                                                 ).src = getAvatarUrl(null);
                                             }}
                                         />
-                                        <span className="text-xs font-medium text-neutral-200 truncate">
+                                        <span className="text-xs font-medium text-stone-900 truncate">
                                             {req.senderNickname ||
                                                 req.senderId.substring(0, 8)}
                                         </span>
@@ -464,13 +473,13 @@ export function FriendsSidebar() {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handleAccept(req.id)}
-                                            className="flex-1 rounded bg-emerald-500/20 text-emerald-400 py-1 text-[10px] hover:bg-emerald-500/40 transition"
+                                            className="flex-1 rounded bg-green-700/20 text-green-800 py-1 text-[10px] hover:bg-green-700/40 transition"
                                         >
                                             Accept
                                         </button>
                                         <button
                                             onClick={() => handleReject(req.id)}
-                                            className="flex-1 rounded bg-rose-500/20 text-rose-400 py-1 text-[10px] hover:bg-rose-500/40 transition"
+                                            className="flex-1 rounded bg-red-700/20 text-red-800 py-1 text-[10px] hover:bg-red-700/40 transition"
                                         >
                                             Decline
                                         </button>
@@ -483,12 +492,12 @@ export function FriendsSidebar() {
 
                 {/* Friends list */}
                 <div>
-                    <p className="mb-2 text-[10px] uppercase tracking-wider text-neutral-500">
+                    <p className="mb-2 uppercase tracking-wider text-stone-700 px-2">
                         My Friends
                     </p>
-                    <ul className="space-y-2">
+                    <ul className="">
                         {friends.length === 0 && (
-                            <p className="text-xs text-neutral-600">
+                            <p className="text-xs text-stone-600">
                                 No friends yet.
                             </p>
                         )}
@@ -497,11 +506,11 @@ export function FriendsSidebar() {
                                 onlineStatuses[friend.userId] ||
                                 friend.onlineStatus ||
                                 'offline';
-                            let statusColor = 'bg-neutral-600';
+                            let statusColor = 'bg-stone-200';
                             if (status === 'online')
-                                statusColor = 'bg-emerald-400';
+                                statusColor = 'bg-green-400';
                             if (status === 'in_game')
-                                statusColor = 'bg-blue-400';
+                                statusColor = 'bg-amber-200';
 
                             const avatarUrl = getAvatarUrl(
                                 friend.avatarUrl || friend.avatar_url,
@@ -512,16 +521,16 @@ export function FriendsSidebar() {
                             return (
                                 <li
                                     key={friend.userId}
-                                    className="group rounded-lg border border-neutral-800 bg-neutral-900/80 transition hover:border-neutral-700"
+                                    className="group border-1 border-neutral-600 bg-yellow-100/50 transition"
                                 >
-                                    <div className="flex items-center justify-between px-3 py-2">
-                                        <div className="flex items-center gap-2 truncate pr-2">
+                                    <div className="flex items-center justify-between px-1 py-3">
+                                        <div className="flex items-center gap-2 truncate">
                                             <img
                                                 src={avatarUrl}
                                                 alt={
                                                     friend.nickname || 'Friend'
                                                 }
-                                                className="h-8 w-8 rounded-full border border-neutral-700 object-cover"
+                                                className="h-8 w-8 border-2 border-neutral-600 object-cover"
                                                 onError={(e) => {
                                                     (
                                                         e.target as HTMLImageElement
@@ -530,7 +539,7 @@ export function FriendsSidebar() {
                                             />
                                             <div className="flex flex-col truncate">
                                                 <span
-                                                    className="text-sm text-neutral-100 truncate"
+                                                    className="text-sm text-stone-900 truncate"
                                                     title={
                                                         friend.nickname ||
                                                         friend.userId
@@ -542,9 +551,9 @@ export function FriendsSidebar() {
                                                             8,
                                                         )}
                                                 </span>
-                                                <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 uppercase tracking-wider">
+                                                <span className="flex items-center gap-1.5 text-[10px] text-stone-600 uppercase tracking-wider">
                                                     <span
-                                                        className={`h-1.5 w-1.5 rounded-full ${statusColor}`}
+                                                        className={`h-1.5 w-1.5 ${statusColor} rounded`}
                                                     />
                                                     {status.replace('_', ' ')}
                                                 </span>
@@ -557,7 +566,7 @@ export function FriendsSidebar() {
                                                 <button
                                                     type="button"
                                                     onClick={handleRejoin}
-                                                    className="rounded px-2 py-1 text-[10px] font-medium transition text-amber-400 hover:bg-amber-500/20 hover:text-amber-300"
+                                                    className="rounded px-2 py-1 text-[10px] font-medium transition text-amber-800 hover:bg-amber-600/20 hover:text-amber-900"
                                                 >
                                                     Rejoin
                                                 </button>
@@ -575,7 +584,7 @@ export function FriendsSidebar() {
                                                         activeSessionOpponentId !==
                                                             null
                                                     }
-                                                    className="rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-orange-400 hover:bg-orange-500/20 hover:text-orange-300 disabled:hover:bg-transparent"
+                                                    className="rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-red-900 hover:bg-orange-500/20 hover:text-grey-300 disabled:hover:bg-transparent"
                                                 >
                                                     Challenge
                                                 </button>
@@ -593,11 +602,11 @@ export function FriendsSidebar() {
                                                           )
                                                 }
                                                 disabled={status === 'offline'}
-                                                className="relative rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-sky-300 hover:bg-orange-500/20 hover:bg-sky-900 disabled:hover:bg-transparent"
+                                                className="relative rounded px-2 py-1 text-[10px] font-medium transition disabled:text-neutral-600 text-grey-300 hover:bg-orange-500/20 hover:bg-orange-200/20 disabled:hover:bg-transparent"
                                             >
                                                 Chat
                                                 {unread > 0 && !isOpen && (
-                                                    <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-orange-500 text-[8px] font-bold text-white">
+                                                    <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center bg-green-300 text-[8px] font-bold text-">
                                                         {unread > 9
                                                             ? '9+'
                                                             : unread}
@@ -610,7 +619,7 @@ export function FriendsSidebar() {
                                                 onClick={() =>
                                                     handleRemove(friend.userId)
                                                 }
-                                                className="rounded px-2 py-1 text-[10px] font-medium text-rose-400 transition hover:bg-rose-500/20 hover:text-rose-300"
+                                                className="rounded px-2 py-1 text-[10px] font-medium text-red-700 transition hover:bg-red-700/20 hover:text-red-800"
                                             >
                                                 Remove
                                             </button>
@@ -633,13 +642,13 @@ export function FriendsSidebar() {
                     <button
                         type="button"
                         onClick={() => setMobileOpen((value) => !value)}
-                        className="rounded-lg border border-neutral-700 bg-neutral-900/90 px-3 py-2 text-xs font-semibold text-neutral-200 backdrop-blur-md transition hover:bg-neutral-800"
+                        className="border-2 border-neutral-600 bg-red-800 px-3 py-2 text-xs font-semibold text- backdrop-blur-md transition hover:bg-red-900"
                     >
                         Friends ({onlineCount})
                     </button>
 
                     {mobileOpen && (
-                        <div className="mt-2 w-[min(88vw,20rem)] max-h-[80vh] flex flex-col overflow-hidden rounded-2xl border border-neutral-700/80 bg-neutral-950/95 shadow-2xl shadow-black/40 backdrop-blur-md">
+                        <div className="mt-2 w-[min(88vw,20rem)] max-h-[80vh] flex flex-col overflow-hidden border-2 border-neutral-600 bg-yellow-100 shadow-lg shadow-red-900/10 backdrop-blur-md">
                             {renderSidebarContent()}
                         </div>
                     )}
@@ -648,7 +657,7 @@ export function FriendsSidebar() {
 
             {/* --- Desktop Drawer --- */}
             <div className="pointer-events-none absolute inset-y-0 right-0 z-20 hidden items-start md:flex">
-                <div className="pointer-events-auto flex h-full w-[min(80vw,18rem)] flex-col overflow-hidden rounded-l-2xl border-l border-neutral-700/80 bg-neutral-950/90 shadow-2xl shadow-black/40 backdrop-blur-md sm:w-72">
+                <div className="pointer-events-auto flex h-full w-[min(80vw,18rem)] flex-col overflow-hidden border-l-2 border-neutral-600 bg-yellow-100 shadow-lg shadow-red-900/10 backdrop-blur-md sm:w-72">
                     {renderSidebarContent()}
                 </div>
             </div>
