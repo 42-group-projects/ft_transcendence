@@ -50,6 +50,7 @@ export default function SoloPage() {
     const {
         mawashiColor,
         dohyoTheme,
+        environment,
         update: updateCustomization,
     } = useCustomization();
     const dashCooldownTotalMs = gameConstants?.DASH_COOLDOWN_MS ?? 800;
@@ -136,6 +137,7 @@ export default function SoloPage() {
                 <CustomizationPanel
                     mawashiColor={mawashiColor}
                     dohyoTheme={dohyoTheme}
+                    environment={environment}
                     onUpdate={updateCustomization}
                 />
 
@@ -163,6 +165,7 @@ export default function SoloPage() {
                             gameConstants={gameConstants}
                             mawashiColor={mawashiColor}
                             dohyoTheme={dohyoTheme}
+                            environment={environment}
                         />
                     </Canvas>
                     <FrameRateDisplay fps={fps} />

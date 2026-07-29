@@ -8,7 +8,7 @@ import {
     SPAWN_LINE_OFFSET,
 } from '../constants';
 import type { GameConstants, PlayerState } from '../types';
-import { DOHYO_THEMES, type DohyoTheme } from '../hooks/useCustomization';
+import { DOHYO_THEMES, type DohyoTheme, type EnvironmentType } from '../hooks/useCustomization';
 import { Player } from '../components/Player';
 import { Environment } from '@react-three/drei';
 
@@ -58,6 +58,7 @@ type WorldSceneProps = {
     gameConstants?: GameConstants | null;
     mawashiColor?: string;
     dohyoTheme?: DohyoTheme;
+    environment?: EnvironmentType;
 };
 
 export function WorldScene({
@@ -66,6 +67,7 @@ export function WorldScene({
     gameConstants,
     mawashiColor = '#3b82f6',
     dohyoTheme = 'default',
+    environment = 'lobby',
 }: WorldSceneProps) {
     // Use passed constants or fallback to imports (for backwards compatibility)
     const SPAWN_DISTANCE =
@@ -94,7 +96,7 @@ export function WorldScene({
 
     return (
         <>
-            <Environment preset="forest" background />
+            <Environment preset={environment} background />
             <ambientLight intensity={0.6} />
             <directionalLight
                 intensity={1.2}

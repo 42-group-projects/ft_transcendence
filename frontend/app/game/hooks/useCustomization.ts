@@ -4,9 +4,22 @@ import { useState, useEffect, useCallback } from 'react';
 
 export type DohyoTheme = 'default' | 'sand' | 'night' | 'clay';
 
+export type EnvironmentType =
+    | 'apartment'
+    | 'city'
+    | 'dawn'
+    | 'forest'
+    | 'lobby'
+    | 'night'
+    | 'park'
+    | 'studio'
+    | 'sunset'
+    | 'warehouse';
+
 export type CustomizationState = {
     mawashiColor: string;
     dohyoTheme: DohyoTheme;
+    environment: EnvironmentType;
 };
 
 const STORAGE_KEY = 'sumoverse-customization';
@@ -14,6 +27,7 @@ const STORAGE_KEY = 'sumoverse-customization';
 const DEFAULT_STATE: CustomizationState = {
     mawashiColor: '#3b82f6',
     dohyoTheme: 'default',
+    environment: 'lobby',
 };
 
 export const MAWASHI_COLORS = [
@@ -35,6 +49,19 @@ export const DOHYO_THEMES: Record<
     sand: { label: 'Sand', surface: '#c2a97e', border: '#8b7355' },
     night: { label: 'Night', surface: '#1a1a2e', border: '#4a4a8a' },
     clay: { label: 'Clay', surface: '#8b4513', border: '#d2b48c' },
+};
+
+export const ENVIRONMENTS: Record<EnvironmentType, { label: string }> = {
+    apartment: { label: 'Apartment' },
+    city: { label: 'City' },
+    dawn: { label: 'Dawn' },
+    forest: { label: 'Forest' },
+    lobby: { label: 'Lobby' },
+    night: { label: 'Night' },
+    park: { label: 'Park' },
+    studio: { label: 'Studio' },
+    sunset: { label: 'Sunset' },
+    warehouse: { label: 'Warehouse' },
 };
 
 function loadFromStorage(): CustomizationState {

@@ -58,6 +58,7 @@ export default function GamePage() {
     const {
         mawashiColor,
         dohyoTheme,
+        environment,
         update: updateCustomization,
     } = useCustomization();
     const dashCooldownTotalMs = gameConstants?.DASH_COOLDOWN_MS ?? 800;
@@ -174,6 +175,7 @@ export default function GamePage() {
                 <CustomizationPanel
                     mawashiColor={mawashiColor}
                     dohyoTheme={dohyoTheme}
+                    environment={environment}
                     onUpdate={updateCustomization}
                 />
 
@@ -202,6 +204,7 @@ export default function GamePage() {
                             gameConstants={gameConstants}
                             mawashiColor={mawashiColor}
                             dohyoTheme={dohyoTheme}
+                            environment={environment}
                         />
                     </Canvas>
                     <FrameRateDisplay fps={fps} />
