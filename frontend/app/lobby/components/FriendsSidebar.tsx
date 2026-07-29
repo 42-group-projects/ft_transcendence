@@ -203,7 +203,7 @@ export function FriendsSidebar() {
             setFriends(friendsData);
             setRequests(requestsData);
         } catch (error) {
-            console.error('Failed to fetch friend data:', error);
+            // console.error('Failed to fetch friend data:', error);
         }
     };
 
@@ -227,7 +227,7 @@ export function FriendsSidebar() {
                 }
             } catch (err) {
                 if (!cancelled) {
-                    console.error('Search failed:', err);
+                    // console.error('Search failed:', err);
                 }
             }
         }, 300);
