@@ -57,7 +57,7 @@ export function useMovementInput({
             if (event.code === 'Space') {
                 // only emit dash on keydown
                 if (pressed) {
-                    // event.preventDefault();
+                    event.preventDefault();
                     // Instead of triggering dash cooldown here, only emit dash event
                     socket?.emit('dash');
                 }
