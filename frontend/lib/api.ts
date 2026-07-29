@@ -114,7 +114,7 @@ async function apiFetch<T>(
 
     if (!res.ok) {
         const message = (data as ApiError).error ?? 'Unknown API error';
-        console.error(`[apiFetch] ${res.status} ${res.url}:`, message, data);
+        // console.error(`[apiFetch] ${res.status} ${res.url}:`, message, data);
         throw new Error(message);
     }
 
