@@ -239,7 +239,7 @@ game_sessions 1──1 match_records
 | 3   | Web       | Use an ORM                               | Minor | 1      | Drizzle ORM with PostgreSQL, type-safe schema, migrations via drizzle-kit              | yuotsubo, mkakizak           |
 | 4   | User Mgmt | Standard User Management                 | Major | 2      | Profile page, friend system (request/accept/reject), online status tracking, avatar    | yutsasak, mkakizak, nateshim |
 | 5   | User Mgmt | Game Statistics & Match History          | Minor | 1      | Career page with win/loss/rating, match history, leaderboard (Banzuke)                 | yuotsubo, mkakizak           |
-| 6   | AI        | AI Opponent                              | Major | 2      | 4 difficulty levels (Easy/Medium/Hard/Oni) with prediction-based steering              | mkakizak                     |
+| 6   | AI        | AI Opponent                              | Major | 2      | 4 difficulty levels (Easy/Medium/Hard) with prediction-based steering              | mkakizak                     |
 | 7   | Gaming    | Implement a complete web-based game      | Major | 2      | 3D sumo wrestling — push opponent out of dohyo to win                                  | mkakizak                     |
 | 8   | Gaming    | Remote players                           | Major | 2      | Two players on separate computers play in real-time via Socket.io with reconnection    | mkakizak                     |
 | 9   | Gaming    | Advanced 3D graphics (Three.js)          | Major | 2      | Three.js via React Three Fiber + Rapier physics                                        | mkakizak                     |
